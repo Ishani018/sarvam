@@ -1,0 +1,170 @@
+# Hindi number lexicon.
+#
+# Devanagari is the PRIMARY form: Sarvam returns Devanagari for hi-IN, so that
+# is what the extractor actually meets. Romanized spellings are aliases for
+# code-mixed output and for hand-written fixtures.
+#
+# Hindi 1-99 is NOT compositional -- there is no "twenty"+"one" rule, every
+# value has its own word -- so all 100 are enumerated. Spelling variance around
+# these forms (teen/theen/tin, hazaar/hajar) is absorbed by the canonicalizer in
+# numwords/__init__.py; only genuinely distinct stems need listing here.
+
+language: hi
+script: devanagari
+native_digits: "०१२३४५६७८९"
+
+units:
+  0:  [शून्य, सुन्न, zero, shunya, sunya]
+  1:  [एक, ek, ik, ake]
+  2:  [दो, do, doh]
+  3:  [तीन, teen, theen, tin]
+  4:  [चार, char, chaar]
+  5:  [पाँच, पांच, panch, paanch, paach]
+  6:  [छह, छः, छे, chah, chhah, che, chhe]
+  7:  [सात, saat, sath]
+  8:  [आठ, aath, ath]
+  9:  [नौ, nau, no]
+  10: [दस, das, dus]
+  11: [ग्यारह, gyarah, gyara]
+  12: [बारह, barah, bara]
+  13: [तेरह, terah, tera]
+  14: [चौदह, chaudah, chauda]
+  15: [पंद्रह, पन्द्रह, pandrah, pandra]
+  16: [सोलह, solah, sola]
+  17: [सत्रह, satrah, satra]
+  18: [अठारह, atharah, athara]
+  19: [उन्नीस, unnis, unis]
+  20: [बीस, bis, bees]
+  21: [इक्कीस, ikkis, ikees]
+  22: [बाईस, bais, baees]
+  23: [तेईस, teis, teees]
+  24: [चौबीस, chaubis, chaubees]
+  25: [पच्चीस, pacchis, pachis]
+  26: [छब्बीस, chhabbis, chhabis]
+  27: [सत्ताईस, sattais, satais]
+  28: [अट्ठाईस, atthais, athais]
+  29: [उनतीस, untis, unatis]
+  30: [तीस, tis, tees]
+  31: [इकतीस, ikatis, ektis]
+  32: [बत्तीस, battis, batis]
+  33: [तैंतीस, taintis, tentis]
+  34: [चौंतीस, chauntis, chautis]
+  35: [पैंतीस, paintis, pentis]
+  36: [छत्तीस, chhattis, chhatis]
+  37: [सैंतीस, saintis, sentis]
+  38: [अड़तीस, adatis, adtis]
+  39: [उनतालीस, untalis, unatalis]
+  40: [चालीस, chalis, chalees]
+  41: [इकतालीस, ikatalis, ektalis]
+  42: [बयालीस, bayalis, bayalees]
+  43: [तैंतालीस, taintalis, tentalis]
+  44: [चवालीस, chavalis, chaualis]
+  45: [पैंतालीस, paintalis, pentalis]
+  46: [छियालीस, chhiyalis, chhiyalees]
+  47: [सैंतालीस, saintalis, sentalis]
+  48: [अड़तालीस, adtalis, adatalis]
+  49: [उनचास, unchas, unachas]
+  50: [पचास, pachas, pachaas]
+  51: [इक्यावन, ikyavan, ikyawan]
+  52: [बावन, bavan, bawan]
+  53: [तिरेपन, tirepan, tirpan]
+  54: [चौवन, chauvan, chauwan]
+  55: [पचपन, pachpan]
+  56: [छप्पन, chhappan, chhapan]
+  57: [सत्तावन, sattavan, satavan]
+  58: [अट्ठावन, atthavan, athavan]
+  59: [उनसठ, unsath, unasath]
+  60: [साठ, sath, saath]
+  61: [इकसठ, ikasath, eksath]
+  62: [बासठ, basath, baasath]
+  63: [तिरसठ, tirsath, tirasath]
+  64: [चौंसठ, chaunsath, chausath]
+  65: [पैंसठ, painsath, pensath]
+  66: [छियासठ, chhiyasath]
+  67: [सड़सठ, sadsath, sarsath]
+  68: [अड़सठ, adsath, arsath]
+  69: [उनहत्तर, unhattar, unahattar]
+  70: [सत्तर, sattar, satar]
+  71: [इकहत्तर, ikahattar, ekhattar]
+  72: [बहत्तर, bahattar, bahatar]
+  73: [तिहत्तर, tihattar, tihatar]
+  74: [चौहत्तर, chauhattar, chauhatar]
+  75: [पचहत्तर, pachhattar, pachattar]
+  76: [छिहत्तर, chhihattar, chhihatar]
+  77: [सतहत्तर, satahattar, sathattar]
+  78: [अठहत्तर, athahattar, athhattar]
+  79: [उन्यासी, unyasi, unasi]
+  80: [अस्सी, assi, asi]
+  81: [इक्यासी, ikyasi, ekyasi]
+  82: [बयासी, bayasi]
+  83: [तिरासी, tirasi]
+  84: [चौरासी, chaurasi]
+  85: [पचासी, pachasi]
+  86: [छियासी, chhiyasi]
+  87: [सत्तासी, sattasi, satasi]
+  88: [अट्ठासी, atthasi, athasi]
+  89: [नवासी, navasi, nawasi]
+  90: [नब्बे, nabbe, nabe]
+  91: [इक्यानवे, ikyanave, ekyanawe]
+  92: [बानवे, banave, banawe]
+  93: [तिरानवे, tiranave, tiranawe]
+  94: [चौरानवे, chauranave, chauranawe]
+  95: [पचानवे, pachanave, pachanawe]
+  96: [छियानवे, chhiyanave, chhiyanawe]
+  97: [सत्तानवे, sattanave, satanawe]
+  98: [अट्ठानवे, atthanave, athanawe]
+  99: [निन्यानवे, ninyanave, ninanawe]
+
+# Indian grouping: hundred, thousand, lakh (10^5), crore (10^7), arab (10^9).
+# There is deliberately no million/billion here -- assuming western grouping is
+# exactly the bug this project exists to catch.
+scales:
+  - {value: 100,        words: [सौ, sau, so]}
+  - {value: 1000,       words: [हज़ार, हजार, hazar, hazaar, hajar, thousand]}
+  - {value: 100000,     words: [लाख, lakh, lac, lakhs]}
+  - {value: 10000000,   words: [करोड़, करोड, crore, karod, crores]}
+  - {value: 1000000000, words: [अरब, arab, arb]}
+
+# Standalone fractional values -- these REPLACE the number, they do not modify
+# a following one. "डेढ़ लाख" is 1.5 lakh, not "one and a half of a lakh unit".
+fraction_values:
+  - {value: 1.5, words: [डेढ़, डेढ, derh, dedh, deodh, dhed]}
+  - {value: 2.5, words: [ढाई, ढाइ, dhai, dhaai, adhai]}
+
+# Prefix modifiers applied to the value that FOLLOWS them.
+# साढ़े तीन लाख = (3 + 0.5) * 100000 = 350000
+# सवा लाख      = (1 + 0.25) * 100000 = 125000   (bare scale implies 1)
+# पौने दो लाख  = (2 - 0.25) * 100000 = 175000
+modifiers:
+  - {delta:  0.5,  words: [साढ़े, साढे, sade, saadhe, sadhe, sarhe]}
+  - {delta:  0.25, words: [सवा, सव्वा, sawa, sava, savva]}
+  - {delta: -0.25, words: [पौने, पौना, paune, pone, pauna]}
+
+currency_cues: [रुपये, रुपए, रूपये, रुपया, रुपयों, rupaye, rupay, rupee, rupees, rs, inr]
+paise_cues: [पैसे, पैसा, paise, paisa]
+decimal_cues: [दशमलव, point, dashamlav]
+
+# Digit-string reading: "डबल पाँच" = 55, spoken in OTPs and account numbers.
+repeat_words:
+  - {times: 2, words: [डबल, double, dabal]}
+  - {times: 3, words: [ट्रिपल, triple, tripal]}
+
+# Cue words that identify which kind of digit run follows.
+entity_cues:
+  otp: [ओटीपी, otp, ओ.टी.पी, कोड, code, वन, टाइम, ओटीपि]
+  account_number: [खाता, खाते, अकाउंट, account, अकाउन्ट, खाता संख्या, acct, a/c]
+  pin_code: [पिन, पिनकोड, pin, pincode, पिन कोड, डाक]
+
+months:
+  1:  [जनवरी, january, jan]
+  2:  [फ़रवरी, फरवरी, february, feb]
+  3:  [मार्च, march, mar]
+  4:  [अप्रैल, april, apr]
+  5:  [मई, may]
+  6:  [जून, june, jun]
+  7:  [जुलाई, july, jul]
+  8:  [अगस्त, august, aug]
+  9:  [सितंबर, सितम्बर, september, sept, sep]
+  10: [अक्टूबर, अक्तूबर, october, oct]
+  11: [नवंबर, नवम्बर, november, nov]
+  12: [दिसंबर, दिसम्बर, december, dec]

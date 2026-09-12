@@ -1,0 +1,85 @@
+# Indian English number lexicon.
+#
+# Unlike Hindi, English 21-99 IS compositional ("twenty" + "one"), so only the
+# atoms are listed and the parser composes tens+units.
+#
+# Scales are Indian: lakh and crore, not million and billion. An Indian English
+# speaker says "three lakh fifty thousand", and a parser that assumes western
+# grouping produces 350 or 3,000,000 instead of 350000.
+
+language: en
+script: latin
+native_digits: "0123456789"
+
+units:
+  0:  [zero, nought, "o", oh]
+  1:  [one]
+  2:  [two]
+  3:  [three]
+  4:  [four]
+  5:  [five]
+  6:  [six]
+  7:  [seven]
+  8:  [eight]
+  9:  [nine]
+  10: [ten]
+  11: [eleven]
+  12: [twelve]
+  13: [thirteen]
+  14: [fourteen]
+  15: [fifteen]
+  16: [sixteen]
+  17: [seventeen]
+  18: [eighteen]
+  19: [nineteen]
+  20: [twenty]
+  30: [thirty]
+  40: [forty, fourty]
+  50: [fifty]
+  60: [sixty]
+  70: [seventy]
+  80: [eighty]
+  90: [ninety]
+
+scales:
+  - {value: 100,        words: [hundred]}
+  - {value: 1000,       words: [thousand]}
+  - {value: 100000,     words: [lakh, lakhs, lac, lacs]}
+  - {value: 10000000,   words: [crore, crores]}
+  - {value: 1000000000, words: [arab]}
+
+fraction_values:
+  - {value: 1.5, words: [derh, dedh]}
+  - {value: 2.5, words: [dhai, dhaai]}
+
+modifiers:
+  - {delta:  0.5,  words: [sade, saadhe, sarhe]}
+  - {delta:  0.25, words: [sawa, sava]}
+  - {delta: -0.25, words: [paune, pone]}
+
+currency_cues: [rupees, rupee, rupaye, rs, inr]
+paise_cues: [paise, paisa]
+decimal_cues: [point, decimal]
+
+repeat_words:
+  - {times: 2, words: [double]}
+  - {times: 3, words: [triple, treble]}
+
+entity_cues:
+  otp: [otp, code, "one-time", onetime, password]
+  account_number: [account, acct, "a/c", ac]
+  pin_code: [pin, pincode, postal, zip]
+
+months:
+  1:  [january, jan]
+  2:  [february, feb]
+  3:  [march, mar]
+  4:  [april, apr]
+  5:  [may]
+  6:  [june, jun]
+  7:  [july, jul]
+  8:  [august, aug]
+  9:  [september, sept, sep]
+  10: [october, oct]
+  11: [november, nov]
+  12: [december, dec]

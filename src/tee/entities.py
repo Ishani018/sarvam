@@ -1,0 +1,340 @@
+"""Entity extraction and normalization from an ASR hypothesis.
+
+Phase 2 scope: numbers, currency, OTPs, PIN codes and dates via deterministic
+rules over the number lexicon. No model. Person and place names are a stub
+interface (:class:`NameExtractor`) awaiting an NER model.
+
+The normalizers here are also what the corpus generator uses to build gold
+values -- but the generator calls them on the *sampled value*, never on the
+generated sentence. Gold must never be produced by parsing text, or a bug in
+this module becomes invisible in the results.
+"""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass, field
+from decimal import Decimal
+from typing import Iterable, Protocol, Sequence
+
+from .numwords import (
+    Lexicon,
+    NumberParseError,
+    Token,
+    canonicalize,
+    folded_text,
+    load_lexicon,
+    parse_digit_sequence,
+    parse_value,
+    tokenize_spans,
+)
+
+DIGIT_TYPES = ("account_number", "otp", "pin_code")
+
+#: Shape constraints used when no cue word identifies a bare digit run.
+SHAPES: dict[str, tuple[int, int]] = {
+    "pin_code": (6, 6),
+    "otp": (4, 6),
+    "account_number": (9, 18),
+}
+
+CUE_LOOKBEHIND = 5
+CUE_LOOKAHEAD = 3
+
+
+@dataclass
+class ExtractedEntity:
+    """An entity found in a hypothesis. Distinct from the gold
+    :class:`~tee.corpus.Entity`: this one carries provenance for debugging."""
+
+    type: str
+    surface: str
+    normalized: str
+    span: tuple[int, int]
+    extractor: str = "rule"
+    cue: str | None = None
+
+    def as_dict(self) -> dict:
+        return {
+            "type": self.type,
+            "surface": self.surface,
+            "normalized": self.normalized,
+            "span": list(self.span),
+            "extractor": self.extractor,
+            "cue": self.cue,
+        }
+
+
+# --------------------------------------------------------------------------
+# Normalizers -- the canonical forms scoring compares
+# --------------------------------------------------------------------------
+
+
+def normalize_digit_string(value: str) -> str:
+    """Digits only. Separators, spaces and Indic numerals all fold away."""
+    return re.sub(r"\D", "", folded_text(str(value)))
+
+
+def normalize_currency(amount: Decimal | int | float | str, code: str = "INR") -> str:
+    """``INR:350000.00``. Fixed 2dp so 350000 and 350000.00 never differ."""
+    return f"{code}:{Decimal(str(amount)).quantize(Decimal('0.01'))}"
+
+
+def normalize_date(year: int | None, month: int, day: int | None) -> str:
+    """ISO-8601, with partials allowed: ``2026-03-14``, ``--03-14``, ``2026-03``."""
+    y = f"{year:04d}" if year is not None else "-"
+    if day is None:
+        return f"{y}-{month:02d}" if year is not None else f"--{month:02d}"
+    if year is None:
+        return f"--{month:02d}-{day:02d}"
+    return f"{y}-{month:02d}-{day:02d}"
+
+
+def normalize_name(value: str) -> str:
+    import unicodedata
+
+    return re.sub(r"\s+", " ", unicodedata.normalize("NFC", value).strip()).casefold()
+
+
+NORMALIZERS = {
+    "account_number": normalize_digit_string,
+    "otp": normalize_digit_string,
+    "pin_code": normalize_digit_string,
+    "person_name": normalize_name,
+    "place_name": normalize_name,
+}
+
+
+# --------------------------------------------------------------------------
+# Name extraction -- stub until an NER model is wired in
+# --------------------------------------------------------------------------
+
+
+class NameExtractor(Protocol):
+    """Interface for person/place name extraction.
+
+    TODO(phase 4): wire in an Indic NER model behind this. Keeping it a
+    Protocol means score.py never learns whether names came from a model.
+    """
+
+    def extract_names(self, text: str, language: str) -> list[ExtractedEntity]: ...
+
+
+class NullNameExtractor:
+    """Finds nothing. The honest default: reporting 0% name accuracy because no
+    extractor exists would look like a finding, so name types are excluded from
+    scoring.entity_types instead."""
+
+    def extract_names(self, text: str, language: str) -> list[ExtractedEntity]:
+        return []
+
+
+# --------------------------------------------------------------------------
+# Rule-based extraction
+# --------------------------------------------------------------------------
+
+
+def _is_numberish(tok: str, lex: Lexicon) -> bool:
+    return bool(re.fullmatch(r"\d+(?:\.\d+)?", tok)) or lex.is_number_word(tok)
+
+
+def _number_runs(tokens: Sequence[Token], lex: Lexicon) -> list[tuple[int, int]]:
+    """Maximal consecutive spans of number tokens (digits or number words)."""
+    runs: list[tuple[int, int]] = []
+    i = 0
+    while i < len(tokens):
+        if _is_numberish(tokens[i].text, lex):
+            j = i
+            while j < len(tokens) and _is_numberish(tokens[j].text, lex):
+                j += 1
+            runs.append((i, j))
+            i = j
+        else:
+            i += 1
+    return runs
+
+
+def _scan_cue(
+    tokens: Sequence[Token], start: int, end: int, lex: Lexicon,
+    match, behind: int = CUE_LOOKBEHIND, ahead: int = CUE_LOOKAHEAD,
+) -> str | None:
+    """Look for a cue word around a run, stopping at any other number.
+
+    The stop condition is what keeps "खाते 50100234567890 में ₹3,50,000" honest:
+    without it the amount's lookbehind reaches past the account number to
+    "खाते" and the amount is reported as an account number, or the account
+    number's lookahead reaches the ₹ and it is reported as currency.
+    """
+    for k in range(start - 1, max(-1, start - behind - 1), -1):
+        if _is_numberish(tokens[k].text, lex):
+            break
+        if match(tokens[k].text):
+            return tokens[k].text
+    for k in range(end, min(len(tokens), end + ahead)):
+        if _is_numberish(tokens[k].text, lex):
+            break
+        if match(tokens[k].text):
+            return tokens[k].text
+    return None
+
+
+def _find_cue(tokens, start, end, cues, lex) -> str | None:
+    return _scan_cue(tokens, start, end, lex, lambda t: canonicalize(t) in cues)
+
+
+def _currency_cue(tokens, start, end, lex: Lexicon) -> str | None:
+    return _scan_cue(
+        tokens, start, end, lex,
+        lambda t: t in ("₹", "Rs", "rs") or canonicalize(t) in lex.currency_cues,
+    )
+
+
+def _run_kind(run_text: Sequence[str], lex: Lexicon) -> str:
+    """"magnitude" if the run uses scale words or fractional modifiers.
+
+    A magnitude expression ("साढ़े तीन लाख") is a quantity, never a digit string
+    read aloud, so it can never be an account number or an OTP. Without this
+    distinction a nearby "खाते" cue turns every amount into an account number.
+    """
+    for t in run_text:
+        c = canonicalize(t)
+        if c in lex.scales or c in lex.modifiers or c in lex.fraction_values:
+            return "magnitude"
+    return "digits"
+
+
+def extract(
+    text: str,
+    language: str,
+    types: Iterable[str] | None = None,
+    name_extractor: NameExtractor | None = None,
+) -> list[ExtractedEntity]:
+    """Extract every entity candidate from ``text``.
+
+    Candidates are typed by cue word where one is present, and by digit-length
+    shape otherwise. A bare 6-digit run with no cue is emitted as *both* a
+    pin_code and an otp candidate -- scoring checks membership per gold type, so
+    over-generating here is safer than guessing wrong and logging a false
+    extractor miss.
+    """
+    wanted = set(types) if types else None
+    lex = load_lexicon(language)
+    folded = folded_text(text)
+    tokens = tokenize_spans(text)
+    out: list[ExtractedEntity] = []
+
+    def want(t: str) -> bool:
+        return wanted is None or t in wanted
+
+    for start, end in _number_runs(tokens, lex):
+        run = tokens[start:end]
+        surface = folded[run[0].start : run[-1].end]
+        span = (run[0].start, run[-1].end)
+        run_text = [t.text for t in run]
+
+        digits = parse_digit_sequence(run_text, language)
+        try:
+            value: Decimal | None = parse_value(run_text, language)
+        except NumberParseError:
+            value = None
+
+        kind = _run_kind(run_text, lex)
+        cur_cue = _currency_cue(tokens, start, end, lex)
+
+        # A magnitude expression is an amount, full stop -- never a digit string.
+        if kind == "magnitude":
+            if value is not None and want("currency"):
+                out.append(ExtractedEntity(
+                    "currency", surface, normalize_currency(value), span, cue=cur_cue,
+                ))
+            continue
+
+        typed = False
+        for etype in DIGIT_TYPES:
+            if not want(etype):
+                continue
+            cue = _find_cue(tokens, start, end, lex.entity_cues.get(etype, set()), lex)
+            if cue:
+                out.append(ExtractedEntity(etype, surface, digits, span, cue=cue))
+                typed = True
+        if typed:
+            continue
+
+        if cur_cue and value is not None and want("currency"):
+            out.append(ExtractedEntity(
+                "currency", surface, normalize_currency(value), span, cue=cur_cue,
+            ))
+            continue
+
+        # No cue: fall back to digit-length shape, emitting every type that fits.
+        for etype, (lo, hi) in SHAPES.items():
+            if want(etype) and lo <= len(digits) <= hi:
+                out.append(ExtractedEntity(etype, surface, digits, span, cue=None))
+
+    if want("date"):
+        dates = _extract_dates(folded, tokens, lex)
+        out.extend(dates)
+        # A year inside a date is not a stray 4-digit OTP.
+        spans = [d.span for d in dates]
+        out = [
+            e for e in out
+            if e.type == "date"
+            or not any(s <= e.span[0] and e.span[1] <= t for s, t in spans)
+        ]
+
+    if name_extractor is not None:
+        out.extend(
+            e for e in name_extractor.extract_names(text, language)
+            if want(e.type)
+        )
+
+    return out
+
+
+_NUMERIC_DATE = re.compile(r"\b(\d{1,2})\s*[/.\-]\s*(\d{1,2})\s*[/.\-]\s*(\d{2,4})\b")
+
+
+def _extract_dates(folded: str, tokens: Sequence[Token], lex: Lexicon) -> list[ExtractedEntity]:
+    out: list[ExtractedEntity] = []
+
+    for m in _NUMERIC_DATE.finditer(folded):
+        day, month, year = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if year < 100:
+            year += 2000
+        if 1 <= month <= 12 and 1 <= day <= 31:
+            out.append(ExtractedEntity(
+                "date", m.group(0), normalize_date(year, month, day), m.span(),
+            ))
+
+    # "15 मार्च 2024" / "march 15" -- a month word with a day either side.
+    for i, tok in enumerate(tokens):
+        month = lex.months.get(canonicalize(tok.text))
+        if month is None:
+            continue
+        day = year = None
+        lo = hi = i
+        for j in (i - 1, i + 1):
+            if not (0 <= j < len(tokens)):
+                continue
+            t = tokens[j].text
+            if not t.isdigit():
+                continue
+            v = int(t)
+            if day is None and 1 <= v <= 31 and len(t) <= 2:
+                day, lo, hi = v, min(lo, j), max(hi, j)
+            elif year is None and len(t) == 4:
+                year, lo, hi = v, min(lo, j), max(hi, j)
+        if year is None and i + 2 < len(tokens) and tokens[i + 2].text.isdigit():
+            t = tokens[i + 2].text
+            if len(t) == 4:
+                year, hi = int(t), max(hi, i + 2)
+        if day is not None:
+            span = (tokens[lo].start, tokens[hi].end)
+            out.append(ExtractedEntity(
+                "date", folded[span[0]:span[1]], normalize_date(year, month, day), span,
+            ))
+    return out
+
+
+def candidates_for(entities: Sequence[ExtractedEntity], etype: str) -> list[ExtractedEntity]:
+    return [e for e in entities if e.type == etype]
