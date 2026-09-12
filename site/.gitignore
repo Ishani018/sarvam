@@ -1,8 +1,2 @@
 node_modules/
 dist/
-
-# Build outputs, derived from results/ + corpora/ + .tee/ by scripts/build-data.mjs.
-# Not committed while the deploy story is undecided: see DEPLOY.md. Committing
-# them is what makes a Vercel build work without .tee/ being in the repo.
-src/generated/
-public/audio/

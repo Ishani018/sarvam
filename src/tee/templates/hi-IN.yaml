@@ -11,6 +11,10 @@
 # Fields:
 #   id          stable, used to group failures by template in triage
 #   text        the frame
+#   gloss       English gloss with the SAME slots. Entity slots render the same
+#               surface string that appears in the Hindi, never a translation
+#               of the number words -- the reader has to be able to see which
+#               token is the entity, and the gold value is shown separately.
 #   domain      banking | collections | delivery | identity  (a reporting cut)
 #   code_mixed  true if the frame itself carries English
 #   notes       free text, not used by code
@@ -22,60 +26,74 @@ templates:
   - id: hi_otp_01
     domain: identity
     text: "आपका ओटीपी {otp} है, इसे किसी के साथ साझा न करें"
+    gloss: "Your OTP is {otp}. Do not share it with anyone."
 
   - id: hi_otp_02
     domain: identity
     text: "लॉगिन करने के लिए {otp} कोड दर्ज करें"
+    gloss: "Enter code {otp} to log in."
 
   - id: hi_acct_01
     domain: banking
     text: "आपका खाता नंबर {account_number} है"
+    gloss: "Your account number is {account_number}."
 
   - id: hi_pin_01
     domain: delivery
     text: "डिलीवरी का पिन कोड {pin_code} दर्ज किया गया है"
+    gloss: "The delivery PIN code {pin_code} has been recorded."
 
   - id: hi_amount_01
     domain: banking
     text: "आपके खाते में {currency} रुपये की शेष राशि है"
+    gloss: "Your account has a balance of {currency} rupees."
 
   - id: hi_amount_02
     domain: collections
     text: "आपकी बकाया राशि {currency} रुपये है, कृपया भुगतान करें"
+    gloss: "Your outstanding amount is {currency} rupees. Please make the payment."
 
   # --- two entities of different types in one sentence --------------------
   - id: hi_acct_amount_01
     domain: banking
     text: "आपके खाते {account_number} में {currency} रुपये जमा हुए हैं"
+    gloss: "{currency} rupees have been credited to your account {account_number}."
 
   - id: hi_acct_amount_02
     domain: collections
     text: "खाता {account_number} से {currency} रुपये काटे गए हैं"
+    gloss: "{currency} rupees have been debited from account {account_number}."
 
   - id: hi_amount_date_01
     domain: collections
     text: "{date} तक {currency} रुपये का भुगतान करना आवश्यक है"
+    gloss: "A payment of {currency} rupees is required by {date}."
 
   - id: hi_pin_acct_01
     domain: delivery
     text: "पिन कोड {pin_code} पर खाता {account_number} से भुगतान हुआ"
+    gloss: "Payment was made from account {account_number} at PIN code {pin_code}."
 
   - id: hi_otp_amount_01
     domain: banking
     text: "{currency} रुपये के लेनदेन के लिए आपका ओटीपी {otp} है"
+    gloss: "Your OTP for a transaction of {currency} rupees is {otp}."
 
   # --- code-mixed ---------------------------------------------------------
   - id: hi_cm_otp_01
     domain: identity
     code_mixed: true
     text: "आपका OTP {otp} है, please इसे share न करें"
+    gloss: "Your OTP is {otp}. Please do not share it."
 
   - id: hi_cm_acct_amount_01
     domain: banking
     code_mixed: true
     text: "Your account {account_number} में {currency} rupees credit हुए हैं"
+    gloss: "{currency} rupees have been credited to your account {account_number}."
 
   - id: hi_cm_amount_01
     domain: collections
     code_mixed: true
     text: "Sir आपका outstanding balance {currency} rupees है, payment कब करेंगे"
+    gloss: "Sir, your outstanding balance is {currency} rupees. When will you pay?"

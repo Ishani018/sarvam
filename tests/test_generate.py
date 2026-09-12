@@ -115,3 +115,34 @@ def test_pin_codes_have_realistic_shape():
         for e in u.entities:
             if e.type == "pin_code":
                 assert len(e.normalized) == 6 and e.normalized[0] not in "09"
+
+
+# --- English gloss ----------------------------------------------------------
+
+
+def test_every_template_has_a_gloss_with_matching_slots():
+    """A gloss whose slots drift from the text would leave an unfilled {slot}
+    on the page, or silently drop the entity from the translation."""
+    for t in load_templates("hi-IN").templates:
+        assert t.gloss, f"{t.id} has no gloss"
+        text_slots = sorted(m.group(0) for m in SLOT_RE.finditer(t.text))
+        gloss_slots = sorted(m.group(0) for m in SLOT_RE.finditer(t.gloss))
+        assert text_slots == gloss_slots, f"{t.id}: {text_slots} vs {gloss_slots}"
+
+
+def test_gloss_carries_the_same_surface_not_a_translation():
+    """The gloss exists so a non-Devanagari reader can locate the entity. If it
+    translated the number words, the token would no longer be findable."""
+    for u in generate("hi-IN", 60, 1337):
+        assert u.gloss and not SLOT_RE.search(u.gloss), u.gloss
+        for e in u.entities:
+            assert e.surface in u.gloss, f"{u.id}: {e.surface!r} missing from gloss"
+
+
+def test_adding_gloss_did_not_change_any_existing_utterance():
+    """Results already on disk are keyed to these sentences. Regenerating with
+    glosses must leave ids, text and gold values byte-identical."""
+    us = generate("hi-IN", 40, 1337)
+    assert us[0].id == "hi-IN-1337-00000"
+    assert us[0].text == "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा न करें"
+    assert us[0].entities[0].normalized == "2184"

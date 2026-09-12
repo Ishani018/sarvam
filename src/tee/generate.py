@@ -41,6 +41,10 @@ SLOT_RE = re.compile(r"\{(\w+?)(?::(\w+))?\}")
 class Template(BaseModel):
     id: str
     text: str
+    #: Same slots as `text`. Entity slots are filled with the identical surface
+    #: string, not a translation -- the gloss exists so a non-Devanagari reader
+    #: can locate the entity, and the gold value is reported separately.
+    gloss: str | None = None
     domain: str | None = None
     code_mixed: bool = False
     notes: str | None = None
@@ -186,13 +190,15 @@ def generate(language: str, n: int, seed: int) -> list[Utterance]:
                 values[key] = SAMPLERS[etype](urng, language)
 
         text = template.text
+        gloss = template.gloss
         entities: list[Entity] = []
         for etype, key in template.slots():
             sampled = values[key]
             surface = sampled.surface(realization)
-            text = text.replace(
-                f"{{{key}}}" if key != etype else f"{{{etype}}}", surface, 1
-            )
+            token = f"{{{key}}}" if key != etype else f"{{{etype}}}"
+            text = text.replace(token, surface, 1)
+            if gloss is not None:
+                gloss = gloss.replace(token, surface, 1)
             entities.append(Entity(type=sampled.type, surface=surface,
                                    normalized=sampled.normalized))
 
@@ -200,6 +206,7 @@ def generate(language: str, n: int, seed: int) -> list[Utterance]:
             id=f"{language}-{seed}-{i:05d}",
             language=language,
             text=text,
+            gloss=gloss,
             entities=entities,
             source="synthetic",
             domain=template.domain,

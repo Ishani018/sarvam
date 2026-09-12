@@ -1,0 +1,1334 @@
+{
+  "generatedAt": "2026-09-12T16:55:40.275Z",
+  "project": {
+    "name": "Ginti",
+    "script": "गिनती",
+    "tagline": "Does the number survive the phone line?"
+  },
+  "provenance": {
+    "isMock": false,
+    "asrImpls": [
+      "sarvam"
+    ],
+    "warnings": [
+      "excluded 120 mock row(s) from mock-calib.jsonl: real results are present and the two cannot be mixed",
+      "declared but absent from results: narrowband, gsm_fr, opus_low, packet_loss_2, packet_loss_5, packet_loss_10, noisy_line",
+      "BUILT WITHOUT AUDIO -- 10 audio file(s) referenced by results are not on disk:"
+    ],
+    "sourceFiles": {
+      "results": [
+        "mock-calib.jsonl",
+        "run-20260912T112926Z.jsonl"
+      ],
+      "corpora": [
+        "hi-calib-40.jsonl",
+        "hi-smoke-5.jsonl"
+      ],
+      "config": "default.yaml"
+    }
+  },
+  "runs": [
+    {
+      "runId": "run-20260912T112926Z",
+      "source": "run-20260912T112926Z.jsonl",
+      "asrImpls": [
+        "sarvam"
+      ],
+      "models": [
+        "saaras:v3",
+        "saaras:v4"
+      ],
+      "modes": [
+        "transcribe"
+      ],
+      "languages": [
+        "hi-IN"
+      ],
+      "conditions": [
+        "clean",
+        "g711_ulaw"
+      ],
+      "nUtterances": 5,
+      "nRows": 20,
+      "nEntities": 20,
+      "nErrors": 0
+    }
+  ],
+  "models": [
+    "saaras:v3",
+    "saaras:v4"
+  ],
+  "modes": [
+    "transcribe"
+  ],
+  "conditions": [
+    {
+      "name": "clean",
+      "description": "16 kHz mono baseline, no telephony damage",
+      "chain": [
+        {
+          "op": "resample",
+          "rate": 16000
+        }
+      ],
+      "exercised": true,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "narrowband",
+      "description": "8 kHz downsample only -- isolates bandwidth loss from codec loss",
+      "chain": [
+        {
+          "op": "resample",
+          "rate": 8000
+        }
+      ],
+      "exercised": false,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "g711_ulaw",
+      "description": "8 kHz + G.711 mu-law round trip (the standard PSTN codec)",
+      "chain": [
+        {
+          "op": "resample",
+          "rate": 8000
+        },
+        {
+          "op": "codec",
+          "codec": "pcm_mulaw",
+          "container": "wav"
+        }
+      ],
+      "exercised": true,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "gsm_fr",
+      "description": "8 kHz + GSM full rate round trip (2G mobile)",
+      "chain": [
+        {
+          "op": "resample",
+          "rate": 8000
+        },
+        {
+          "op": "codec",
+          "codec": "libgsm",
+          "container": "gsm"
+        }
+      ],
+      "exercised": false,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "opus_low",
+      "description": "low bitrate Opus round trip (VoIP / WebRTC under congestion)",
+      "chain": [
+        {
+          "op": "codec",
+          "codec": "libopus",
+          "container": "ogg",
+          "bitrate": "12k",
+          "application": "voip"
+        }
+      ],
+      "exercised": false,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "packet_loss_2",
+      "description": "g711_ulaw + 2% frame loss",
+      "chain": [
+        {
+          "op": "resample",
+          "rate": 8000
+        },
+        {
+          "op": "codec",
+          "codec": "pcm_mulaw",
+          "container": "wav"
+        },
+        {
+          "op": "packet_loss",
+          "rate": 0.02,
+          "frame_ms": 20,
+          "fill": "silence"
+        }
+      ],
+      "exercised": false,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "packet_loss_5",
+      "description": "g711_ulaw + 5% frame loss",
+      "chain": [
+        {
+          "op": "resample",
+          "rate": 8000
+        },
+        {
+          "op": "codec",
+          "codec": "pcm_mulaw",
+          "container": "wav"
+        },
+        {
+          "op": "packet_loss",
+          "rate": 0.05,
+          "frame_ms": 20,
+          "fill": "silence"
+        }
+      ],
+      "exercised": false,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "packet_loss_10",
+      "description": "g711_ulaw + 10% frame loss",
+      "chain": [
+        {
+          "op": "resample",
+          "rate": 8000
+        },
+        {
+          "op": "codec",
+          "codec": "pcm_mulaw",
+          "container": "wav"
+        },
+        {
+          "op": "packet_loss",
+          "rate": 0.1,
+          "frame_ms": 20,
+          "fill": "silence"
+        }
+      ],
+      "exercised": false,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    },
+    {
+      "name": "noisy_line",
+      "description": "pink noise at 15 dB SNR, then the phone line. Noise is added before the codec because that is the physical order: noisy room, then G.711.",
+      "chain": [
+        {
+          "op": "noise",
+          "source": "pink",
+          "snr_db": 15
+        },
+        {
+          "op": "resample",
+          "rate": 8000
+        },
+        {
+          "op": "codec",
+          "codec": "pcm_mulaw",
+          "container": "wav"
+        }
+      ],
+      "exercised": false,
+      "commands": [],
+      "tools": {},
+      "seed": null,
+      "durationS": null
+    }
+  ],
+  "entityTypes": [
+    "account_number",
+    "currency",
+    "otp",
+    "pin_code"
+  ],
+  "summary": {
+    "utterances": 5,
+    "rows": 20,
+    "entities": 20,
+    "hits": 20,
+    "hitRate": 1,
+    "conditions": 2,
+    "models": 2
+  },
+  "matrix": [
+    {
+      "model": "saaras:v3",
+      "condition": "clean",
+      "entityType": "otp",
+      "hits": 2,
+      "total": 2,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "clean",
+      "entityType": "otp",
+      "hits": 2,
+      "total": 2,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "g711_ulaw",
+      "entityType": "otp",
+      "hits": 2,
+      "total": 2,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "g711_ulaw",
+      "entityType": "otp",
+      "hits": 2,
+      "total": 2,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "clean",
+      "entityType": "account_number",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "clean",
+      "entityType": "account_number",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "g711_ulaw",
+      "entityType": "account_number",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "g711_ulaw",
+      "entityType": "account_number",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "clean",
+      "entityType": "pin_code",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "clean",
+      "entityType": "pin_code",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "g711_ulaw",
+      "entityType": "pin_code",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "g711_ulaw",
+      "entityType": "pin_code",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "clean",
+      "entityType": "currency",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "clean",
+      "entityType": "currency",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "g711_ulaw",
+      "entityType": "currency",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "g711_ulaw",
+      "entityType": "currency",
+      "hits": 1,
+      "total": 1,
+      "rate": 1,
+      "lowN": true
+    }
+  ],
+  "lowNThreshold": 10,
+  "wer": [
+    {
+      "model": "saaras:v3",
+      "condition": "clean",
+      "wer": 0.9157936507936508,
+      "n": 5
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "clean",
+      "wer": 0.2562698412698413,
+      "n": 5
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "g711_ulaw",
+      "wer": 1.0562698412698412,
+      "n": 5
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "g711_ulaw",
+      "wer": 0.2562698412698413,
+      "n": 5
+    }
+  ],
+  "rendering": [
+    {
+      "utteranceId": "hi-IN-1337-00000",
+      "condition": "clean",
+      "entityType": "otp",
+      "expected": "2184",
+      "reference": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा न करें",
+      "referenceRendering": "words",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "words",
+          "hit": true,
+          "wer": 0.14285714285714285,
+          "hypothesis": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा ना करें।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.42857142857142855,
+          "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00000",
+      "condition": "g711_ulaw",
+      "entityType": "otp",
+      "expected": "2184",
+      "reference": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा न करें",
+      "referenceRendering": "words",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.42857142857142855,
+          "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.42857142857142855,
+          "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00001",
+      "condition": "clean",
+      "entityType": "otp",
+      "expected": "5584",
+      "reference": "लॉगिन करने के लिए 5584 कोड दर्ज करें",
+      "referenceRendering": "digits",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.375,
+          "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.125,
+          "hypothesis": "लॉगिन करने के लिए 5584 कोड दर्ज करें।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00001",
+      "condition": "g711_ulaw",
+      "entityType": "otp",
+      "expected": "5584",
+      "reference": "लॉगिन करने के लिए 5584 कोड दर्ज करें",
+      "referenceRendering": "digits",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.375,
+          "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.125,
+          "hypothesis": "लॉगिन करने के लिए 5584 कोड दर्ज करें।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00002",
+      "condition": "clean",
+      "entityType": "account_number",
+      "expected": "762600781019989",
+      "reference": "आपका खाता नंबर 762600781019989 है",
+      "referenceRendering": "digits",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "words",
+          "hit": true,
+          "wer": 3.2,
+          "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.2,
+          "hypothesis": "आपका खाता नंबर 762600781019989 है।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00002",
+      "condition": "g711_ulaw",
+      "entityType": "account_number",
+      "expected": "762600781019989",
+      "reference": "आपका खाता नंबर 762600781019989 है",
+      "referenceRendering": "digits",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "words",
+          "hit": true,
+          "wer": 3.2,
+          "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.2,
+          "hypothesis": "आपका खाता नंबर 762600781019989 है।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00003",
+      "condition": "clean",
+      "entityType": "pin_code",
+      "expected": "375022",
+      "reference": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है",
+      "referenceRendering": "digits",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "words",
+          "hit": true,
+          "wer": 0.7777777777777778,
+          "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.1111111111111111,
+          "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00003",
+      "condition": "g711_ulaw",
+      "entityType": "pin_code",
+      "expected": "375022",
+      "reference": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है",
+      "referenceRendering": "digits",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "words",
+          "hit": true,
+          "wer": 0.7777777777777778,
+          "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.1111111111111111,
+          "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00004",
+      "condition": "clean",
+      "entityType": "currency",
+      "expected": "INR:7674000.00",
+      "reference": "आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है",
+      "referenceRendering": "words",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "words",
+          "hit": true,
+          "wer": 0.08333333333333333,
+          "hypothesis": "आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.4166666666666667,
+          "hypothesis": "आपके खाते में 76,74,000 रुपये की शेष राशि है।"
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00004",
+      "condition": "g711_ulaw",
+      "entityType": "currency",
+      "expected": "INR:7674000.00",
+      "reference": "आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है",
+      "referenceRendering": "words",
+      "models": [
+        {
+          "model": "saaras:v3",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.5,
+          "hypothesis": "आपके खाते में 76,74,000 रुपए की शेष राशि है।"
+        },
+        {
+          "model": "saaras:v4",
+          "mode": "transcribe",
+          "rendering": "digits",
+          "hit": true,
+          "wer": 0.4166666666666667,
+          "hypothesis": "आपके खाते में 76,74,000 रुपये की शेष राशि है।"
+        }
+      ]
+    }
+  ],
+  "renderingStats": {
+    "pairs": 10,
+    "disagreements": 6,
+    "selfFlips": 2,
+    "rewrote": 10,
+    "models": 2
+  },
+  "werSpread": {
+    "min": {
+      "wer": 0.08333333333333333,
+      "model": "saaras:v3",
+      "id": "hi-IN-1337-00004"
+    },
+    "max": {
+      "wer": 3.2,
+      "model": "saaras:v3",
+      "id": "hi-IN-1337-00002"
+    }
+  },
+  "listen": [
+    {
+      "utteranceId": "hi-IN-1337-00002",
+      "language": "hi-IN",
+      "text": "आपका खाता नंबर 762600781019989 है",
+      "gloss": "Your account number is 762600781019989.",
+      "templateId": "hi_acct_01",
+      "realization": "digits",
+      "domain": "banking",
+      "codeMixed": false,
+      "entities": [
+        {
+          "type": "account_number",
+          "surface": "762600781019989",
+          "normalized": "762600781019989",
+          "start": 15,
+          "end": 30
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "clean",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।",
+              "wer": 3.2,
+              "error": null,
+              "entities": [
+                {
+                  "type": "account_number",
+                  "expected": "762600781019989",
+                  "expectedSurface": "762600781019989",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "आपका खाता नंबर 762600781019989 है।",
+              "wer": 0.2,
+              "error": null,
+              "entities": [
+                {
+                  "type": "account_number",
+                  "expected": "762600781019989",
+                  "expectedSurface": "762600781019989",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "g711_ulaw",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।",
+              "wer": 3.2,
+              "error": null,
+              "entities": [
+                {
+                  "type": "account_number",
+                  "expected": "762600781019989",
+                  "expectedSurface": "762600781019989",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "आपका खाता नंबर 762600781019989 है।",
+              "wer": 0.2,
+              "error": null,
+              "entities": [
+                {
+                  "type": "account_number",
+                  "expected": "762600781019989",
+                  "expectedSurface": "762600781019989",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00004",
+      "language": "hi-IN",
+      "text": "आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है",
+      "gloss": "Your account has a balance of छिहत्तर लाख चौहत्तर हज़ार rupees.",
+      "templateId": "hi_amount_01",
+      "realization": "words",
+      "domain": "banking",
+      "codeMixed": false,
+      "entities": [
+        {
+          "type": "currency",
+          "surface": "छिहत्तर लाख चौहत्तर हज़ार",
+          "normalized": "INR:7674000.00",
+          "start": 14,
+          "end": 39
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "clean",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है।",
+              "wer": 0.08333333333333333,
+              "error": null,
+              "entities": [
+                {
+                  "type": "currency",
+                  "expected": "INR:7674000.00",
+                  "expectedSurface": "छिहत्तर लाख चौहत्तर हज़ार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "आपके खाते में 76,74,000 रुपये की शेष राशि है।",
+              "wer": 0.4166666666666667,
+              "error": null,
+              "entities": [
+                {
+                  "type": "currency",
+                  "expected": "INR:7674000.00",
+                  "expectedSurface": "छिहत्तर लाख चौहत्तर हज़ार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "g711_ulaw",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "आपके खाते में 76,74,000 रुपए की शेष राशि है।",
+              "wer": 0.5,
+              "error": null,
+              "entities": [
+                {
+                  "type": "currency",
+                  "expected": "INR:7674000.00",
+                  "expectedSurface": "छिहत्तर लाख चौहत्तर हज़ार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "आपके खाते में 76,74,000 रुपये की शेष राशि है।",
+              "wer": 0.4166666666666667,
+              "error": null,
+              "entities": [
+                {
+                  "type": "currency",
+                  "expected": "INR:7674000.00",
+                  "expectedSurface": "छिहत्तर लाख चौहत्तर हज़ार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00000",
+      "language": "hi-IN",
+      "text": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा न करें",
+      "gloss": "Your OTP is दो एक आठ चार. Do not share it with anyone.",
+      "templateId": "hi_otp_01",
+      "realization": "words",
+      "domain": "identity",
+      "codeMixed": false,
+      "entities": [
+        {
+          "type": "otp",
+          "surface": "दो एक आठ चार",
+          "normalized": "2184",
+          "start": 11,
+          "end": 23
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "clean",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा ना करें।",
+              "wer": 0.14285714285714285,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "2184",
+                  "expectedSurface": "दो एक आठ चार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।",
+              "wer": 0.42857142857142855,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "2184",
+                  "expectedSurface": "दो एक आठ चार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "g711_ulaw",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।",
+              "wer": 0.42857142857142855,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "2184",
+                  "expectedSurface": "दो एक आठ चार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।",
+              "wer": 0.42857142857142855,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "2184",
+                  "expectedSurface": "दो एक आठ चार",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00003",
+      "language": "hi-IN",
+      "text": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है",
+      "gloss": "The delivery PIN code 375022 has been recorded.",
+      "templateId": "hi_pin_01",
+      "realization": "digits",
+      "domain": "delivery",
+      "codeMixed": false,
+      "entities": [
+        {
+          "type": "pin_code",
+          "surface": "375022",
+          "normalized": "375022",
+          "start": 19,
+          "end": 25
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "clean",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।",
+              "wer": 0.7777777777777778,
+              "error": null,
+              "entities": [
+                {
+                  "type": "pin_code",
+                  "expected": "375022",
+                  "expectedSurface": "375022",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।",
+              "wer": 0.1111111111111111,
+              "error": null,
+              "entities": [
+                {
+                  "type": "pin_code",
+                  "expected": "375022",
+                  "expectedSurface": "375022",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "g711_ulaw",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।",
+              "wer": 0.7777777777777778,
+              "error": null,
+              "entities": [
+                {
+                  "type": "pin_code",
+                  "expected": "375022",
+                  "expectedSurface": "375022",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।",
+              "wer": 0.1111111111111111,
+              "error": null,
+              "entities": [
+                {
+                  "type": "pin_code",
+                  "expected": "375022",
+                  "expectedSurface": "375022",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "utteranceId": "hi-IN-1337-00001",
+      "language": "hi-IN",
+      "text": "लॉगिन करने के लिए 5584 कोड दर्ज करें",
+      "gloss": "Enter code 5584 to log in.",
+      "templateId": "hi_otp_02",
+      "realization": "digits",
+      "domain": "identity",
+      "codeMixed": false,
+      "entities": [
+        {
+          "type": "otp",
+          "surface": "5584",
+          "normalized": "5584",
+          "start": 18,
+          "end": 22
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "clean",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।",
+              "wer": 0.375,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "5584",
+                  "expectedSurface": "5584",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "लॉगिन करने के लिए 5584 कोड दर्ज करें।",
+              "wer": 0.125,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "5584",
+                  "expectedSurface": "5584",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "condition": "g711_ulaw",
+          "audio": null,
+          "sizeBytes": null,
+          "durationS": null,
+          "results": [
+            {
+              "model": "saaras:v3",
+              "mode": "transcribe",
+              "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।",
+              "wer": 0.375,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "5584",
+                  "expectedSurface": "5584",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            },
+            {
+              "model": "saaras:v4",
+              "mode": "transcribe",
+              "hypothesis": "लॉगिन करने के लिए 5584 कोड दर्ज करें।",
+              "wer": 0.125,
+              "error": null,
+              "entities": [
+                {
+                  "type": "otp",
+                  "expected": "5584",
+                  "expectedSurface": "5584",
+                  "found": null,
+                  "foundSurface": null,
+                  "hit": true,
+                  "editDistance": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "method": {
+    "seed": 1337,
+    "audio": {
+      "sample_rate": 16000,
+      "channels": 1,
+      "sample_format": "s16le",
+      "frame_ms": 20,
+      "restore_rate": true
+    },
+    "scoring": {
+      "entity_types": [
+        "account_number",
+        "currency",
+        "otp",
+        "pin_code",
+        "date"
+      ],
+      "wer": {
+        "strip_punct": true,
+        "unicode_nfc": true,
+        "casefold": true
+      }
+    },
+    "cost": {
+      "asr_inr_per_audio_second": 0.00833,
+      "tts_inr_per_1k_chars": 3
+    },
+    "asr": {
+      "impl": "mock",
+      "sarvam": {
+        "endpoint": "https://api.sarvam.ai/speech-to-text",
+        "models": [
+          "saaras:v3",
+          "saaras:v4"
+        ],
+        "mode": "transcribe",
+        "timeout_s": 120,
+        "max_retries": 4,
+        "backoff_base_s": 2
+      }
+    },
+    "tts": {
+      "impl": "mock",
+      "sarvam": {
+        "endpoint": "https://api.sarvam.ai/text-to-speech",
+        "model": "bulbul:v3",
+        "speaker": "shubh",
+        "speech_sample_rate": 24000,
+        "pace": 1,
+        "timeout_s": 120,
+        "max_retries": 4,
+        "backoff_base_s": 2
+      }
+    },
+    "tools": {}
+  },
+  "content": {},
+  "audioBundle": {
+    "files": 0,
+    "bytes": 0
+  }
+}

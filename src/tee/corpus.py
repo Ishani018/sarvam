@@ -53,6 +53,10 @@ class Utterance(BaseModel):
     source: Literal["synthetic", "gramvaani", "indicvoices", "shrutilipi"]
 
     # Optional, phase-2 additions.
+    #: English gloss with entity surfaces rendered exactly as they appear in
+    #: `text`, so a reader who cannot read Devanagari can still see which token
+    #: is the entity. Never a translation of the number words.
+    gloss: str | None = None
     audio_path: str | None = None
     domain: str | None = None
     #: "digits" or "words" -- which rendering of the entities went into `text`.

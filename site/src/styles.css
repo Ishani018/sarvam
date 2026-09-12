@@ -1,0 +1,468 @@
+/* Ginti -- design system.
+ *
+ * Reference points: a well-set research paper and an engineering postmortem.
+ * White ground, near-black text, hairline rules instead of card borders, and
+ * exactly one accent.
+ *
+ * The accent marks MISSES, not hits. That inversion is deliberate: a table of
+ * successes should be visually quiet, so a wall of green can never form and
+ * imply a result the sample size does not support. Colour is reserved for the
+ * thing a reader needs to find.
+ */
+
+/* ---------------------------------------------------------------- fonts -- */
+/* Self-hosted. No CDN: a third-party font request at runtime leaks the
+ * visitor's IP, which is poor form on a page sent out for review. */
+@import "@fontsource-variable/ibm-plex-sans";
+@import "@fontsource/ibm-plex-sans-devanagari/400.css";
+@import "@fontsource/ibm-plex-sans-devanagari/500.css";
+@import "@fontsource/ibm-plex-sans-devanagari/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+:root {
+  /* IBM Plex Mono has no Devanagari, and no good Devanagari monospace exists.
+   * Latin digits and entity values -- where column alignment actually matters
+   * -- get true monospace with tabular figures; Devanagari falls through to
+   * Plex Sans Devanagari, staying inside the same type family instead of
+   * dropping to an arbitrary system font. Forcing monospace on Devanagari
+   * would wreck the shaping for no alignment benefit. */
+  --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans Devanagari",
+    system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", "IBM Plex Sans Devanagari",
+    ui-monospace, SFMono-Regular, monospace;
+  --font-deva: "IBM Plex Sans Devanagari", "IBM Plex Sans Variable", sans-serif;
+
+  /* Type scale, ~1.25 ratio off a 17px body. */
+  --t-11: 0.6875rem;
+  --t-12: 0.75rem;
+  --t-13: 0.8125rem;
+  --t-15: 0.9375rem;
+  --t-17: 1.0625rem;
+  --t-21: 1.3125rem;
+  --t-26: 1.625rem;
+  --t-33: 2.0625rem;
+  --t-42: clamp(2rem, 1.3rem + 3.2vw, 2.625rem);
+
+  --lh-tight: 1.22;
+  --lh-snug: 1.4;
+  --lh-body: 1.62;
+
+  /* Ink. Near-black, never pure black: #000 on #fff is harsh at this density. */
+  --ink: #16181d;
+  --ink-2: #474c56;
+  --ink-3: #7b818c;
+  --ink-4: #a9aeb6;
+
+  --paper: #ffffff;
+  --paper-2: #faf9f7;
+  --rule: #e6e5e0;
+  --rule-strong: #c8c7c0;
+
+  /* The one accent. Miss / failure / attention. */
+  --accent: #b03621;
+  --accent-ink: #8d2a19;
+  --accent-wash: #fbf1ee;
+
+  --measure: 36rem;
+  --wide: 74rem;
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+}
+
+/* ----------------------------------------------------------------- base -- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-17);
+  line-height: var(--lh-body);
+  font-feature-settings: "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 { font-weight: 600; line-height: var(--lh-tight); margin: 0; }
+p { margin: 0 0 1em; }
+p:last-child { margin-bottom: 0; }
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+a:hover { text-decoration-color: var(--accent); }
+
+code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Devanagari needs a touch more leading than Latin at the same size. */
+.deva { font-family: var(--font-deva); line-height: 1.7; }
+
+/* ------------------------------------------------------------- layout --- */
+
+.wrap {
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.prose { max-width: var(--measure); }
+
+/* ---------------------------------------------------------------- nav --- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.nav__inner {
+  display: flex;
+  align-items: baseline;
+  gap: 2rem;
+  height: 3.25rem;
+}
+
+.nav__mark {
+  font-size: var(--t-15);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.nav__mark .deva { font-weight: 500; color: var(--ink-3); margin-left: 0.45rem; }
+
+.nav__links {
+  display: flex;
+  gap: 1.35rem;
+  margin-left: auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav__links::-webkit-scrollbar { display: none; }
+
+.nav__links a {
+  font-size: var(--t-12);
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+.nav__links a:hover { color: var(--ink); }
+
+/* -------------------------------------------------------------- header -- */
+
+.masthead { padding-block: clamp(3.5rem, 9vw, 6.5rem) clamp(2.5rem, 6vw, 4rem); }
+
+.masthead__title {
+  font-size: var(--t-42);
+  letter-spacing: -0.022em;
+  margin-bottom: 0.6rem;
+}
+.masthead__title .deva {
+  font-weight: 400;
+  color: var(--ink-3);
+  letter-spacing: 0;
+  margin-left: 0.6rem;
+}
+
+.masthead__lede {
+  font-size: var(--t-21);
+  line-height: 1.45;
+  color: var(--ink-2);
+  max-width: 30rem;
+  text-wrap: balance;
+}
+
+/* Run facts, set as a definition list rather than stat cards. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 1.5rem 2rem;
+  margin-top: 2.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+.facts__k {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-bottom: 0.3rem;
+}
+.facts__v {
+  font-family: var(--font-mono);
+  font-size: var(--t-15);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+
+/* ------------------------------------------------------------ sections -- */
+
+.section {
+  padding-block: clamp(3rem, 7vw, 5rem);
+  border-top: 1px solid var(--rule);
+  /* Clears the sticky nav when an anchor link jumps here. */
+  scroll-margin-top: 3.25rem;
+}
+
+.section__head { margin-bottom: 2rem; }
+
+.section__no {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  color: var(--ink-4);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.section__title {
+  font-size: var(--t-26);
+  letter-spacing: -0.014em;
+  margin-bottom: 0.75rem;
+}
+
+.section__intro { color: var(--ink-2); }
+
+.subhead {
+  font-size: var(--t-12);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-block: 2.5rem 0.9rem;
+}
+.subhead:first-child { margin-top: 0; }
+
+/* --------------------------------------------------------------- notes -- */
+
+.note {
+  border-left: 2px solid var(--rule-strong);
+  padding: 0.1rem 0 0.1rem 1rem;
+  color: var(--ink-2);
+  font-size: var(--t-15);
+  max-width: var(--measure);
+}
+.note--warn { border-left-color: var(--accent); }
+.note strong { color: var(--ink); font-weight: 600; }
+
+/* ------------------------------------------------------------- tables --- */
+
+/* Wide tables scroll rather than shrinking the type. The paired gradients are
+ * the standard local/scroll background trick: the shadow appears at an edge
+ * only while there is more table beyond it, so a reader at a narrow width can
+ * tell there are columns they have not seen. */
+.tablewrap {
+  overflow-x: auto;
+  margin-inline: calc(-1 * var(--gutter));
+  padding-inline: var(--gutter);
+  background:
+    linear-gradient(to right, var(--paper) 40%, rgba(255, 255, 255, 0))
+      left center / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--paper) 40%, rgba(255, 255, 255, 0))
+      right center / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(22, 24, 29, 0.13), rgba(22, 24, 29, 0))
+      left center / 0.7rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(22, 24, 29, 0.13), rgba(22, 24, 29, 0))
+      right center / 0.7rem 100% no-repeat scroll;
+}
+
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+
+caption {
+  text-align: left;
+  font-size: var(--t-12);
+  color: var(--ink-3);
+  padding-bottom: 0.7rem;
+}
+
+th, td { text-align: left; padding: 0.5rem 0.9rem 0.5rem 0; vertical-align: baseline; }
+th:last-child, td:last-child { padding-right: 0; }
+
+thead th {
+  font-size: var(--t-11);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: 0.55rem;
+  white-space: nowrap;
+}
+
+tbody td { border-bottom: 1px solid var(--rule); font-size: var(--t-13); }
+tbody tr:last-child td { border-bottom: 0; }
+
+.num { text-align: right; font-family: var(--font-mono); }
+.t-mono { font-family: var(--font-mono); }
+.t-dim { color: var(--ink-3); }
+.nowrap { white-space: nowrap; }
+
+/* Row-header column: the entity type / utterance id down the left edge. */
+.rowhead {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  color: var(--ink-2);
+  white-space: nowrap;
+  padding-right: 1.5rem;
+}
+
+/* ---------------------------------------------------------- rate cells -- */
+
+.cell { display: flex; flex-direction: column; gap: 0.1rem; align-items: flex-end; }
+
+.cell__rate {
+  font-family: var(--font-mono);
+  font-size: var(--t-15);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.cell__n {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Sufficient n: the rate is the number, shown plainly. */
+.cell--ok .cell__rate { color: var(--ink); }
+
+/* Sufficient n and something missed: the accent, which is the only colour on
+ * the page, and it points at failure. */
+.cell--miss .cell__rate { color: var(--accent); }
+
+/* Below threshold: no rate at all. The count stands alone and the em-dash
+ * holds the column so the absence is legible rather than looking like a gap. */
+.cell--lown .cell__rate { color: var(--ink-4); font-size: var(--t-13); }
+.cell--lown .cell__n { color: var(--ink-3); }
+
+/* Declared but never run. Distinct from low-n: nothing was attempted. */
+.cell--norun {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-4);
+  text-align: right;
+  display: block;
+  font-style: italic;
+}
+
+td.cell-td { padding-left: 0.9rem; }
+
+/* ---------------------------------------------------------- state tags -- */
+
+.tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  letter-spacing: 0.02em;
+  padding: 0.08rem 0.34rem;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.tag--miss { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
+.tag--hit { border-color: var(--rule-strong); color: var(--ink-3); }
+.tag--warn { border-color: var(--accent); color: var(--accent-ink); }
+
+/* --------------------------------------------------------- key/legend --- */
+
+.key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule);
+  font-size: var(--t-12);
+  color: var(--ink-3);
+}
+.key__item { display: flex; align-items: baseline; gap: 0.6rem; }
+.key__sample { min-width: 3.4rem; text-align: right; }
+
+/* ------------------------------------------------------------- banner --- */
+
+.banner {
+  border: 1px solid var(--accent);
+  background: var(--accent-wash);
+  padding: 1rem 1.15rem;
+  margin-bottom: 2rem;
+  font-size: var(--t-15);
+  color: var(--accent-ink);
+  max-width: var(--measure);
+}
+.banner strong { font-weight: 600; }
+
+/* --------------------------------------------------------------- gate --- */
+
+.gate {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+}
+.gate__box { width: 100%; max-width: 20rem; }
+.gate__title { font-size: var(--t-21); margin-bottom: 0.35rem; }
+.gate__title .deva { color: var(--ink-3); font-weight: 400; margin-left: 0.5rem; }
+.gate__hint { font-size: var(--t-13); color: var(--ink-3); margin-bottom: 1.75rem; }
+.gate__field { margin-bottom: 0.75rem; }
+.gate__label {
+  display: block;
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-bottom: 0.3rem;
+}
+.gate input {
+  width: 100%;
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--t-15);
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: 0;
+}
+.gate input:focus { outline: 2px solid var(--ink); outline-offset: -1px; }
+.gate button {
+  width: 100%;
+  font: inherit;
+  font-size: var(--t-15);
+  font-weight: 500;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1px solid var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+}
+.gate button:hover { background: #000; }
+.gate__error { font-size: var(--t-13); color: var(--accent-ink); margin-top: 0.75rem; }
+
+/* -------------------------------------------------------------- footer -- */
+
+.footer {
+  border-top: 1px solid var(--rule);
+  padding-block: 2.5rem 4rem;
+  font-size: var(--t-12);
+  color: var(--ink-3);
+}
+.footer__grid { display: flex; flex-wrap: wrap; gap: 0.5rem 2.5rem; }
+
+/* -------------------------------------------------------------- narrow -- */
+
+@media (max-width: 46rem) {
+  .facts { gap: 1.15rem 1.25rem; }
+  .nav__inner { gap: 1rem; }
+  .rowhead { padding-right: 0.9rem; }
+  th, td { padding-right: 0.65rem; }
+}

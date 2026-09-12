@@ -38,6 +38,16 @@ const PATHS = {
  *  costs (conditions x ~130 KB) of wav in the deployed bundle. */
 const LISTEN_LIMIT = Number(process.env.GINTI_LISTEN_LIMIT ?? 6);
 
+/** Below this many observations a cell is an anecdote, and the page must show
+ *  the raw count without a rate or a success colour. A wall of 1.000 off n=1 is
+ *  the fastest way to lose a reader who knows what they are looking at. */
+const LOW_N = Number(process.env.GINTI_LOW_N ?? 10);
+
+/** Missing audio is a hard failure by default: a listen section that silently
+ *  drops players is worse than a build that refuses. Set this only for local
+ *  work on a machine that does not have .tee/work/. */
+const ALLOW_MISSING_AUDIO = process.env.GINTI_ALLOW_MISSING_AUDIO === "1";
+
 const warnings = [];
 const warn = (msg) => {
   warnings.push(msg);
@@ -181,9 +191,7 @@ function hitRateMatrix(rows) {
       model, condition, entityType,
       hits: v.hits, total: v.total,
       rate: v.total ? v.hits / v.total : null,
-      // Below this, a rate is an anecdote and the page must show it as one.
-      // A green 1.000 off a single sample is actively misleading.
-      lowN: v.total < 5,
+      lowN: v.total < LOW_N,
     };
   });
 }
@@ -254,6 +262,74 @@ function pickListenSet(rows, limit) {
 
 const sha8 = (buf) => createHash("sha256").update(buf).digest("hex").slice(0, 8);
 
+/** Did this hypothesis render the entity as digits or as number words?
+ *
+ *  Derived, never asserted: the gold normalized value already holds the digit
+ *  string, so if those digits appear in the hypothesis (ignoring Indian group
+ *  separators) the model wrote digits; if the entity was scored a hit without
+ *  them, it must have spelled the number out.
+ */
+function renderingOf(hypothesis, entity) {
+  const digits = goldDigits(entity.expected);
+  if (!digits) return "n/a";
+  const hypDigits = hypothesis.replace(/[^0-9]/g, "");
+  if (hypDigits.includes(digits)) return "digits";
+  return entity.hit ? "words" : "absent";
+}
+
+/** The digit string a model would have to emit to have written this entity as
+ *  numerals.
+ *
+ *  Currency gold is "INR:7674000.00", and stripping non-digits from that whole
+ *  string yields 767400000 -- the decimal's trailing zeros -- which matches no
+ *  hypothesis and silently mislabels every amount as spelled-out. Take the
+ *  value after the currency code, and drop a zero fraction.
+ */
+function goldDigits(expected) {
+  let v = String(expected ?? "");
+  const colon = v.lastIndexOf(":");
+  if (colon !== -1) v = v.slice(colon + 1);
+  const m = v.match(/^(\d+)\.(\d+)$/);
+  if (m) v = Number(m[2]) === 0 ? m[1] : m[1] + m[2];
+  return v.replace(/\D/g, "");
+}
+
+/** One row per (utterance, condition, model): how the number was written on
+ *  each side, and the WER that follows from that choice alone. */
+function renderingTable(rows) {
+  const byKey = new Map();
+  for (const r of rows) {
+    for (const e of r.entities) {
+      const key = JSON.stringify([r.utterance_id, r.condition, e.type, e.expected]);
+      if (!byKey.has(key)) {
+        byKey.set(key, {
+          utteranceId: r.utterance_id,
+          condition: r.condition,
+          entityType: e.type,
+          expected: e.expected,
+          reference: r.reference,
+          referenceRendering: r.realization ?? null,
+          models: [],
+        });
+      }
+      byKey.get(key).models.push({
+        model: r.asr_model ?? "-",
+        mode: r.asr_mode ?? null,
+        rendering: renderingOf(r.hypothesis, e),
+        hit: e.hit,
+        wer: r.wer,
+        hypothesis: r.hypothesis,
+      });
+    }
+  }
+  const out = [...byKey.values()];
+  for (const row of out) row.models.sort((a, b) => a.model.localeCompare(b.model));
+  out.sort((a, b) =>
+    a.utteranceId.localeCompare(b.utteranceId) ||
+    a.condition.localeCompare(b.condition));
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // Build
 // ---------------------------------------------------------------------------
@@ -308,6 +384,7 @@ function build() {
   mkdirSync(PATHS.outAudio, { recursive: true });
 
   const picked = pickListenSet(rows, LISTEN_LIMIT);
+  const missingAudio = [];
   let copied = 0;
   let bytes = 0;
 
@@ -350,7 +427,7 @@ function build() {
             audio = `audio/${name}`;
             sizeBytes = data.length;
           } else {
-            warn(`missing audio referenced by results: ${src}`);
+            missingAudio.push(src);
           }
         }
         return {
@@ -391,11 +468,22 @@ function build() {
     };
   });
 
+  if (missingAudio.length) {
+    const detail =
+      `${missingAudio.length} audio file(s) referenced by results are not on disk:\n` +
+      missingAudio.map((m) => `    ${m}`).join("\n") +
+      `\n\n  The listen section is the centrepiece; shipping it with silent gaps` +
+      `\n  is worse than not shipping. Run this build on a machine that has` +
+      `\n  .tee/work/ and commit site/public/audio/, or re-run the harness.` +
+      `\n  To build anyway (no audio), set GINTI_ALLOW_MISSING_AUDIO=1.`;
+    if (!ALLOW_MISSING_AUDIO) throw new Error(detail);
+    warn(`BUILT WITHOUT AUDIO -- ${detail.split("\n")[0]}`);
+  }
+
   if (listen.some((l) => l.gloss === null)) {
     warn(
-      "no English gloss available: the corpus has no `gloss` field. Add one to " +
-      "src/tee/templates/<lang>.yaml and regenerate, or the listen section " +
-      "ships Hindi with no translation."
+      "some utterances have no English gloss; regenerate the corpus after " +
+      "adding `gloss:` to src/tee/templates/<lang>.yaml"
     );
   }
 
@@ -453,7 +541,40 @@ function build() {
       models: models.length,
     },
     matrix: hitRateMatrix(rows),
+    lowNThreshold: LOW_N,
     wer: werAggregate(rows),
+    rendering: renderingTable(rows),
+    // Derived so the prose can state what happened without anyone typing a
+    // finding into a component. With one model, or none of these effects, the
+    // page says less rather than saying something untrue.
+    renderingStats: (() => {
+      const rt = renderingTable(rows);
+      const disagreements = rt.filter(
+        (r) => new Set(r.models.map((m) => m.rendering)).size > 1).length;
+      const seen = new Map();
+      for (const r of rt) {
+        for (const m of r.models) {
+          const k = `${r.utteranceId}|${m.model}`;
+          if (!seen.has(k)) seen.set(k, new Set());
+          seen.get(k).add(m.rendering);
+        }
+      }
+      const selfFlips = [...seen.values()].filter((v) => v.size > 1).length;
+      const rewrote = rt.reduce((a, r) => a + r.models.filter(
+        (m) => m.rendering !== r.referenceRendering
+          && m.rendering !== "absent" && m.rendering !== "n/a").length, 0);
+      return { pairs: rt.length, disagreements, selfFlips, rewrote,
+               models: models.length };
+    })(),
+    werSpread: (() => {
+      // The headline of the results section: how far WER moves on identical
+      // audio, purely from how each side chose to write the number.
+      const vals = rows.map((r) => ({ wer: r.wer, model: r.asr_model, id: r.utterance_id }));
+      if (!vals.length) return null;
+      const min = vals.reduce((a, b) => (b.wer < a.wer ? b : a));
+      const max = vals.reduce((a, b) => (b.wer > a.wer ? b : a));
+      return { min, max };
+    })(),
     listen,
     method: {
       seed: cfg.seed,
