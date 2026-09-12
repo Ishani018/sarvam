@@ -138,6 +138,30 @@ egress policy in this remote environment, so both need a session with egress.
 Docs pages also serve clean Markdown by appending `.md` to any URL, and
 section indexes at `<section>/llms.txt`.
 
+## Development environments differ in case sensitivity
+
+This repository is developed on **macOS** (case-insensitive filesystem by
+default) and built in a **Linux** container (case-sensitive). A filename
+collision that only exists under case-insensitivity is invisible on Linux and
+fatal on macOS, so it is checked rather than noticed.
+
+Two hazards:
+
+- **Two paths differing only by case.** Git tracks both; a macOS or Windows
+  checkout can only hold one, and silently loses a file.
+- **Two modules in one directory whose names match once the extension is
+  stripped** — `gate.ts` alongside `Gate.tsx`. Both coexist on Linux, but an
+  extensionless `import { Gate } from "./Gate"` probes `./Gate.ts`, which a
+  case-insensitive filesystem answers with `gate.ts`, and the import resolves to
+  the wrong module. This one has already happened once: it produced
+  `No matching export in "src/gate.ts" for import "Gate"` on macOS while
+  building cleanly in the container.
+
+`site/scripts/check-case-collisions.mjs` checks both over every tracked file and
+runs as part of `npm run dev`, `npm run build` and `npm run build:ci`. If you
+are adding files from a Linux environment, that check is the only thing standing
+between you and a build that works for you and not for anyone on a Mac.
+
 ## Not built yet
 
 No report, plots, heatmaps or dashboard. No real dataset loaders (GramVaani,

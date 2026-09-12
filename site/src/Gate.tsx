@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { GATE } from "./gate";
+import { GATE } from "./gateConfig";
 
 /**
  * SOFT GATE ONLY -- a doorbell, not a lock. The credentials live in the client

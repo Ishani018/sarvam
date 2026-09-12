@@ -1,1 +1,1 @@
-{"root":["./src/App.tsx","./src/Gate.tsx","./src/gate.ts","./src/main.tsx","./src/types.ts","./src/components/RenderingTable.tsx","./src/components/ResultsMatrix.tsx"],"version":"5.9.3"}
+{"root":["./src/App.tsx","./src/Gate.tsx","./src/gateConfig.ts","./src/main.tsx","./src/types.ts","./src/components/RenderingTable.tsx","./src/components/ResultsMatrix.tsx"],"version":"5.9.3"}

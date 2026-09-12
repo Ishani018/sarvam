@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "data": "node scripts/build-data.mjs",
+    "check": "node scripts/check-case-collisions.mjs",
+    "data": "node scripts/check-case-collisions.mjs && node scripts/build-data.mjs",
     "dev": "npm run data && vite",
     "build": "npm run data && tsc -b && vite build",
-    "build:ci": "tsc -b && vite build",
+    "build:ci": "node scripts/check-case-collisions.mjs && tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
