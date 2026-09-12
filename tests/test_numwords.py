@@ -207,3 +207,69 @@ def test_devanagari_matras_survive_tokenization():
     """Python's \\w excludes combining marks, so a naive \\w+ tokenizer turns
     "तीन" into ["त", "न"] and loses the vowel."""
     assert tokenize("तीन लाख पचास हज़ार") == ["तीन", "लाख", "पचास", "हज़ार"]
+
+
+# --- orthographic variants and truncation refusal ---------------------------
+#
+# These are the regressions from run-20260912T174319Z, where four entities were
+# reported as ASR errors and every one was this parser failing.
+
+
+@pytest.mark.parametrize("variants,want", [
+    # छयासठ is what the recogniser returned; छियासठ is what the lexicon had.
+    (["छियासठ", "छयासठ"], 66),
+    (["छिहत्तर", "छियत्तर", "छिहतर"], 76),
+    (["चौहत्तर", "चौहतर"], 74),
+    (["निन्यानवे", "निन्यानबे"], 99),
+    (["अट्ठानवे", "अठानवे"], 98),
+    (["पच्चीस", "पचीस"], 25),
+    (["अस्सी", "असी"], 80),
+    (["सत्तर", "सतर"], 70),
+    (["छियालीस", "छयालीस"], 46),
+    (["बानवे", "बानबे"], 92),
+])
+def test_devanagari_spelling_variants_resolve_to_one_value(variants, want):
+    for v in variants:
+        assert val(v) == want, v
+
+
+def test_the_566000_regression():
+    """hi-IN-1337-00026: the recogniser returned this correctly and the
+    extractor reported 500000, which was then filed as an ASR error."""
+    assert val("पाँच लाख छयासठ हज़ार") == 566_000
+
+
+def test_the_7674000_regression():
+    assert val("छिहत्तर लाख चौहत्तर हज़ार") == 7_674_000
+    assert val("छियत्तर लाख चौहत्तर हज़ार") == 7_674_000
+    assert val("76,74,000") == 7_674_000
+
+
+@pytest.mark.parametrize("text", [
+    "लाख चौहत्तर हज़ार",   # the count was a word we could not read
+    "हज़ार",                # a bare scale is not a quantity
+    "76 74 लाख",            # two values with no scale between them
+])
+def test_strict_mode_refuses_expressions_it_cannot_fully_read(text):
+    """The dangerous failure is a plausible wrong number, not a crash. An
+    unreadable expression must raise rather than return a partial value."""
+    with pytest.raises(NumberParseError):
+        parse_value(tokenize(text), "hi-IN", strict=True)
+
+
+@pytest.mark.parametrize("text,want", [
+    ("तीन लाख पचास हज़ार", 350_000),
+    ("सवा लाख", 125_000),          # bare scale is fine behind a modifier
+    ("डेढ़ लाख", 150_000),
+    ("नौ सौ निन्यानवे", 999),
+    ("twenty one thousand", 21_000),  # tens+units is composition, not adjacency
+])
+def test_strict_mode_still_accepts_every_legitimate_expression(text, want):
+    lang = "en-IN" if text.isascii() else "hi-IN"
+    assert int(parse_value(tokenize(text), lang, strict=True)) == want
+
+
+def test_lenient_mode_is_unchanged_for_probes():
+    """Triage probes ask whether a value is recoverable by any reading, which
+    is a different question from what the extractor may report."""
+    assert int(parse_value(tokenize("हज़ार"), "hi-IN")) == 1000

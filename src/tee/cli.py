@@ -17,7 +17,9 @@ from .costs import BudgetExceeded, CostGuard
 from .generate import generate as generate_corpus
 from .pipeline import execute_run, make_run_id, plan_run
 from .review import render_review
-from .score import aggregate, aggregate_wer, read_rows, write_rows
+from .score import (
+    aggregate, aggregate_wer, read_rows, score_utterance, write_rows,
+)
 from .triage import render_report, triage
 from .tts import build_tts
 
@@ -166,6 +168,66 @@ def triage_cmd(
     if len(report) > 4000:
         typer.echo(f"... (truncated)\n")
     typer.echo(f"full report: {path}")
+
+
+@app.command()
+def rescore(
+    results: Path = typer.Argument(..., help="Results JSONL from a previous run."),
+    config: str = CONFIG,
+    out: Optional[Path] = typer.Option(None, "--out", help="Where to write (default: in place)."),
+) -> None:
+    """Re-score stored hypotheses against the current extractor. No API calls.
+
+    Hypotheses and audio hashes are already on disk, so a fix to the extractor
+    or the scorer can be applied to an existing run for free. Nothing about the
+    recogniser's output changes -- only what this harness makes of it.
+    """
+    cfg = load_config(config)
+    rows = read_rows(results)
+    # Look in every place a corpus can live: the configured file, the corpora
+    # directory, and the dev fixtures. Re-scoring must find the utterance the
+    # row was produced from, whichever of those it came from.
+    search = [Path(cfg.paths.corpus), *sorted(Path("corpora").glob("*.jsonl")),
+              *sorted(Path("fixtures").glob("*.jsonl"))]
+    corpus: dict[str, object] = {}
+    for path in search:
+        if path.exists():
+            for u in load_utterances(path):
+                corpus.setdefault(u.id, u)
+
+    missing = sorted({r.utterance_id for r in rows} - set(corpus))
+    if missing:
+        typer.echo(
+            f"cannot re-score: {len(missing)} utterance(s) are not in any corpus "
+            f"file, e.g. {missing[:3]}", err=True)
+        raise typer.Exit(1)
+
+    before = sum(1 for r in rows for e in r.entities if e.hit)
+    total = sum(len(r.entities) for r in rows)
+
+    rescored = [
+        score_utterance(
+            corpus[r.utterance_id], r.hypothesis,
+            condition=r.condition, run_id=r.run_id, asr_impl=r.asr_impl,
+            asr_model=r.asr_model, asr_mode=r.asr_mode,
+            entity_types=cfg.scoring.entity_types, wer_cfg=cfg.scoring.wer,
+            audio_path=r.audio_path, audio_sha256=r.audio_sha256, error=r.error,
+        )
+        for r in rows
+    ]
+    after = sum(1 for r in rescored for e in r.entities if e.hit)
+
+    dest = out or results
+    write_rows(dest, rescored)
+    typer.echo(f"re-scored {len(rows)} rows -> {dest}   (0 API calls)")
+    typer.echo(f"entity hits: {before}/{total} -> {after}/{total}")
+
+    misses = triage(rescored)
+    counts: dict[str, int] = {}
+    for m in misses:
+        counts[m.bucket] = counts.get(m.bucket, 0) + 1
+    typer.echo("triage: " + (", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
+                             or "no misses"))
 
 
 @app.command()

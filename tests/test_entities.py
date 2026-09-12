@@ -124,3 +124,34 @@ def test_name_extractor_is_a_stub_that_finds_nothing():
     """Deliberate: reporting 0% name accuracy with no extractor would look
     like a result. Name types are excluded from scoring instead."""
     assert NullNameExtractor().extract_names("राम शर्मा बेंगलुरु में", "hi-IN") == []
+
+
+# --- regressions from run-20260912T174319Z ----------------------------------
+
+
+def test_unrecognised_word_inside_a_number_emits_nothing_not_a_partial():
+    """A number split by a word the lexicon cannot read must not surface as a
+    confident partial value. Reporting 500000 here is how an extractor bug
+    becomes a published finding about the recogniser."""
+    text = "आपके खाते में पाँच लाख XYZQ हज़ार रुपये क्रेडिट हुए हैं"
+    assert find(text, "hi-IN", "currency") == set()
+
+
+def test_566000_is_extracted_now_that_the_variant_is_known():
+    text = "आपके खाते में पाँच लाख छयासठ हज़ार रुपये क्रेडिट हुए हैं।"
+    assert "INR:566000.00" in find(text, "hi-IN", "currency")
+
+
+def test_amount_with_no_currency_word_is_still_found():
+    """The recogniser routinely drops रुपये: the template says "{amount} रुपये
+    की शेष राशि" and the transcript comes back "{amount} की शेष राशि"."""
+    text = "आपके खाते में 76,74,000 की शेष राशि है।"
+    assert "INR:7674000.00" in find(text, "hi-IN", "currency")
+
+
+def test_equidistant_cues_emit_both_types():
+    """खाते two tokens back, शेष two forward. Letting the digit type win the
+    tie dropped the amount entirely."""
+    text = "आपके खाते में 76,74,000 की शेष राशि है।"
+    types = {e.type for e in extract(text, "hi-IN")}
+    assert "currency" in types

@@ -231,7 +231,26 @@ def extract(
     def want(t: str) -> bool:
         return wanted is None or t in wanted
 
-    for start, end in _number_runs(tokens, lex):
+    runs = _number_runs(tokens, lex)
+
+    # A number expression broken by an unrecognised word shows up as two runs
+    # separated by a short gap, the second beginning with a scale word:
+    # "पाँच लाख [छयासठ] हज़ार". Neither half is the number, and emitting the
+    # first half is exactly how an extractor bug becomes a reported ASR error.
+    # Both halves are dropped.
+    split_runs: set[int] = set()
+    for i in range(len(runs) - 1):
+        gap = runs[i + 1][0] - runs[i][1]
+        if not 1 <= gap <= 2:
+            continue
+        nxt = tokens[runs[i + 1][0]]
+        if canonicalize(nxt.text) in lex.scales:
+            split_runs.add(i)
+            split_runs.add(i + 1)
+
+    for run_index, (start, end) in enumerate(runs):
+        if run_index in split_runs:
+            continue
         run = tokens[start:end]
         surface = folded[run[0].start : run[-1].end]
         span = (run[0].start, run[-1].end)
@@ -239,7 +258,9 @@ def extract(
 
         digits = parse_digit_sequence(run_text, language)
         try:
-            value: Decimal | None = parse_value(run_text, language)
+            # Strict: an expression this parser cannot fully read must not be
+            # reported as a value. See parse_value's docstring.
+            value: Decimal | None = parse_value(run_text, language, strict=True)
         except NumberParseError:
             value = None
 
@@ -269,24 +290,24 @@ def extract(
         cur_dist = cur_cue[1] if cur_cue else None
         best_digit = min((v[1] for v in digit_cues.values()), default=None)
 
-        currency_wins = cur_dist is not None and (
-            best_digit is None or cur_dist < best_digit
-        )
-        if currency_wins and value is not None and want("currency"):
+        # Nearest cue wins, but a tie emits both. "76,74,000 की शेष राशि" has
+        # खाते two tokens back and शेष two tokens forward; letting the digit
+        # type win a tie silently drops the amount entirely, and scoring checks
+        # candidates per gold type, so over-generating on a tie costs nothing.
+        emitted = False
+        if (cur_dist is not None and value is not None and want("currency")
+                and (best_digit is None or cur_dist <= best_digit)):
             out.append(ExtractedEntity(
                 "currency", surface, normalize_currency(value), span, cue=cur_cue[0],
             ))
-            continue
+            emitted = True
 
-        if digit_cues:
+        if digit_cues and (cur_dist is None or best_digit <= cur_dist):
             for etype, cue in digit_cues.items():
                 out.append(ExtractedEntity(etype, surface, digits, span, cue=cue[0]))
-            continue
+            emitted = True
 
-        if cur_cue and value is not None and want("currency"):
-            out.append(ExtractedEntity(
-                "currency", surface, normalize_currency(value), span, cue=cur_cue[0],
-            ))
+        if emitted:
             continue
 
         # No cue: fall back to digit-length shape, emitting every type that fits.

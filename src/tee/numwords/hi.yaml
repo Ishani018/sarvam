@@ -16,14 +16,14 @@ native_digits: "०१२३४५६७८९"
 units:
   0:  [शून्य, सुन्न, zero, shunya, sunya]
   1:  [एक, ek, ik, ake]
-  2:  [दो, do, doh]
+  2:  [दो, do, doh, दौ]
   3:  [तीन, teen, theen, tin]
   4:  [चार, char, chaar]
   5:  [पाँच, पांच, panch, paanch, paach]
-  6:  [छह, छः, छे, chah, chhah, che, chhe]
+  6:  [छह, छः, छे, chah, chhah, che, chhe, छै]
   7:  [सात, saat, sath]
   8:  [आठ, aath, ath]
-  9:  [नौ, nau, no]
+  9:  [नौ, nau, no, नव]
   10: [दस, das, dus]
   11: [ग्यारह, gyarah, gyara]
   12: [बारह, barah, bara]
@@ -43,7 +43,7 @@ units:
   26: [छब्बीस, chhabbis, chhabis]
   27: [सत्ताईस, sattais, satais]
   28: [अट्ठाईस, atthais, athais]
-  29: [उनतीस, untis, unatis]
+  29: [उनतीस, untis, unatis, उनत्तीस]
   30: [तीस, tis, tees]
   31: [इकतीस, ikatis, ektis]
   32: [बत्तीस, battis, batis]
@@ -53,7 +53,7 @@ units:
   36: [छत्तीस, chhattis, chhatis]
   37: [सैंतीस, saintis, sentis]
   38: [अड़तीस, adatis, adtis]
-  39: [उनतालीस, untalis, unatalis]
+  39: [उनतालीस, untalis, unatalis, उनचालीस]
   40: [चालीस, chalis, chalees]
   41: [इकतालीस, ikatalis, ektalis]
   42: [बयालीस, bayalis, bayalees]
@@ -63,7 +63,7 @@ units:
   46: [छियालीस, chhiyalis, chhiyalees]
   47: [सैंतालीस, saintalis, sentalis]
   48: [अड़तालीस, adtalis, adatalis]
-  49: [उनचास, unchas, unachas]
+  49: [उनचास, unchas, unachas, उन्चास]
   50: [पचास, pachas, pachaas]
   51: [इक्यावन, ikyavan, ikyawan]
   52: [बावन, bavan, bawan]
@@ -73,7 +73,7 @@ units:
   56: [छप्पन, chhappan, chhapan]
   57: [सत्तावन, sattavan, satavan]
   58: [अट्ठावन, atthavan, athavan]
-  59: [उनसठ, unsath, unasath]
+  59: [उनसठ, unsath, unasath, उनसाठ]
   60: [साठ, sath, saath]
   61: [इकसठ, ikasath, eksath]
   62: [बासठ, basath, baasath]
@@ -83,17 +83,17 @@ units:
   66: [छियासठ, chhiyasath]
   67: [सड़सठ, sadsath, sarsath]
   68: [अड़सठ, adsath, arsath]
-  69: [उनहत्तर, unhattar, unahattar]
+  69: [उनहत्तर, unhattar, unahattar, उन्हत्तर]
   70: [सत्तर, sattar, satar]
   71: [इकहत्तर, ikahattar, ekhattar]
   72: [बहत्तर, bahattar, bahatar]
   73: [तिहत्तर, tihattar, tihatar]
   74: [चौहत्तर, chauhattar, chauhatar]
   75: [पचहत्तर, pachhattar, pachattar]
-  76: [छिहत्तर, chhihattar, chhihatar]
+  76: [छिहत्तर, chhihattar, chhihatar, छियत्तर]
   77: [सतहत्तर, satahattar, sathattar]
   78: [अठहत्तर, athahattar, athhattar]
-  79: [उन्यासी, unyasi, unasi]
+  79: [उन्यासी, unyasi, unasi, उन्नासी, उनासी]
   80: [अस्सी, assi, asi]
   81: [इक्यासी, ikyasi, ekyasi]
   82: [बयासी, bayasi]
@@ -140,7 +140,13 @@ modifiers:
   - {delta:  0.25, words: [सवा, सव्वा, sawa, sava, savva]}
   - {delta: -0.25, words: [पौने, पौना, paune, pone, pauna]}
 
-currency_cues: [रुपये, रुपए, रूपये, रुपया, रुपयों, rupaye, rupay, rupee, rupees, rs, inr]
+# The currency word itself is often dropped by the recogniser -- the template
+# says "{amount} रुपये की शेष राशि" and the transcript comes back "{amount} की
+# शेष राशि". Financial context words are therefore cues too: without them an
+# amount with no रुपये beside it is extracted as nothing at all.
+currency_cues: [रुपये, रुपए, रूपये, रुपया, रुपयों, rupaye, rupay, rupee, rupees, rs, inr,
+                राशि, बकाया, बैलेंस, शेष, जमा, भुगतान, क्रेडिट, डेबिट, लेनदेन, किस्त,
+                balance, credit, debit, payment, outstanding, emi]
 paise_cues: [पैसे, पैसा, paise, paisa]
 decimal_cues: [दशमलव, point, dashamlav]
 

@@ -37,6 +37,39 @@ _DIGIT_MAP = {
 _NUKTA = "़"
 _CHANDRABINDU = "ँ"
 _ANUSVARA = "ं"
+_VIRAMA = "्"
+
+#: Unaspirated stop -> its aspirated partner. Hindi gemination is written either
+#: as a doubled consonant (सत्तर) or as stop + aspirate (अट्ठानवे), and ASR output
+#: varies between the geminated and ungeminated spelling of the same numeral.
+_ASPIRATE = {
+    "क": "ख", "ग": "घ", "च": "छ", "ज": "झ", "ट": "ठ",
+    "ड": "ढ", "त": "थ", "द": "ध", "प": "फ", "ब": "भ",
+}
+
+_GEMINATE_RE = re.compile(
+    "([" + "".join(_ASPIRATE) + "क-ह])" + _VIRAMA + "([क-ह])")
+
+
+def _degeminate(word: str) -> str:
+    """Collapse written gemination: सत्तर == सतर, अट्ठानवे == अठानवे.
+
+    The Devanagari counterpart of the Latin doubled-consonant rule already
+    applied below. A consonant followed by virama and either itself or its
+    aspirated partner is reduced to the second consonant.
+    """
+    def sub(m: re.Match) -> str:
+        first, second = m.group(1), m.group(2)
+        if second == first or _ASPIRATE.get(first) == second:
+            return second
+        return m.group(0)
+
+    prev = None
+    out = word
+    while out != prev:
+        prev = out
+        out = _GEMINATE_RE.sub(sub, out)
+    return out
 
 _LATIN_VOWEL_RULES = [("aa", "a"), ("ee", "i"), ("ii", "i"), ("oo", "u"), ("uu", "u")]
 
@@ -61,6 +94,14 @@ def canonicalize(word: str) -> str:
     # Decompose so a precomposed nukta letter (ज़, ड़) also loses its nukta.
     w = unicodedata.normalize("NFD", w).replace(_NUKTA, "")
     w = unicodedata.normalize("NFC", w)
+    if re.search(r"[\u0900-\u097f]", w):
+        # Numeral spellings vary in three regular ways in real ASR output, and
+        # all three are folded here so the lexicon need not enumerate them:
+        # gemination (सत्तर/सतर), the छिया/छया alternation, and व/ब in the
+        # nineties (निन्यानवे/निन्यानबे).
+        w = _degeminate(w)
+        w = w.replace("िय", "य")
+        w = w.replace("नब", "नव")
     if re.search(r"[a-z]", w):
         w = w.replace("z", "j")
         for src, dst in _LATIN_VOWEL_RULES:
@@ -261,7 +302,9 @@ class NumberParseError(ValueError):
     pass
 
 
-def parse_value(tokens: Iterable[str], language: str) -> Decimal:
+def parse_value(
+    tokens: Iterable[str], language: str, strict: bool = False,
+) -> Decimal:
     """Parse number words as a magnitude, using Indian grouping.
 
     A sub-thousand group is built from two accumulators -- ``group`` for the
@@ -270,7 +313,27 @@ def parse_value(tokens: Iterable[str], language: str) -> Decimal:
     "पचास हज़ार" must replace. Collapsing these into one accumulator silently
     turns 350 into 50.
 
-    Raises :class:`NumberParseError` if the tokens contain no number at all.
+    Raises :class:`NumberParseError` if the tokens contain no number at all, or,
+    under ``strict``, if the expression looks truncated.
+
+    Strict mode exists because the dangerous failure is not a crash, it is a
+    plausible wrong number. An unrecognised word inside a number expression --
+    a spelling the lexicon does not carry -- used to be skipped silently, so
+    "पाँच लाख छयासठ हज़ार" parsed as 500000 and was reported as a confident
+    value. No lexicon will ever be complete against a live recogniser, so the
+    parser has to detect that it has been handed something it cannot fully read
+    and refuse. Two signals:
+
+      * a scale with nothing in front of it ("लाख चौहत्तर हज़ार" -- the count
+        was a word we failed to recognise), unless a fractional modifier
+        supplies the count ("सवा लाख")
+      * two values in a row with no scale between them ("76 74 लाख"), which is
+        not a shape Indian grouping produces
+
+    Callers that want a best-effort reading (date extraction, triage probes)
+    leave strict off; entity extraction turns it on, so an unknown spelling
+    surfaces as "found nothing" rather than as a wrong value attributed to the
+    recogniser.
     """
     lex = load_lexicon(language)
     toks = [canonicalize(t) for t in tokens]
@@ -281,6 +344,7 @@ def parse_value(tokens: Iterable[str], language: str) -> Decimal:
     pending_mod = Decimal(0)
     saw_in_group = False
     saw_any = False
+    prev_kind: str | None = None
 
     def group_value() -> Decimal:
         """The group's value, treating a bare scale ("सवा लाख") as 1 x scale."""
@@ -296,31 +360,53 @@ def parse_value(tokens: Iterable[str], language: str) -> Decimal:
         if tok in lex.modifiers:
             pending_mod = lex.modifiers[tok]
             saw_any = True
+            prev_kind = "modifier"
             continue
 
         if tok in lex.fraction_values:
             small = lex.fraction_values[tok]
             saw_in_group = saw_any = True
+            prev_kind = "value"
             continue
 
         if re.fullmatch(r"\d+(?:\.\d+)?", tok):
+            if strict and prev_kind == "value":
+                raise NumberParseError(
+                    f"two values in a row with no scale between them "
+                    f"({list(tokens)!r}); the expression cannot be read")
             small = Decimal(tok)
             saw_in_group = saw_any = True
+            prev_kind = "value"
             continue
 
         if tok in lex.units:
             value = Decimal(lex.units[tok])
             # English composes tens+units ("twenty one"); Hindi never does, its
             # 1-99 are single words, so this branch simply never fires for hi.
-            if Decimal(20) <= small < Decimal(100) and small % 10 == 0 and 0 < value < 10:
+            composing = (
+                Decimal(20) <= small < Decimal(100)
+                and small % 10 == 0 and 0 < value < 10
+            )
+            if composing:
                 small += value
             else:
+                if strict and prev_kind == "value":
+                    raise NumberParseError(
+                        f"two values in a row with no scale between them "
+                        f"({list(tokens)!r}); the expression cannot be read")
                 small = value
             saw_in_group = saw_any = True
+            prev_kind = "value"
             continue
 
         if tok in lex.scales:
             scale = Decimal(lex.scales[tok])
+            if strict and not saw_in_group and not pending_mod:
+                # A scale with no count in front of it. Something that should
+                # have been the count was not recognised.
+                raise NumberParseError(
+                    f"scale {tok!r} with no preceding value ({list(tokens)!r}); "
+                    f"the count was probably a word the lexicon does not carry")
             base = group_value()
             if pending_mod:
                 base += pending_mod
@@ -336,6 +422,7 @@ def parse_value(tokens: Iterable[str], language: str) -> Decimal:
                 small = Decimal(0)
                 saw_in_group = True
             saw_any = True
+            prev_kind = "scale"
             continue
 
         # Not a number word: ends nothing. Windowing is the caller's job.

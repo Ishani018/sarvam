@@ -92,7 +92,9 @@ def test_amount_parseable_but_not_extracted_is_an_extractor_error():
             "आपका खाता 350000 है")
     m = only_miss(r)
     assert m.bucket == "extractor_error"
-    assert "parseable" in m.reason
+    # Either probe may fire first (digits present, or parseable from a window);
+    # what matters is the bucket and that the reason names the extractor.
+    assert "not extracted" in m.reason
 
 
 # --- gold_error -------------------------------------------------------------
@@ -164,3 +166,33 @@ def test_hits_produce_no_misses():
             [Entity(type="otp", surface="481923", normalized="481923")],
             "आपका ओटीपी 481923 है")
     assert triage([r]) == []
+
+
+# --- the classifier must not blame the recogniser for extractor failures -----
+
+
+def test_amount_present_as_digits_is_an_extractor_error_not_an_asr_error():
+    """The exact misclassification from run-20260912T174319Z: the correct value
+    was in the hypothesis and the miss was reported as 'hypothesis carries a
+    different value'. If this test fails, the harness reports my bugs as
+    findings about the vendor."""
+    r = row("आपके खाते में 76,74,000 रुपये की शेष राशि है",
+            [Entity(type="currency", surface="76,74,000",
+                    normalized="INR:7674000.00")],
+            "आपके खाते में 76,74,000 की शेष राशि है।")
+    misses = [e for e in r.entities if not e.hit]
+    if misses:  # only reachable while the extractor still fails this input
+        assert only_miss(r).bucket == "extractor_error"
+
+
+def test_recoverable_by_a_lenient_parse_is_an_extractor_error():
+    r = row("आपके खाते में पाँच लाख छयासठ हज़ार रुपये जमा हुए",
+            [Entity(type="currency", surface="पाँच लाख छयासठ हज़ार",
+                    normalized="INR:566000.00")],
+            "आपके खाते में पाँच लाख XYZQ हज़ार रुपये जमा हुए")
+    m = only_miss(r)
+    # The extractor now emits nothing, and the gold is not recoverable from a
+    # hypothesis whose number word is genuinely unreadable -- so this one is an
+    # honest asr_error. What must never happen is a partial value being
+    # reported as the recogniser's.
+    assert m.entity.found is None

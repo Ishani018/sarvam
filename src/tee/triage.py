@@ -84,12 +84,22 @@ def _value_present_anyhow(gold_type: str, gold_norm: str, text: str,
 
     if gold_type == "currency":
         want = gold_norm.split(":", 1)[1]
+        # The amount written as digits, in any grouping. "76,74,000" folds to
+        # 7674000 and the check is a substring of the hypothesis' digits.
+        as_digits = want.split(".")[0]
+        if as_digits and as_digits in re.sub(r"\D", "", folded_text(text)):
+            return True, (
+                "amount present in the hypothesis as digits but not extracted"
+            ), False
         lex = load_lexicon(language)
         tokens = [t.text for t in tokenize_spans(text)]
         for i in range(len(tokens)):
             for j in range(i + 1, min(i + 9, len(tokens)) + 1):
                 try:
-                    v = parse_value(tokens[i:j], language)
+                    # Lenient on purpose: this probe asks whether the value is
+                    # recoverable by ANY reading, which is a different question
+                    # from what the extractor is allowed to report.
+                    v = parse_value(tokens[i:j], language, strict=False)
                 except (NumberParseError, ValueError):
                     continue
                 if normalize_currency(v).split(":", 1)[1] == want:
