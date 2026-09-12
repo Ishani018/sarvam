@@ -157,7 +157,7 @@ def _number_runs(tokens: Sequence[Token], lex: Lexicon) -> list[tuple[int, int]]
 def _scan_cue(
     tokens: Sequence[Token], start: int, end: int, lex: Lexicon,
     match, behind: int = CUE_LOOKBEHIND, ahead: int = CUE_LOOKAHEAD,
-) -> str | None:
+) -> tuple[str, int] | None:
     """Look for a cue word around a run, stopping at any other number.
 
     The stop condition is what keeps "खाते 50100234567890 में ₹3,50,000" honest:
@@ -165,24 +165,29 @@ def _scan_cue(
     "खाते" and the amount is reported as an account number, or the account
     number's lookahead reaches the ₹ and it is reported as currency.
     """
+    best: tuple[str, int] | None = None
     for k in range(start - 1, max(-1, start - behind - 1), -1):
         if _is_numberish(tokens[k].text, lex):
             break
         if match(tokens[k].text):
-            return tokens[k].text
+            best = (tokens[k].text, start - k)
+            break
     for k in range(end, min(len(tokens), end + ahead)):
         if _is_numberish(tokens[k].text, lex):
             break
         if match(tokens[k].text):
-            return tokens[k].text
-    return None
+            dist = k - end + 1
+            if best is None or dist < best[1]:
+                best = (tokens[k].text, dist)
+            break
+    return best
 
 
-def _find_cue(tokens, start, end, cues, lex) -> str | None:
+def _find_cue(tokens, start, end, cues, lex) -> tuple[str, int] | None:
     return _scan_cue(tokens, start, end, lex, lambda t: canonicalize(t) in cues)
 
 
-def _currency_cue(tokens, start, end, lex: Lexicon) -> str | None:
+def _currency_cue(tokens, start, end, lex: Lexicon) -> tuple[str, int] | None:
     return _scan_cue(
         tokens, start, end, lex,
         lambda t: t in ("₹", "Rs", "rs") or canonicalize(t) in lex.currency_cues,
@@ -245,24 +250,42 @@ def extract(
         if kind == "magnitude":
             if value is not None and want("currency"):
                 out.append(ExtractedEntity(
-                    "currency", surface, normalize_currency(value), span, cue=cur_cue,
+                    "currency", surface, normalize_currency(value), span,
+                    cue=cur_cue[0] if cur_cue else None,
                 ))
             continue
 
-        typed = False
-        for etype in DIGIT_TYPES:
-            if not want(etype):
-                continue
-            cue = _find_cue(tokens, start, end, lex.entity_cues.get(etype, set()), lex)
-            if cue:
-                out.append(ExtractedEntity(etype, surface, digits, span, cue=cue))
-                typed = True
-        if typed:
+        digit_cues = {
+            etype: _find_cue(tokens, start, end, lex.entity_cues.get(etype, set()), lex)
+            for etype in DIGIT_TYPES if want(etype)
+        }
+        digit_cues = {k: v for k, v in digit_cues.items() if v is not None}
+
+        # Nearest cue wins between currency and the digit types. "खाते में
+        # 13,00,00,000 रुपये" is an amount: रुपये is adjacent, खाते is two
+        # tokens back. Within the digit types every cued type is emitted --
+        # "पिन कोड" legitimately matches both pin_code and otp, and scoring
+        # checks per gold type, so over-generating there is free.
+        cur_dist = cur_cue[1] if cur_cue else None
+        best_digit = min((v[1] for v in digit_cues.values()), default=None)
+
+        currency_wins = cur_dist is not None and (
+            best_digit is None or cur_dist < best_digit
+        )
+        if currency_wins and value is not None and want("currency"):
+            out.append(ExtractedEntity(
+                "currency", surface, normalize_currency(value), span, cue=cur_cue[0],
+            ))
+            continue
+
+        if digit_cues:
+            for etype, cue in digit_cues.items():
+                out.append(ExtractedEntity(etype, surface, digits, span, cue=cue[0]))
             continue
 
         if cur_cue and value is not None and want("currency"):
             out.append(ExtractedEntity(
-                "currency", surface, normalize_currency(value), span, cue=cur_cue,
+                "currency", surface, normalize_currency(value), span, cue=cur_cue[0],
             ))
             continue
 
@@ -306,28 +329,44 @@ def _extract_dates(folded: str, tokens: Sequence[Token], lex: Lexicon) -> list[E
                 "date", m.group(0), normalize_date(year, month, day), m.span(),
             ))
 
-    # "15 मार्च 2024" / "march 15" -- a month word with a day either side.
+    # A month word with a number run either side. The runs are parsed as
+    # magnitudes, not read digit-by-digit, so "चार मई दो हज़ार छब्बीस" gives
+    # 4 May 2026 rather than a 4-digit string.
+    runs = _number_runs(tokens, lex)
+    ends_at = {end: (start, end) for start, end in runs}
+    starts_at = {start: (start, end) for start, end in runs}
+
     for i, tok in enumerate(tokens):
         month = lex.months.get(canonicalize(tok.text))
         if month is None:
             continue
+
+        def run_value(run: tuple[int, int] | None) -> int | None:
+            if run is None:
+                return None
+            try:
+                return int(parse_value([t.text for t in tokens[run[0]:run[1]]], lex.language))
+            except (NumberParseError, ValueError):
+                return None
+
+        before, after = ends_at.get(i), starts_at.get(i + 1)
         day = year = None
         lo = hi = i
-        for j in (i - 1, i + 1):
-            if not (0 <= j < len(tokens)):
-                continue
-            t = tokens[j].text
-            if not t.isdigit():
-                continue
-            v = int(t)
-            if day is None and 1 <= v <= 31 and len(t) <= 2:
-                day, lo, hi = v, min(lo, j), max(hi, j)
-            elif year is None and len(t) == 4:
-                year, lo, hi = v, min(lo, j), max(hi, j)
-        if year is None and i + 2 < len(tokens) and tokens[i + 2].text.isdigit():
-            t = tokens[i + 2].text
-            if len(t) == 4:
-                year, hi = int(t), max(hi, i + 2)
+
+        bv, av = run_value(before), run_value(after)
+        if bv is not None and 1 <= bv <= 31:
+            day, lo = bv, before[0]
+        if av is not None:
+            if av >= 1000:
+                year, hi = av, after[1] - 1
+            elif day is None and 1 <= av <= 31:
+                day, hi = av, after[1] - 1
+        if day is not None and year is None and after is not None and av is not None \
+                and av <= 31 and (nxt := starts_at.get(after[1] + 1)):
+            nv = run_value(nxt)
+            if nv is not None and nv >= 1000:
+                year, hi = nv, nxt[1] - 1
+
         if day is not None:
             span = (tokens[lo].start, tokens[hi].end)
             out.append(ExtractedEntity(

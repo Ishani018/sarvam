@@ -76,14 +76,22 @@ class Lexicon:
     def __init__(self, data: dict):
         self.language: str = data.get("language", "")
         self.units: dict[str, int] = {}
+        #: Reverse index, value -> primary (first-listed) spelling. Used by the
+        #: corpus generator to render a sampled number as spoken words.
+        self.unit_words: dict[int, str] = {}
         for value, words in (data.get("units") or {}).items():
             for w in words:
                 self.units.setdefault(canonicalize(str(w)), int(value))
+            if words:
+                self.unit_words.setdefault(int(value), str(words[0]))
 
         self.scales: dict[str, int] = {}
+        self.scale_words: dict[int, str] = {}
         for entry in data.get("scales") or []:
             for w in entry["words"]:
                 self.scales.setdefault(canonicalize(w), int(entry["value"]))
+            if entry["words"]:
+                self.scale_words.setdefault(int(entry["value"]), str(entry["words"][0]))
 
         self.fraction_values: dict[str, Decimal] = {}
         for entry in data.get("fraction_values") or []:
@@ -91,9 +99,12 @@ class Lexicon:
                 self.fraction_values.setdefault(canonicalize(w), Decimal(str(entry["value"])))
 
         self.modifiers: dict[str, Decimal] = {}
+        self.modifier_words: dict[str, str] = {}
         for entry in data.get("modifiers") or []:
             for w in entry["words"]:
                 self.modifiers.setdefault(canonicalize(w), Decimal(str(entry["delta"])))
+            if entry["words"]:
+                self.modifier_words.setdefault(str(entry["delta"]), str(entry["words"][0]))
 
         self.repeats: dict[str, int] = {}
         for entry in data.get("repeat_words") or []:
@@ -101,9 +112,12 @@ class Lexicon:
                 self.repeats.setdefault(canonicalize(w), int(entry["times"]))
 
         self.months: dict[str, int] = {}
+        self.month_words: dict[int, str] = {}
         for value, words in (data.get("months") or {}).items():
             for w in words:
                 self.months.setdefault(canonicalize(str(w)), int(value))
+            if words:
+                self.month_words.setdefault(int(value), str(words[0]))
 
         self.currency_cues = {canonicalize(w) for w in data.get("currency_cues") or []}
         self.paise_cues = {canonicalize(w) for w in data.get("paise_cues") or []}
@@ -117,7 +131,8 @@ class Lexicon:
         """Add ``other``'s entries where this lexicon has none. setdefault
         semantics throughout: the primary language always wins."""
         for attr in ("units", "scales", "fraction_values", "modifiers",
-                     "repeats", "months"):
+                     "repeats", "months", "unit_words", "scale_words",
+                     "modifier_words", "month_words"):
             mine = getattr(self, attr)
             for k, v in getattr(other, attr).items():
                 mine.setdefault(k, v)
@@ -383,3 +398,64 @@ def parse_digit_sequence(tokens: Iterable[str], language: str) -> str:
         pending_repeat = 1
 
     return "".join(out)
+
+
+# --------------------------------------------------------------------------
+# Formatting (the generator's direction: value -> text)
+# --------------------------------------------------------------------------
+
+
+def format_indian_grouping(n: int) -> str:
+    """123456789 -> "12,34,56,789". Indian 2-2-3 grouping, not 3-3-3."""
+    s = str(abs(int(n)))
+    if len(s) <= 3:
+        out = s
+    else:
+        head, tail = s[:-3], s[-3:]
+        parts = []
+        while len(head) > 2:
+            parts.insert(0, head[-2:])
+            head = head[:-2]
+        if head:
+            parts.insert(0, head)
+        out = ",".join(parts + [tail])
+    return ("-" if n < 0 else "") + out
+
+
+def value_to_words(n: int, language: str) -> str:
+    """Render an integer as spoken words using Indian grouping."""
+    lex = load_lexicon(language)
+    n = int(n)
+    if n == 0:
+        return lex.unit_words[0]
+
+    parts: list[str] = []
+    for scale in (10_000_000, 100_000, 1000):
+        if n >= scale:
+            count, n = divmod(n, scale)
+            parts.append(f"{_below_thousand_words(count, lex)} {lex.scale_words[scale]}")
+    if n:
+        parts.append(_below_thousand_words(n, lex))
+    return " ".join(p for p in parts if p)
+
+
+def _below_thousand_words(n: int, lex: Lexicon) -> str:
+    parts: list[str] = []
+    hundreds, rest = divmod(n, 100)
+    if hundreds:
+        parts.append(f"{lex.unit_words[hundreds]} {lex.scale_words[100]}")
+    if rest:
+        if rest in lex.unit_words:
+            parts.append(lex.unit_words[rest])
+        else:  # English-style tens + units
+            tens, units = divmod(rest, 10)
+            parts.append(lex.unit_words[tens * 10])
+            if units:
+                parts.append(lex.unit_words[units])
+    return " ".join(parts)
+
+
+def digits_to_words(digits: str, language: str) -> str:
+    """Read a digit string aloud one digit at a time: "9234" -> "नौ दो तीन चार"."""
+    lex = load_lexicon(language)
+    return " ".join(lex.unit_words[int(d)] for d in str(digits) if d.isdigit())
