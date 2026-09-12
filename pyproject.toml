@@ -27,5 +27,10 @@ packages = ["src/tee"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
 [tool.hatch.build]
 include = ["src/tee/**/*.py", "src/tee/**/*.yaml"]

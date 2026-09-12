@@ -52,16 +52,6 @@ providers:
     dir: .tee/cache
     raw_dir: .tee/raw_responses
 
-cost:
-  # Hard abort, not a warning. Sized for the calibration run as configured:
-  # 40 TTS + (40 x 3 conditions x 2 models) ASR = 280. Lower it when narrowing
-  # the run; the dry run always prints the real total first.
-  max_api_calls: 300
-  asr_inr_per_audio_second: 0.0   # fill in from your rate card
-  tts_inr_per_1k_chars: 0.0
-  currency: INR
-  count_cached: false
-
 scoring:
   entity_types: [account_number, currency, otp, pin_code, date]
   wer:
@@ -126,3 +116,7 @@ conditions:
       - {op: noise, source: pink, snr_db: 15}
       - {op: resample, rate: 8000}
       - {op: codec, codec: pcm_mulaw, container: wav}
+
+cost:
+  asr_inr_per_audio_second: 0.00833
+  tts_inr_per_1k_chars: 3.0
