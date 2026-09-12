@@ -85,7 +85,11 @@ class Condition(BaseModel):
 
 class SarvamASRConfig(BaseModel):
     endpoint: str = "https://api.sarvam.ai/speech-to-text"
-    model: str = "saaras:v3"
+    #: Model is an axis, not a setting. v4 adds telephony-tuned handling and
+    #: entity preservation, which is exactly what this harness measures, so it
+    #: has to be compared against v3 rather than swapped in. Every extra model
+    #: multiplies the ASR call count -- the dry run shows the total.
+    models: list[str] = Field(default_factory=lambda: ["saaras:v3"])
     #: saaras:v3+ only. "transcribe" normalizes numbers to digits;
     #: "verbatim" preserves spoken number words. This materially changes what
     #: the entity extractor sees -- see README.
@@ -95,17 +99,26 @@ class SarvamASRConfig(BaseModel):
     timeout_s: float = 120.0
     max_retries: int = 4
     backoff_base_s: float = 2.0
+    #: Merged into the request body verbatim. An escape hatch for parameters
+    #: added or renamed upstream, so a field-name change is a config edit
+    #: rather than a code change.
+    extra_params: dict[str, Any] = Field(default_factory=dict)
 
 
 class SarvamTTSConfig(BaseModel):
     endpoint: str = "https://api.sarvam.ai/text-to-speech"
     model: str = "bulbul:v3"
     speaker: str = "shubh"
-    sample_rate: int = 24000
+    #: The API parameter is `speech_sample_rate`, default 24000. 8 kHz is
+    #: supported natively but deliberately unused: synthesizing at telephony
+    #: rate would move the independent variable out of degrade.py and into the
+    #: TTS, and the whole point is to control the degradation ourselves.
+    speech_sample_rate: int = 24000
     pace: float = 1.0
     timeout_s: float = 120.0
     max_retries: int = 4
     backoff_base_s: float = 2.0
+    extra_params: dict[str, Any] = Field(default_factory=dict)
 
 
 class ASRConfig(BaseModel):

@@ -123,10 +123,13 @@ class MockASR:
 class SarvamASR:
     name = "sarvam"
 
-    def __init__(self, cfg: SarvamASRConfig, cache: ResponseCache, guard: CostGuard):
+    def __init__(self, cfg: SarvamASRConfig, cache: ResponseCache,
+                 guard: CostGuard, model: str | None = None):
         self.cfg = cfg
         self.cache = cache
         self.guard = guard
+        #: One instance per model, so a run can compare models as an axis.
+        self.model = model or cfg.models[0]
 
     def transcribe(self, audio_path: Path, language: str,
                    hint: str | None = None) -> ASRResult:
@@ -136,7 +139,7 @@ class SarvamASR:
         key = request_key({
             "provider": "sarvam-asr",
             "endpoint": self.cfg.endpoint,
-            "model": self.cfg.model,
+            "model": self.model,
             "mode": self.cfg.mode,
             "language_code": language,
             "audio_sha256": audio_sha,
@@ -147,7 +150,7 @@ class SarvamASR:
             self.guard.note_cached()
             return ASRResult(text=cached["transcript"], language=language,
                              cached=True, provider="sarvam", request_key=key,
-                             model=self.cfg.model, mode=self.cfg.mode,
+                             model=self.model, mode=self.cfg.mode,
                              raw_path=Path(cached["raw_path"]) if cached.get("raw_path") else None)
 
         self.guard.spend_asr(probe_duration(audio_path))
@@ -170,19 +173,26 @@ class SarvamASR:
         self.cache.put(key, {
             "transcript": transcript,
             "raw_path": str(raw_path),
-            "model": self.cfg.model,
+            "model": self.model,
             "mode": self.cfg.mode,
             "language_code": language,
             "audio_sha256": audio_sha,
         })
         return ASRResult(text=transcript, language=language, cached=False,
-                         provider="sarvam", request_key=key, model=self.cfg.model,
+                         provider="sarvam", request_key=key, model=self.model,
                          mode=self.cfg.mode, raw_path=raw_path)
 
     def _post(self, audio_path: Path, language: str) -> bytes:
         headers = {"api-subscription-key": api_key()}
-        data = {"model": self.cfg.model, "language_code": language,
-                "mode": self.cfg.mode}
+        data = {"model": self.model, "language_code": language,
+                **self.cfg.extra_params}
+        # `mode` is only honoured on saaras:v3 and later. Sending it to a
+        # legacy model is at best ignored and at worst a 400.
+        if self.model.startswith("saaras"):
+            data["mode"] = self.cfg.mode
+        else:
+            log.warning("model %s predates the `mode` parameter; not sending "
+                        "mode=%s", self.model, self.cfg.mode)
         last: Exception | None = None
         for attempt in range(self.cfg.max_retries + 1):
             try:
@@ -215,7 +225,17 @@ class _Retryable(Exception):
 
 
 def build_asr(cfg, cache: ResponseCache, guard: CostGuard,
-              mock_error_rate: float = 0.0) -> ASRProvider:
+              mock_error_rate: float = 0.0) -> list[ASRProvider]:
+    """One provider per model. Models are an axis, so this returns a list."""
     if cfg.providers.asr.impl == "sarvam":
-        return SarvamASR(cfg.providers.asr.sarvam, cache, guard)
-    return MockASR(error_rate=mock_error_rate)
+        sarvam = cfg.providers.asr.sarvam
+        return [SarvamASR(sarvam, cache, guard, model=m) for m in sarvam.models]
+    return [MockASR(error_rate=mock_error_rate)]
+
+
+# TODO(phase 3): Keyterm Prompting. Saaras v4 can be primed with names, places,
+# brands and technical terms, which acts directly on entity accuracy -- the
+# metric this whole harness reports. Measuring with and without keyterms is a
+# genuine extra axis. The request field name is not verified here (the docs host
+# is unreachable from this environment); until it is, it can be passed through
+# providers.asr.sarvam.extra_params without a code change.

@@ -76,6 +76,10 @@ def run(
         "mock", "--provider", help="mock | sarvam. Real providers are opt-in."),
     limit: Optional[int] = typer.Option(None, "--limit", help="First N utterances."),
     dry_run: bool = typer.Option(False, "--dry-run", help="Print the cost and exit."),
+    models: Optional[str] = typer.Option(
+        None, "--models",
+        help="Comma-separated ASR models, overriding config. Each one multiplies "
+             "the ASR call count."),
     mock_error_rate: float = typer.Option(
         0.0, "--mock-error-rate",
         help="Digit corruption rate for the mock ASR, to exercise scoring offline."),
@@ -95,6 +99,8 @@ def run(
     names = [c.strip() for c in conditions_opt.split(",")] if conditions_opt else None
     conds = cfg.select_conditions(names)
 
+    if models:
+        cfg.providers.asr.sarvam.models = [m.strip() for m in models.split(",")]
     run_id = make_run_id()
     plan = plan_run(cfg, utterances, conds, run_id=run_id)
 
@@ -119,10 +125,10 @@ def run(
                           cfg.providers.cache.enabled)
     guard = CostGuard(cfg.cost)
     tts = build_tts(cfg, cache, guard)
-    asr = build_asr(cfg, cache, guard, mock_error_rate=mock_error_rate)
+    asr_providers = build_asr(cfg, cache, guard, mock_error_rate=mock_error_rate)
 
     try:
-        rows = execute_run(cfg, plan, tts, asr, guard,
+        rows = execute_run(cfg, plan, tts, asr_providers, guard,
                            on_progress=lambda m: typer.echo(m, err=True))
     except BudgetExceeded as exc:
         typer.echo(f"\nABORTED: {exc}", err=True)
@@ -135,7 +141,8 @@ def run(
 
     typer.echo("\nentity hit rate:")
     for a in aggregate(rows):
-        typer.echo(f"  {a['condition']:16s} {a['entity_type']:16s} "
+        typer.echo(f"  {a['asr_model']:12s} {a['condition']:16s} "
+                   f"{a['entity_type']:16s} "
                    f"{a['hits']:3d}/{a['total']:3d}  {a['hit_rate']:.3f}")
     typer.echo("\nWER:")
     for a in aggregate_wer(rows):

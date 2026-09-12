@@ -124,3 +124,60 @@ def test_mock_asr_corruption_only_touches_digits(tmp_path):
     t = MockTTS().synthesize("आपका ओटीपी 481923 है", "hi-IN", tmp_path / "a.wav")
     out = MockASR(error_rate=1.0).transcribe(t.path, "hi-IN").text
     assert "आपका ओटीपी" in out and out != "आपका ओटीपी 481923 है"
+
+
+# --- model axis / verified API fields ---------------------------------------
+
+
+def test_build_asr_returns_one_provider_per_model():
+    from tee.asr import build_asr
+    from tee.cache import ResponseCache
+    from tee.config import load_config
+    import tempfile
+    from pathlib import Path as P
+
+    cfg = load_config("configs/default.yaml")
+    cfg.providers.asr.impl = "sarvam"
+    cfg.providers.asr.sarvam.models = ["saaras:v3", "saaras:v4"]
+    d = P(tempfile.mkdtemp())
+    providers = build_asr(cfg, ResponseCache(d / "c", d / "r"),
+                          CostGuard(cfg.cost))
+    assert [p.model for p in providers] == ["saaras:v3", "saaras:v4"]
+
+
+def test_tts_payload_uses_the_verified_speech_sample_rate_field():
+    from tee.cache import ResponseCache
+    from tee.config import load_config
+    from tee.tts import SarvamTTS
+    import tempfile
+    from pathlib import Path as P
+
+    cfg = load_config("configs/default.yaml")
+    d = P(tempfile.mkdtemp())
+    t = SarvamTTS(cfg.providers.tts.sarvam, ResponseCache(d / "c", d / "r"),
+                  CostGuard(cfg.cost))
+    payload = t._payload("नमस्ते", "hi-IN")
+    assert payload["speech_sample_rate"] == 24000
+    assert "sample_rate" not in payload
+    assert payload["speaker"] == "shubh"
+
+
+def test_tts_synthesizes_above_telephony_rate():
+    """8 kHz is supported natively but must not be used: synthesizing at
+    telephony rate would move the independent variable out of degrade.py."""
+    from tee.config import load_config
+    cfg = load_config("configs/default.yaml")
+    assert cfg.providers.tts.sarvam.speech_sample_rate > 8000
+
+
+def test_tts_accepts_documented_and_raw_audio_shapes(tmp_path):
+    import base64
+    from tee.tts import _extract_audio, ProviderError
+    import json as _json
+
+    wav = b"RIFF" + b"\x00" * 40
+    doc = _json.dumps({"audios": [base64.b64encode(wav).decode()]}).encode()
+    assert _extract_audio(doc, tmp_path / "raw") == wav
+    assert _extract_audio(wav, tmp_path / "raw") == wav
+    with pytest.raises(ProviderError, match="audios"):
+        _extract_audio(b'{"detail": "bad request"}', tmp_path / "raw")

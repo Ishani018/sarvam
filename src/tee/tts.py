@@ -119,7 +119,8 @@ class SarvamTTS:
             "model": self.cfg.model,
             "speaker": self.cfg.speaker,
             "pace": self.cfg.pace,
-            "sample_rate": self.cfg.sample_rate,
+            "speech_sample_rate": self.cfg.speech_sample_rate,
+            **self.cfg.extra_params,
         }
 
     def synthesize(self, text: str, language: str, out_path: Path) -> TTSResult:
@@ -140,17 +141,8 @@ class SarvamTTS:
         body = _post_json(self.cfg.endpoint, payload, api_key(), self.cfg)
         raw_path = self.cache.put_raw(key, body)
 
-        try:
-            data = json.loads(body)
-            audios = data["audios"]
-        except (json.JSONDecodeError, KeyError) as exc:
-            raise ProviderError(
-                f"unexpected TTS response shape (raw body at {raw_path}): {exc}"
-            ) from exc
-        if not audios:
-            raise ProviderError(f"TTS returned no audio (raw body at {raw_path})")
-
-        out_path.write_bytes(b64decode(audios[0]))
+        audio = _extract_audio(body, raw_path)
+        out_path.write_bytes(audio)
         digest = sha256_file(out_path)
         self.cache.put(key, {"path": str(out_path), "sha256": digest,
                              "raw_path": str(raw_path), "model": self.cfg.model})
@@ -184,6 +176,35 @@ def _post_json(url: str, payload: dict, key: str, cfg: SarvamTTSConfig) -> bytes
     raise ProviderError(f"TTS failed after {cfg.max_retries} retries: {last}")
 
 
+def _extract_audio(body: bytes, raw_path: Path) -> bytes:
+    """Pull audio bytes out of a TTS response.
+
+    The documented shape is {"audios": ["<base64 wav>"]}. A raw audio body is
+    accepted too, so a response-shape change surfaces as working audio rather
+    than a crash -- but anything else fails loudly and names the raw body,
+    because silently writing a zero-length wav would degrade into an
+    entity-miss that looks like a real result.
+    """
+    try:
+        data = json.loads(body)
+    except json.JSONDecodeError:
+        if body[:4] in (b"RIFF", b"OggS") or body[:3] == b"ID3":
+            return body
+        raise ProviderError(
+            f"TTS returned neither JSON nor recognizable audio "
+            f"(raw body at {raw_path})"
+        ) from None
+
+    audios = data.get("audios") if isinstance(data, dict) else None
+    if not audios:
+        keys = sorted(data) if isinstance(data, dict) else type(data).__name__
+        raise ProviderError(
+            f"TTS response has no non-empty 'audios' field (raw body at "
+            f"{raw_path}); keys were: {keys}"
+        )
+    return b64decode(audios[0])
+
+
 class _Retryable(Exception):
     pass
 
@@ -191,4 +212,4 @@ class _Retryable(Exception):
 def build_tts(cfg, cache: ResponseCache, guard: CostGuard) -> TTSProvider:
     if cfg.providers.tts.impl == "sarvam":
         return SarvamTTS(cfg.providers.tts.sarvam, cache, guard)
-    return MockTTS(sample_rate=cfg.providers.tts.sarvam.sample_rate)
+    return MockTTS(sample_rate=cfg.providers.tts.sarvam.speech_sample_rate)

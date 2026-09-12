@@ -63,15 +63,22 @@ measurement is "did the audio survive *and* did their normalizer agree". The mod
 is in config and recorded on every result row; running both is the way to
 separate the two effects.
 
-**2. Verified model strings** (as of the last check — these move fast):
+**2. Verified models and parameters:**
 
 | | Current | Notes |
 |---|---|---|
-| ASR | `saaras:v3` | default; `saaras:v4` adds Global English; `saarika:v2.5` deprecated |
-| TTS | `bulbul:v3` | default speaker `shubh`, lowercase, case-sensitive |
+| ASR | `saaras:v3`, `saaras:v4` | v4 adds telephony-tuned handling and entity preservation; `saarika:v2.5` deprecated |
+| TTS | `bulbul:v3` | speaker `shubh`, lowercase, case-sensitive; rate parameter is `speech_sample_rate`, default 24000 |
 
-The TTS `sample_rate` field name could not be verified against live docs and
-should be checked on the first real call.
+**The ASR model is an axis, not a setting.** v4 advertises exactly the two
+things this harness measures — telephony robustness and entity preservation —
+so it has to be *compared* against v3, not swapped in. `configs/default.yaml`
+runs both; each model multiplies the ASR call count, and `--dry-run` prints the
+total before anything is spent.
+
+TTS synthesizes at 24 kHz. Sarvam supports 8 kHz natively and this deliberately
+does not use it: synthesizing at telephony rate would move the independent
+variable out of `degrade.py` and into the TTS.
 
 ## Design notes
 
@@ -104,6 +111,32 @@ ambiguous between "the line broke it" and "my extractor never handled it".
 **No partial credit.** An entity is a hit only on exact normalized match. A
 wrong digit in an account number is a total failure, and character similarity
 would score a transfer to the wrong account at 0.9.
+
+## Next axis: keyterm prompting
+
+Saaras v4 supports **keyterm prompting** — priming the model with names, places,
+brands and technical terms. That acts directly on entity accuracy, which is the
+only thing this harness reports, so with/without keyterms is a real extra axis
+and probably the most interesting result available after the model comparison.
+
+Not built. The request field name is unverified here (`docs.sarvam.ai` is
+unreachable from this environment), but it can be passed through
+`providers.asr.sarvam.extra_params` without a code change once known.
+
+Sarvam's BFSI voice-bot and IVR/contact-centre guides document their own
+recommended configuration for this exact use case. The harness should be run
+against those recommended settings rather than against guesses — worth reading
+before the first paid run.
+
+## Tooling for future sessions
+
+Sarvam publishes an MCP server at `docs.sarvam.ai/_mcp/server` and ready-made
+Agent Skills for its SDKs. Connecting those to a coding assistant stops it
+guessing parameter names. Note that `docs.sarvam.ai` is blocked by the network
+egress policy in this remote environment, so both need a session with egress.
+
+Docs pages also serve clean Markdown by appending `.md` to any URL, and
+section indexes at `<section>/llms.txt`.
 
 ## Not built yet
 

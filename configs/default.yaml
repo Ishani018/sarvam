@@ -24,7 +24,11 @@ providers:
     impl: mock            # mock | sarvam ; --provider overrides
     sarvam:
       endpoint: https://api.sarvam.ai/speech-to-text
-      model: saaras:v3    # saarika:v2.5 is deprecated; saaras:v4 also available
+      # Model is an axis, not a setting: v4 adds telephony-tuned handling and
+      # entity preservation, which is the thing being measured, so it has to be
+      # compared against v3 rather than swapped in. Each model multiplies the
+      # ASR call count -- check `tee run --dry-run` before spending.
+      models: [saaras:v3, saaras:v4]
       mode: transcribe    # transcribe normalizes numbers to digits;
                           # verbatim keeps spoken number words. See README.
       timeout_s: 120
@@ -35,8 +39,10 @@ providers:
     sarvam:
       endpoint: https://api.sarvam.ai/text-to-speech
       model: bulbul:v3
-      speaker: shubh      # lowercase; speaker names are case-sensitive
-      sample_rate: 24000  # synthesize clean, degrade afterwards
+      speaker: shubh            # lowercase; speaker names are case-sensitive
+      speech_sample_rate: 24000 # 8000 is supported natively -- deliberately
+                                # unused, so degrade.py stays the only thing
+                                # controlling the independent variable
       pace: 1.0
       timeout_s: 120
       max_retries: 4
@@ -47,7 +53,10 @@ providers:
     raw_dir: .tee/raw_responses
 
 cost:
-  max_api_calls: 200      # hard abort, not a warning
+  # Hard abort, not a warning. Sized for the calibration run as configured:
+  # 40 TTS + (40 x 3 conditions x 2 models) ASR = 280. Lower it when narrowing
+  # the run; the dry run always prints the real total first.
+  max_api_calls: 300
   asr_inr_per_audio_second: 0.0   # fill in from your rate card
   tts_inr_per_1k_chars: 0.0
   currency: INR

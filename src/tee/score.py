@@ -230,19 +230,20 @@ def read_rows(path: str | Path) -> list[ScoreRow]:
 
 def aggregate(rows: Sequence[ScoreRow]) -> list[dict[str, Any]]:
     """Hit rate per (language, condition, entity type). Pure function over rows."""
-    buckets: dict[tuple[str, str, str], list[int]] = {}
+    buckets: dict[tuple[str, str, str, str], list[int]] = {}
     for row in rows:
         for e in row.entities:
-            key = (row.language, row.condition, e.type)
+            key = (row.language, row.condition, e.type, row.asr_model or "-")
             hits, total = buckets.setdefault(key, [0, 0])
             buckets[key] = [hits + int(e.hit), total + 1]
 
     out = []
-    for (lang, cond, etype), (hits, total) in sorted(buckets.items()):
+    for (lang, cond, etype, model), (hits, total) in sorted(buckets.items()):
         out.append({
             "language": lang,
             "condition": cond,
             "entity_type": etype,
+            "asr_model": model,
             "hits": hits,
             "total": total,
             "hit_rate": hits / total if total else 0.0,

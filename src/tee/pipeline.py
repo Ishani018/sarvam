@@ -39,7 +39,7 @@ class RunPlan:
     max_api_calls: int
     asr_impl: str
     tts_impl: str
-    asr_model: str | None
+    asr_models: list[str]
     asr_mode: str | None
 
     @property
@@ -62,8 +62,10 @@ class RunPlan:
             "",
             f"  TTS provider      {self.tts_impl}",
             f"  ASR provider      {self.asr_impl}"
-            + (f"  model={self.asr_model} mode={self.asr_mode}"
-               if self.asr_impl != "mock" else ""),
+            + (f"  mode={self.asr_mode}" if self.asr_impl != "mock" else ""),
+            f"  ASR models        {', '.join(self.asr_models)}"
+            + (f"   ({len(self.asr_models)}x the ASR calls)"
+               if len(self.asr_models) > 1 else ""),
             "",
             f"  TTS calls         {self.tts_calls}  ({self.tts_chars} chars)",
             f"  ASR calls         {self.asr_calls}",
@@ -97,18 +99,23 @@ def plan_run(
     conditions: Sequence[Condition],
     run_id: str | None = None,
     chars_per_second: float = 14.0,
+    asr_models: Sequence[str] | None = None,
 ) -> RunPlan:
     """Cost a run without performing it.
 
     Audio duration is estimated from text length, since the audio does not
     exist yet. It is an estimate and labelled as one.
     """
+    models = list(asr_models or (
+        cfg.providers.asr.sarvam.models if cfg.providers.asr.impl == "sarvam"
+        else ["mock"]
+    ))
     tts_chars = sum(len(u.text) for u in utterances)
     seconds_each = [max(1.0, len(u.text) / chars_per_second) for u in utterances]
-    asr_seconds = sum(seconds_each) * len(conditions)
+    asr_seconds = sum(seconds_each) * len(conditions) * len(models)
 
     tts_calls = len(utterances)
-    asr_calls = len(utterances) * len(conditions)
+    asr_calls = len(utterances) * len(conditions) * len(models)
     cost = (
         tts_chars / 1000.0 * cfg.cost.tts_inr_per_1k_chars
         + asr_seconds * cfg.cost.asr_inr_per_audio_second
@@ -126,7 +133,7 @@ def plan_run(
         max_api_calls=cfg.cost.max_api_calls,
         asr_impl=cfg.providers.asr.impl,
         tts_impl=cfg.providers.tts.impl,
-        asr_model=cfg.providers.asr.sarvam.model,
+        asr_models=models,
         asr_mode=cfg.providers.asr.sarvam.mode,
     )
 
@@ -135,14 +142,14 @@ def execute_run(
     cfg: Config,
     plan: RunPlan,
     tts: TTSProvider,
-    asr: ASRProvider,
+    asr_providers: Sequence[ASRProvider],
     guard: CostGuard,
     on_progress: Callable[[str], None] | None = None,
 ) -> list[ScoreRow]:
     """Run the plan, returning one score row per (utterance, condition)."""
     work = Path(cfg.paths.work_dir) / plan.run_id
     rows: list[ScoreRow] = []
-    total = len(plan.utterances) * len(plan.conditions)
+    total = len(plan.utterances) * len(plan.conditions) * len(asr_providers)
     done = 0
 
     for utt in plan.utterances:
@@ -154,37 +161,51 @@ def execute_run(
         except Exception as exc:  # noqa: BLE001 - recorded, not swallowed
             log.error("TTS failed for %s: %s", utt.id, exc)
             for cond in plan.conditions:
-                rows.append(_error_row(cfg, plan, utt, cond.name, f"tts: {exc}"))
+                for _ in asr_providers:
+                    rows.append(_error_row(cfg, plan, utt, cond.name, f"tts: {exc}"))
             continue
 
         for cond in plan.conditions:
-            done += 1
             out = udir / f"{cond.name}.wav"
             try:
                 deg = apply_condition(
                     tts_result.path, out, cond, cfg.audio,
                     seed=derive_seed(cfg.seed, utt.id, cond.name),
                 )
-                hint = utt.text if isinstance(asr, MockASR) else None
-                hyp = asr.transcribe(out, utt.language, hint=hint)
-                rows.append(score_utterance(
-                    utt, hyp.text,
-                    condition=cond.name,
-                    run_id=plan.run_id,
-                    asr_impl=asr.name,
-                    asr_model=hyp.model,
-                    asr_mode=hyp.mode,
-                    entity_types=cfg.scoring.entity_types,
-                    wer_cfg=cfg.scoring.wer,
-                    audio_path=str(out),
-                    audio_sha256=deg.sha256,
-                ))
             except Exception as exc:  # noqa: BLE001
-                log.error("%s/%s failed: %s", utt.id, cond.name, exc)
-                rows.append(_error_row(cfg, plan, utt, cond.name, str(exc)))
+                log.error("%s/%s degradation failed: %s", utt.id, cond.name, exc)
+                for _ in asr_providers:
+                    rows.append(_error_row(cfg, plan, utt, cond.name, str(exc)))
+                done += len(asr_providers)
+                continue
 
-            if on_progress:
-                on_progress(f"[{done}/{total}] {utt.id} {cond.name}  {guard.summary()}")
+            # The audio is degraded once and transcribed by every model, so a
+            # model comparison is over byte-identical inputs.
+            for asr in asr_providers:
+                done += 1
+                try:
+                    hint = utt.text if isinstance(asr, MockASR) else None
+                    hyp = asr.transcribe(out, utt.language, hint=hint)
+                    rows.append(score_utterance(
+                        utt, hyp.text,
+                        condition=cond.name,
+                        run_id=plan.run_id,
+                        asr_impl=asr.name,
+                        asr_model=hyp.model,
+                        asr_mode=hyp.mode,
+                        entity_types=cfg.scoring.entity_types,
+                        wer_cfg=cfg.scoring.wer,
+                        audio_path=str(out),
+                        audio_sha256=deg.sha256,
+                    ))
+                except Exception as exc:  # noqa: BLE001
+                    log.error("%s/%s/%s failed: %s", utt.id, cond.name,
+                              getattr(asr, "model", asr.name), exc)
+                    rows.append(_error_row(cfg, plan, utt, cond.name, str(exc)))
+
+                if on_progress:
+                    on_progress(f"[{done}/{total}] {utt.id} {cond.name}  "
+                                f"{guard.summary()}")
 
     return rows
 
