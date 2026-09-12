@@ -1,0 +1,119 @@
+# telephony-entity-eval -- default run configuration.
+#
+# Conditions are data. Adding a telephony condition means editing this file,
+# never touching Python. Each condition is an ordered chain of transforms;
+# every step is shelled out to ffmpeg/sox and its argv is logged to a manifest
+# next to the output file.
+
+seed: 1337
+
+paths:
+  corpus: fixtures/utterances.jsonl
+  work_dir: .tee/work
+  out_dir: results
+
+audio:
+  sample_rate: 16000      # canonical rate handed to ASR
+  channels: 1
+  sample_format: s16le
+  frame_ms: 20            # packet-loss frame size
+  restore_rate: true      # upsample degraded audio back to sample_rate
+
+providers:
+  asr:
+    impl: mock            # mock | sarvam ; --provider overrides
+    sarvam:
+      endpoint: https://api.sarvam.ai/speech-to-text
+      model: saaras:v3    # saarika:v2.5 is deprecated; saaras:v4 also available
+      mode: transcribe    # transcribe normalizes numbers to digits;
+                          # verbatim keeps spoken number words. See README.
+      timeout_s: 120
+      max_retries: 4
+      backoff_base_s: 2.0
+  tts:
+    impl: mock
+    sarvam:
+      endpoint: https://api.sarvam.ai/text-to-speech
+      model: bulbul:v3
+      speaker: shubh      # lowercase; speaker names are case-sensitive
+      sample_rate: 24000  # synthesize clean, degrade afterwards
+      pace: 1.0
+      timeout_s: 120
+      max_retries: 4
+      backoff_base_s: 2.0
+  cache:
+    enabled: true
+    dir: .tee/cache
+    raw_dir: .tee/raw_responses
+
+cost:
+  max_api_calls: 200      # hard abort, not a warning
+  asr_inr_per_audio_second: 0.0   # fill in from your rate card
+  tts_inr_per_1k_chars: 0.0
+  currency: INR
+  count_cached: false
+
+scoring:
+  entity_types: [account_number, currency, otp, pin_code, date]
+  wer:
+    strip_punct: true
+    unicode_nfc: true
+    casefold: true
+
+conditions:
+  - name: clean
+    description: 16 kHz mono baseline, no telephony damage
+    chain:
+      - {op: resample, rate: 16000}
+
+  - name: narrowband
+    description: 8 kHz downsample only -- isolates bandwidth loss from codec loss
+    chain:
+      - {op: resample, rate: 8000}
+
+  - name: g711_ulaw
+    description: 8 kHz + G.711 mu-law round trip (the standard PSTN codec)
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+
+  - name: gsm_fr
+    description: 8 kHz + GSM full rate round trip (2G mobile)
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: libgsm, container: gsm}
+
+  - name: opus_low
+    description: low bitrate Opus round trip (VoIP / WebRTC under congestion)
+    chain:
+      - {op: codec, codec: libopus, container: ogg, bitrate: 12k, application: voip}
+
+  - name: packet_loss_2
+    description: g711_ulaw + 2% frame loss
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+      - {op: packet_loss, rate: 0.02, frame_ms: 20, fill: silence}
+
+  - name: packet_loss_5
+    description: g711_ulaw + 5% frame loss
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+      - {op: packet_loss, rate: 0.05, frame_ms: 20, fill: silence}
+
+  - name: packet_loss_10
+    description: g711_ulaw + 10% frame loss
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+      - {op: packet_loss, rate: 0.10, frame_ms: 20, fill: silence}
+
+  - name: noisy_line
+    description: >
+      pink noise at 15 dB SNR, then the phone line. Noise is added before the
+      codec because that is the physical order: noisy room, then G.711.
+    chain:
+      - {op: noise, source: pink, snr_db: 15}
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
