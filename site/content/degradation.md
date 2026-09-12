@@ -1,3 +1,5 @@
+SUMMARY: Nine telephony conditions are declared as chains of ffmpeg transforms; the page shows the commands that actually ran, not a restatement of the config.
+
 Each condition is a named chain of transforms declared in YAML, applied with
 ffmpeg and sox. Nothing is reimplemented in Python except packet-loss frame
 gating, which is byte slicing over raw PCM and lives there precisely so a seed

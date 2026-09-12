@@ -1,3 +1,5 @@
+SUMMARY: These are the reasons the numbers above are narrower than they look, and they should be read before the results, not after.
+
 This section is not a disclaimer. These are the reasons the numbers above are
 narrower than they look, and anyone reading the results should read these first.
 

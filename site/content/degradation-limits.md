@@ -1,3 +1,5 @@
+SUMMARY: Packet loss is modelled as independent per-frame loss, which is gentler than real networks; read these figures as a floor on the damage.
+
 Packet loss is modelled as an independent probability per 20 ms frame. Real
 networks do not lose packets that way — loss arrives in bursts, and a burst that
 removes four consecutive frames does far more damage to a digit than four

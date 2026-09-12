@@ -1,3 +1,5 @@
+SUMMARY: The number is chosen before the sentence is written, so the correct answer is known by construction and every miss is attributable.
+
 The generator samples the value first — an account number, an amount, an OTP, a
 PIN code, a date — and then builds a sentence around it. The correct answer is
 therefore known by construction, before any audio exists.

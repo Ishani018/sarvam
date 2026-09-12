@@ -1,3 +1,5 @@
+SUMMARY: The corpus is seeded and prefix-stable, so anyone can regenerate the identical test set and check the numbers rather than take them on trust.
+
 The corpus is fully seeded and prefix-stable: generating forty utterances and
 generating five with the same seed produce the same first five. Anyone with the
 language, the count and the seed can regenerate the identical test set, so a

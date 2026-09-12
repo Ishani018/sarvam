@@ -1,4 +1,5 @@
 import { AudioPlayer } from "./AudioPlayer";
+import { Waveform } from "./Charts";
 import type { ConditionDef, ListenEntry, ListenEntity } from "../types";
 
 /**
@@ -88,12 +89,15 @@ export function ListenSection({ listen, conditions }: Props) {
 
           <div className="utt__grid">
             {u.conditions.map((c) => (
-              <section className="cond" key={c.condition}>
+              <section className="cond cond--card" key={c.condition}>
                 <AudioPlayer
                   src={c.audio}
                   label={c.condition}
                   hint={describe(c.condition)}
                 />
+                {/* Gaps punched by packet loss are visible here as well as
+                    audible. Peaks are precomputed at build time. */}
+                <Waveform peaks={c.peaks} label={c.condition} />
 
                 {c.results.map((r) => (
                   <div className="hyp" key={r.model}>

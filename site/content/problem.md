@@ -1,3 +1,5 @@
+SUMMARY: A single aggregate word error rate cannot tell you whether the account number survived, and on a collections call that is the only thing that matters.
+
 Production voice agents in India run over the phone network: 8 kHz sampling, a
 lossy codec, and packet loss on a bad line. The audio a model actually receives
 in a collections or banking call bears little resemblance to a studio recording.

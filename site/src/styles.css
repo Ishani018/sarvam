@@ -49,21 +49,30 @@
   --lh-snug: 1.4;
   --lh-body: 1.62;
 
-  /* Ink. Near-black, never pure black: #000 on #fff is harsh at this density. */
-  --ink: #16181d;
-  --ink-2: #474c56;
-  --ink-3: #7b818c;
-  --ink-4: #a9aeb6;
+  /* Warm near-black. Pure #000 on pure #fff reads as unfinished at this
+   * density; a little warmth in both makes the page look considered without
+   * costing any seriousness. */
+  --ink: #1a1714;
+  --ink-2: #4d463f;
+  --ink-3: #857c72;
+  --ink-4: #b0a79c;
 
-  --paper: #ffffff;
-  --paper-2: #faf9f7;
-  --rule: #e6e5e0;
-  --rule-strong: #c8c7c0;
+  --paper: #fcfaf7;
+  --paper-2: #f6f2ec;
+  --rule: #e7e0d6;
+  --rule-strong: #cdc3b5;
 
-  /* The one accent. Miss / failure / attention. */
-  --accent: #b03621;
-  --accent-ink: #8d2a19;
-  --accent-wash: #fbf1ee;
+  /* Accent 1, rust. Means: something failed, or something is uncertain --
+   * a miss, a low-n cell, a condition that was never run. Never decoration. */
+  --accent: #b4502e;
+  --accent-ink: #8f3c20;
+  --accent-wash: #b4502e14;   /* ~8% -- the one tinted panel treatment */
+
+  /* Accent 2, teal. Introduced for exactly one reason: the disagreement chart
+   * needs two distinguishable series. Having earned its place there it also
+   * marks section numbers and the active nav item, and nothing else. */
+  --accent-2: #1f5c63;
+  --accent-2-ink: #17474d;
 
   --measure: 36rem;
   --wide: 74rem;
@@ -156,7 +165,7 @@ code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
 
 /* -------------------------------------------------------------- header -- */
 
-.masthead { padding-block: clamp(3.5rem, 9vw, 6.5rem) clamp(2.5rem, 6vw, 4rem); }
+.masthead { padding-block: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 3vw, 2.25rem); }
 
 .masthead__title {
   font-size: var(--t-42);
@@ -215,9 +224,31 @@ code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
 .section__no {
   font-family: var(--font-mono);
   font-size: var(--t-12);
-  color: var(--ink-4);
+  color: var(--accent-2);
   display: block;
   margin-bottom: 0.5rem;
+}
+
+/* A short rule under the heading, not a full-width divider: it marks the start
+ * of a section without drawing a box around it. */
+.section__title::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--accent-2);
+  margin-top: 0.7rem;
+}
+
+/* The one sentence carrying the section's argument. A reader who reads only
+ * these should come away with the case intact. */
+.section__summary {
+  font-size: var(--t-21);
+  line-height: 1.45;
+  color: var(--ink);
+  max-width: 34rem;
+  margin: 0 0 1.1rem;
+  text-wrap: pretty;
 }
 
 .section__title {
@@ -722,3 +753,227 @@ td.cell-td { padding-left: 0.9rem; }
   .utt__grid { gap: 2rem; }
   .utt__text { font-size: var(--t-17); }
 }
+
+
+/* ==================================================== result block ======== */
+
+/* The two numbers that make the argument, above the fold. No celebration
+ * styling: large type and whitespace are the emphasis, and a wall of green
+ * would claim more than 40 utterances can support. */
+.result {
+  background: var(--accent-wash);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding-block: clamp(2rem, 5vw, 3.25rem);
+}
+
+.result__pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 2rem 3.5rem;
+  align-items: end;
+}
+
+.result__k {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-3);
+  margin-bottom: 0.5rem;
+}
+
+.result__v {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2.25rem, 1.2rem + 4.4vw, 3.25rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.result__v--teal { color: var(--accent-2); }
+.result__v--rust { color: var(--accent); }
+
+.result__sub {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  color: var(--ink-3);
+  margin-top: 0.5rem;
+}
+
+.result__says {
+  font-size: var(--t-17);
+  line-height: 1.55;
+  color: var(--ink);
+  max-width: 38rem;
+  margin: 2rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.result__scope {
+  font-size: var(--t-13);
+  color: var(--ink-3);
+  max-width: 38rem;
+  margin: 0.75rem 0 0;
+}
+
+/* ==================================================== charts ============= */
+
+.chart { margin: 1.75rem 0 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.ch-axis { stroke: var(--rule-strong); stroke-width: 1; }
+.ch-grid { stroke: var(--rule); stroke-width: 1; }
+.ch-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--ink-3);
+}
+.ch-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.ch-series-a { stroke: var(--accent-2); fill: none; stroke-width: 2; }
+.ch-series-b { stroke: var(--accent); fill: none; stroke-width: 2; }
+.ch-dot-a { fill: var(--accent-2); }
+.ch-dot-b { fill: var(--accent); }
+
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  margin-top: 0.9rem;
+  font-size: var(--t-12);
+  color: var(--ink-2);
+}
+.chart__swatch {
+  display: inline-block;
+  width: 1.1rem;
+  height: 2px;
+  vertical-align: middle;
+  margin-right: 0.45rem;
+}
+.chart__swatch--a { background: var(--accent-2); }
+.chart__swatch--b { background: var(--accent); }
+
+/* Condition ladder: what each condition progressively removes. */
+.ladder { margin-top: 1.5rem; }
+.ladder__row {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) 1fr;
+  gap: 0.9rem;
+  align-items: center;
+  padding-block: 0.45rem;
+  border-bottom: 1px solid var(--rule);
+}
+.ladder__row:last-child { border-bottom: 0; }
+.ladder__name {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  color: var(--ink-2);
+}
+.ladder__name--off { color: var(--ink-4); }
+
+/* Waveform pair beside each player. */
+.wave { display: block; width: 100%; height: 34px; margin-top: 0.5rem; }
+.wave rect { fill: var(--ink-3); }
+.wave rect.gap { fill: var(--accent); }
+
+/* ==================================================== disclosure ========= */
+
+.detail { margin-top: 0.5rem; }
+
+.detail__toggle {
+  font: inherit;
+  font-size: var(--t-13);
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  padding: 0.15rem 0;
+  cursor: pointer;
+}
+.detail__toggle:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+.detail__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 180ms ease;
+}
+.detail__body > div { overflow: hidden; }
+.detail--open .detail__body { grid-template-rows: 1fr; }
+
+@media (prefers-reduced-motion: reduce) {
+  .detail__body { transition: none; }
+}
+
+/* ==================================================== left rail nav ====== */
+
+.nav__progress {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent-2);
+  transition: width 90ms linear;
+}
+.nav { position: sticky; }
+.nav__inner { position: relative; }
+
+.nav__pos {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--accent-2);
+  margin-left: 0.5rem;
+}
+
+.nav__links a.is-active { color: var(--ink); }
+
+.rail {
+  position: fixed;
+  top: 7rem;
+  left: max(1.25rem, calc((100vw - var(--wide)) / 2 + 0.5rem));
+  width: 11rem;
+  z-index: 10;
+}
+.rail ol { list-style: none; margin: 0; padding: 0; }
+.rail li { margin-bottom: 0.5rem; }
+.rail a {
+  display: flex;
+  gap: 0.6rem;
+  font-size: var(--t-12);
+  color: var(--ink-3);
+  text-decoration: none;
+  line-height: 1.3;
+  transition: color 120ms ease;
+}
+.rail a:hover { color: var(--ink-2); }
+.rail .rail__no { font-family: var(--font-mono); color: var(--ink-4); }
+.rail a.is-active { color: var(--ink); }
+.rail a.is-active .rail__no { color: var(--accent-2); }
+
+/* The rail only exists where there is room for it beside the content. */
+@media (max-width: 78rem) { .rail { display: none; } }
+@media (min-width: 78rem) {
+  .nav__links { display: none; }
+  .section > .wrap, .result > .wrap, .masthead > .wrap, .footer > .wrap,
+  .banner-wrap > .wrap { padding-left: 13.5rem; }
+}
+
+/* Listen cards get the same faint tint as the result block: they are the other
+ * thing on the page that is not prose. */
+.cond--card {
+  background: var(--accent-wash);
+  padding: 0.9rem 1rem 1.1rem;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.banner-wrap { padding-top: 1.5rem; }

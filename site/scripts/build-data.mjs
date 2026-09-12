@@ -123,7 +123,13 @@ function loadContent() {
   const out = {};
   if (!existsSync(PATHS.content)) return out;
   for (const f of readdirSync(PATHS.content).filter((n) => n.endsWith(".md"))) {
-    out[basename(f, ".md")] = readFileSync(join(PATHS.content, f), "utf8");
+    const raw = readFileSync(join(PATHS.content, f), "utf8");
+    // An optional leading "SUMMARY: ..." line is lifted out, so a section can
+    // lead with one sentence in larger type and keep the argument skimmable.
+    const m = /^SUMMARY:\s*(.+?)\n/.exec(raw);
+    out[basename(f, ".md")] = m
+      ? { summary: m[1].trim(), body: raw.slice(m[0].length).trim() }
+      : { summary: null, body: raw.trim() };
   }
   console.log(`  content: ${Object.keys(out).length} markdown file(s)`);
   return out;
@@ -308,6 +314,49 @@ function pickListenSet(rows, limit) {
 
 const sha8 = (buf) => createHash("sha256").update(buf).digest("hex").slice(0, 8);
 
+/** Peak amplitude envelope of a 16-bit PCM wav, as `buckets` integers 0-100.
+ *
+ *  Computed here rather than in the browser: decoding audio client-side to draw
+ *  a picture would mean downloading and decoding every clip before the page
+ *  could render one, for a visual that never changes. A hundred-odd small
+ *  integers per clip costs nothing in the bundle.
+ */
+function waveformPeaks(buf, buckets = 120) {
+  // Walk the RIFF chunk list rather than assuming a 44-byte header: ffmpeg
+  // writes a LIST chunk ahead of data unless -bitexact is set.
+  let offset = 12;
+  let dataStart = -1, dataLen = 0, channels = 1, bits = 16;
+  while (offset + 8 <= buf.length) {
+    const id = buf.toString("ascii", offset, offset + 4);
+    const size = buf.readUInt32LE(offset + 4);
+    if (id === "fmt ") {
+      channels = buf.readUInt16LE(offset + 10);
+      bits = buf.readUInt16LE(offset + 22);
+    } else if (id === "data") {
+      dataStart = offset + 8;
+      dataLen = Math.min(size, buf.length - dataStart);
+      break;
+    }
+    offset += 8 + size + (size % 2);
+  }
+  if (dataStart < 0 || bits !== 16) return null;
+
+  const samples = Math.floor(dataLen / 2 / channels);
+  if (samples <= 0) return null;
+  const per = Math.max(1, Math.floor(samples / buckets));
+  const out = [];
+  for (let b = 0; b < buckets; b++) {
+    let peak = 0;
+    const from = b * per;
+    for (let i = from; i < Math.min(from + per, samples); i++) {
+      const v = Math.abs(buf.readInt16LE(dataStart + i * channels * 2));
+      if (v > peak) peak = v;
+    }
+    out.push(Math.round((peak / 32768) * 100));
+  }
+  return out;
+}
+
 /** Did this hypothesis render the entity as digits or as number words?
  *
  *  Derived, never asserted: the gold normalized value already holds the digit
@@ -462,6 +511,7 @@ function build() {
       .map(([condition, rs]) => {
         let audio = null;
         let sizeBytes = null;
+        let peaks = null;
         const src = rs.find((r) => r.audio_path)?.audio_path;
         if (src) {
           const abs = join(REPO, src);
@@ -479,6 +529,7 @@ function build() {
             keep.add(name);
             audio = `audio/${name}`;
             sizeBytes = data.length;
+            peaks = waveformPeaks(data);
           } else {
             // Source gone, but this checkout may already carry the committed
             // bundle. The hash in the name cannot be recomputed without the
@@ -488,7 +539,9 @@ function build() {
             if (already) {
               keep.add(already);
               audio = `audio/${already}`;
-              sizeBytes = statSync(join(PATHS.outAudio, already)).size;
+              const abs2 = join(PATHS.outAudio, already);
+              sizeBytes = statSync(abs2).size;
+              peaks = waveformPeaks(readFileSync(abs2));
               reused++;
             } else {
               missingAudio.push(src);
@@ -499,6 +552,7 @@ function build() {
           condition,
           audio,
           sizeBytes,
+          peaks,
           durationS: conditions.find((c) => c.name === condition)?.durationS ?? null,
           results: rs.map((r) => ({
             model: r.asr_model ?? "-",
@@ -664,6 +718,24 @@ function build() {
       tools: Object.values(commandsByCondition)[0]?.tools ?? {},
     },
     content,
+    // The headline pair. Both describe the same audio and disagree completely;
+    // that disagreement is the argument, so it is derived here and never typed.
+    headline: (() => {
+      const werValues = werAggregate(rows).map((w) => w.wer);
+      return {
+        hits: totalHits,
+        entities: totalEntities,
+        hitRate: totalEntities ? totalHits / totalEntities : null,
+        werMin: werValues.length ? Math.min(...werValues) : null,
+        werMax: werValues.length ? Math.max(...werValues) : null,
+        conditions: conditionsInResults.length,
+        declaredConditions: cfg.conditions.length,
+        models: models.length,
+        modes,
+        languages: [...new Set(rows.map((r) => r.language))].sort(),
+        utterances: new Set(rows.map((r) => r.utterance_id)).size,
+      };
+    })(),
     audioBundle: { files: copied, bytes },
   };
 

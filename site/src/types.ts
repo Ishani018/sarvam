@@ -90,7 +90,13 @@ export interface GintiData {
   };
   listen: ListenEntry[];
   method: Record<string, unknown>;
-  content: Record<string, string>;
+  content: Record<string, { summary: string | null; body: string }>;
+  headline: {
+    hits: number; entities: number; hitRate: number | null;
+    werMin: number | null; werMax: number | null;
+    conditions: number; declaredConditions: number; models: number;
+    modes: string[]; languages: string[]; utterances: number;
+  };
   audioBundle: { files: number; bytes: number };
 }
 
@@ -127,6 +133,7 @@ export interface ListenCondition {
   condition: string;
   audio: string | null;
   sizeBytes: number | null;
+  peaks: number[] | null;
   durationS: number | null;
   results: ListenResult[];
 }
