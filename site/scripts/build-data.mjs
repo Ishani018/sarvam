@@ -132,6 +132,28 @@ function loadContent() {
 /** The recorded argv for each condition, lifted from one manifest that used it.
  *  This is what actually ran -- not a restatement of the config. */
 function loadCommandsByCondition(rows) {
+  // Manifests live in .tee/work/, which is scratch and exists only on the
+  // machine that ran the harness. On any other checkout the previously emitted
+  // data.json is the record, so carry its commands forward rather than
+  // silently emitting a section that claims nothing was run.
+  let previous = {};
+  if (existsSync(PATHS.outData)) {
+    try {
+      const old = JSON.parse(readFileSync(PATHS.outData, "utf8"));
+      for (const c of old.conditions ?? []) {
+        if (c.commands?.length) {
+          previous[c.name] = {
+            commands: c.commands.map((cmd) => ({
+              ...cmd, argv: (cmd.argv ?? []).map(shortenTempPath),
+            })),
+            tools: c.tools ?? {},
+            seed: c.seed ?? null, durationS: c.durationS ?? null,
+          };
+        }
+      }
+    } catch { /* a malformed previous build is simply not reused */ }
+  }
+
   const out = {};
   for (const r of rows) {
     if (!r.audio_path || out[r.condition]) continue;
@@ -141,7 +163,7 @@ function loadCommandsByCondition(rows) {
       const m = JSON.parse(readFileSync(manifest, "utf8"));
       out[r.condition] = {
         commands: (m.commands ?? []).map((c) => ({
-          argv: c.argv,
+          argv: (c.argv ?? []).map(shortenTempPath),
           note: c.note,
           // Frame gating is done in Python, not shelled out; the page should
           // not present it as an ffmpeg invocation.
@@ -155,7 +177,31 @@ function loadCommandsByCondition(rows) {
       warn(`unreadable manifest ${manifest}: ${e.message}`);
     }
   }
+
+  let carried = 0;
+  for (const [name, rec] of Object.entries(previous)) {
+    if (!out[name]) { out[name] = rec; carried++; }
+  }
+  if (carried) {
+    console.log(`  manifests: ${carried} condition(s) carried from the previous build`);
+  }
   return out;
+}
+
+/**
+ * Replace the per-run scratch directory in a recorded argv with just the
+ * filename.
+ *
+ * The manifests record absolute paths inside a throwaway temp directory
+ * (/var/folders/... on macOS, /tmp/... on Linux). Those are noise on the page,
+ * and they publish the local filesystem layout of whoever ran the harness. The
+ * filename is the part that identifies the step; the directory is meaningless
+ * outside that one invocation, so dropping it loses nothing and the flags,
+ * codecs and rates -- the parts a reader is checking -- are untouched.
+ */
+function shortenTempPath(arg) {
+  if (typeof arg !== "string" || !arg.includes("/tee_degrade_")) return arg;
+  return arg.slice(arg.lastIndexOf("/") + 1);
 }
 
 // ---------------------------------------------------------------------------
@@ -380,12 +426,18 @@ function build() {
   }
 
   // --- listen set + audio ---------------------------------------------------
-  rmSync(PATHS.outAudio, { recursive: true, force: true });
+  // The bundle is not cleared up front. .tee/work/ is scratch and lives only on
+  // the machine that ran the harness, so on any other checkout the committed
+  // bundle IS the source. Files are kept or copied, then anything unreferenced
+  // is pruned at the end.
   mkdirSync(PATHS.outAudio, { recursive: true });
+  const existingAudio = readdirSync(PATHS.outAudio).filter((f) => f.endsWith(".wav"));
 
   const picked = pickListenSet(rows, LISTEN_LIMIT);
   const missingAudio = [];
+  const keep = new Set();
   let copied = 0;
+  let reused = 0;
   let bytes = 0;
 
   const conditionOrder = (name) => {
@@ -424,10 +476,23 @@ function build() {
               copied++;
               bytes += data.length;
             }
+            keep.add(name);
             audio = `audio/${name}`;
             sizeBytes = data.length;
           } else {
-            missingAudio.push(src);
+            // Source gone, but this checkout may already carry the committed
+            // bundle. The hash in the name cannot be recomputed without the
+            // source, so match on the (utterance, condition) prefix.
+            const prefix = `${p.id}--${condition}--`;
+            const already = existingAudio.find((f) => f.startsWith(prefix));
+            if (already) {
+              keep.add(already);
+              audio = `audio/${already}`;
+              sizeBytes = statSync(join(PATHS.outAudio, already)).size;
+              reused++;
+            } else {
+              missingAudio.push(src);
+            }
           }
         }
         return {
@@ -449,6 +514,11 @@ function build() {
               foundSurface: e.found_surface,
               hit: e.hit,
               editDistance: e.edit_distance,
+              // Digits or spelled out -- the finding, surfaced per transcript
+              // so the listen section can mark it without recomputing.
+              rendering: renderingOf(r.hypothesis, {
+                expected: e.expected, hit: e.hit,
+              }),
             })),
           })),
         };
@@ -468,13 +538,21 @@ function build() {
     };
   });
 
+  // Prune anything the page no longer references, so a shrinking listen set
+  // does not leave orphaned audio in the deployed bundle.
+  let pruned = 0;
+  for (const f of existingAudio) {
+    if (!keep.has(f)) { rmSync(join(PATHS.outAudio, f)); pruned++; }
+  }
+
   if (missingAudio.length) {
     const detail =
       `${missingAudio.length} audio file(s) referenced by results are not on disk:\n` +
       missingAudio.map((m) => `    ${m}`).join("\n") +
       `\n\n  The listen section is the centrepiece; shipping it with silent gaps` +
-      `\n  is worse than not shipping. Run this build on a machine that has` +
-      `\n  .tee/work/ and commit site/public/audio/, or re-run the harness.` +
+      `\n  is worse than not shipping. Neither .tee/work/ nor a matching file in` +
+      `\n  site/public/audio/ was found. Run this build on the machine that ran` +
+      `\n  the harness and commit site/public/audio/, or re-run the harness.` +
       `\n  To build anyway (no audio), set GINTI_ALLOW_MISSING_AUDIO=1.`;
     if (!ALLOW_MISSING_AUDIO) throw new Error(detail);
     warn(`BUILT WITHOUT AUDIO -- ${detail.split("\n")[0]}`);
@@ -593,7 +671,9 @@ function build() {
   writeFileSync(PATHS.outData, JSON.stringify(data, null, 2));
 
   const kb = (n) => `${(n / 1024).toFixed(0)} KB`;
-  console.log(`  audio: ${copied} file(s), ${kb(bytes)} into public/audio/`);
+  console.log(
+    `  audio: ${copied} copied (${kb(bytes)}), ${reused} reused from the ` +
+    `committed bundle, ${pruned} pruned`);
   console.log(`  data.json: ${kb(statSync(PATHS.outData).size)}`);
   console.log(
     `  models=${models.join(",")} modes=${modes.join(",")} ` +

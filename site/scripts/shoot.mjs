@@ -46,11 +46,13 @@ for (const [name, width, height] of [["desktop", 1440, 1000], ["narrow", 390, 84
   const pre = TAG ? `${TAG}-` : "";
   await page.screenshot({ path: join(OUT, `${pre}${name}-full.png`), fullPage: true });
 
-  const results = page.locator("#results");
-  if (await results.count()) {
-    await results.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(200);
-    await results.screenshot({ path: join(OUT, `${pre}${name}-results.png`) });
+  for (const id of ["listen", "degradation", "what", "results", "issues"]) {
+    const el = page.locator(`#${id}`);
+    if (await el.count()) {
+      await el.scrollIntoViewIfNeeded();
+      await page.waitForTimeout(150);
+      await el.screenshot({ path: join(OUT, `${pre}${name}-${id}.png`) });
+    }
   }
   await ctx.close();
 }

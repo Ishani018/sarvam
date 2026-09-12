@@ -88,8 +88,58 @@ export interface GintiData {
     pairs: number; disagreements: number; selfFlips: number;
     rewrote: number; models: number;
   };
-  listen: unknown[];
+  listen: ListenEntry[];
   method: Record<string, unknown>;
   content: Record<string, string>;
   audioBundle: { files: number; bytes: number };
+}
+
+
+export interface ListenEntity {
+  type: string;
+  surface: string;
+  normalized: string;
+  start: number | null;
+  end: number | null;
+}
+
+export interface ListenResultEntity {
+  type: string;
+  expected: string;
+  expectedSurface: string;
+  found: string | null;
+  foundSurface: string | null;
+  hit: boolean;
+  editDistance: number | null;
+  rendering?: Rendering;
+}
+
+export interface ListenResult {
+  model: string;
+  mode: string | null;
+  hypothesis: string;
+  wer: number;
+  error: string | null;
+  entities: ListenResultEntity[];
+}
+
+export interface ListenCondition {
+  condition: string;
+  audio: string | null;
+  sizeBytes: number | null;
+  durationS: number | null;
+  results: ListenResult[];
+}
+
+export interface ListenEntry {
+  utteranceId: string;
+  language: string;
+  text: string;
+  gloss: string | null;
+  templateId: string | null;
+  realization: string | null;
+  domain: string | null;
+  codeMixed: boolean;
+  entities: ListenEntity[];
+  conditions: ListenCondition[];
 }

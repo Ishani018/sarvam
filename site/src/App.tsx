@@ -1,10 +1,58 @@
 import { Gate } from "./Gate";
 import { ResultsMatrix } from "./components/ResultsMatrix";
 import { RenderingTable } from "./components/RenderingTable";
+import { ListenSection } from "./components/ListenSection";
+import { Conditions, PipelineDiagram } from "./components/Explainers";
+import { Markdown } from "./components/Markdown";
+import { MethodTable } from "./components/MethodTable";
 import raw from "./generated/data.json";
 import type { GintiData } from "./types";
 
 const data = raw as unknown as GintiData;
+
+/**
+ * Plain-language notes per condition. Keyed by name: a condition with no note
+ * renders without one, and a new condition in the config needs no code change.
+ * Everything factual about a condition -- its chain, its commands, whether it
+ * ran -- comes from the data, not from here.
+ */
+const CONDITION_NOTES: Record<string, string> = {
+  clean:
+    "The baseline. 16 kHz mono, untouched, so every other row can be read as a " +
+    "difference from this one.",
+  narrowband:
+    "Resampled to 8 kHz and nothing else. Everything above 4 kHz is discarded, " +
+    "by Nyquist. That band is where most of the energy distinguishing s from f, " +
+    "or t from k, actually lives, which is why phones sound muffled and why " +
+    "consonants become confusable before vowels do.",
+  g711_ulaw:
+    "8 kHz plus a mu-law encode and decode. Each 16-bit sample is mapped onto 8 " +
+    "bits along a logarithmic curve, because hearing is roughly logarithmic: " +
+    "quiet detail is preserved at the cost of precision in loud passages. It is " +
+    "lossy and irreversible, and it is what most VoIP and Indian telephony " +
+    "actually carries.",
+  gsm_fr:
+    "GSM full rate, the 2G mobile codec. Far more aggressive than G.711: it " +
+    "models the vocal tract rather than the waveform, so what survives is what " +
+    "the model thought speech should look like.",
+  opus_low:
+    "Opus at a low bitrate, as a VoIP or WebRTC leg under congestion would " +
+    "negotiate. Modern and efficient, but at this bitrate it is still discarding " +
+    "most of the signal.",
+  packet_loss_2:
+    "Audio travels in roughly 20 ms packets and some never arrive. Dropped " +
+    "frames are zeroed, punching holes in the speech.",
+  packet_loss_5:
+    "20 ms is about the length of one short Hindi syllable, which makes this the " +
+    "condition most likely to remove a digit outright rather than blur it.",
+  packet_loss_10:
+    "At this rate the holes start to overlap the same word. Note that loss here " +
+    "is independent per frame, not bursty; see the limitations below.",
+  noisy_line:
+    "Additive background noise at a set signal-to-noise ratio, applied before " +
+    "the codec. That order is the physical one: a noisy room first, then the " +
+    "phone line compresses the room and the speech together.",
+};
 
 /** Sections are numbered like a paper; the nav is the table of contents. */
 const SECTIONS = [
@@ -33,12 +81,6 @@ function Section({ id, no, title, intro, children }: {
       </div>
     </section>
   );
-}
-
-/** Placeholder for sections not yet built, so the page rhythm and nav are real
- *  while the remaining steps land. */
-function Pending({ what }: { what: string }) {
-  return <p className="t-dim prose" style={{ fontSize: "var(--t-15)" }}>{what}</p>;
 }
 
 function Masthead() {
@@ -148,7 +190,7 @@ export function App() {
           failed transaction, not a typo.
         </p>
       }>
-        <Pending what="Section prose lands with the content pass." />
+        <Markdown source={data.content.problem} />
       </Section>
 
       <Section id="what" no="02" title="What Ginti does" intro={
@@ -159,7 +201,8 @@ export function App() {
           fallible annotations.
         </p>
       }>
-        <Pending what="Pipeline diagram lands in the explainer pass." />
+        <PipelineDiagram />
+        <Markdown source={data.content["what-ginti-does"]} />
       </Section>
 
       <Section id="degradation" no="03" title="How the degradation works" intro={
@@ -169,7 +212,10 @@ export function App() {
           actually executed rather than a restatement of the config.
         </p>
       }>
-        <Pending what="Per-condition explainers land in the explainer pass." />
+        <Markdown source={data.content.degradation} />
+        <Conditions conditions={data.conditions} notes={CONDITION_NOTES} />
+        <h3 className="subhead">What this model of the phone line leaves out</h3>
+        <Markdown source={data.content["degradation-limits"]} />
       </Section>
 
       <Section id="listen" no="04" title="Listen for yourself" intro={
@@ -178,7 +224,7 @@ export function App() {
           underneath.
         </p>
       }>
-        <Pending what="Audio player and listen section land next." />
+        <ListenSection listen={data.listen} conditions={data.conditions} />
       </Section>
 
       <Section id="results" no="05" title="Results" intro={
@@ -253,11 +299,13 @@ export function App() {
           be regenerated from a language, a count and a seed.
         </p>
       }>
-        <Pending what="Run metadata and exact API parameters land with the content pass." />
+        <Markdown source={data.content.method} />
+        <h3 className="subhead">Exact parameters</h3>
+        <MethodTable data={data} />
       </Section>
 
       <Section id="issues" no="07" title="Known issues">
-        <Pending what="Pulled from content/known-issues.md in the content pass." />
+        <Markdown source={data.content["known-issues"]} />
       </Section>
 
       <footer className="footer">

@@ -466,3 +466,259 @@ td.cell-td { padding-left: 0.9rem; }
   .rowhead { padding-right: 0.9rem; }
   th, td { padding-right: 0.65rem; }
 }
+
+/* ======================================================== listen section == */
+
+.utt {
+  padding-block: 2.25rem;
+  border-top: 1px solid var(--rule);
+}
+.utt:first-child { border-top: 0; padding-top: 0; }
+
+.utt__head { max-width: 46rem; margin-bottom: 1.5rem; }
+
+.utt__id {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-4);
+  margin-bottom: 0.7rem;
+}
+
+.utt__text {
+  font-size: var(--t-21);
+  line-height: 1.55;
+  margin: 0 0 0.5rem;
+}
+
+.utt__gloss {
+  font-size: var(--t-15);
+  color: var(--ink-2);
+  margin: 0 0 1rem;
+}
+
+/* The entity, marked in place. Underline rather than highlight: a filled
+ * background at this density would fight the tables for attention. */
+.ent {
+  background: none;
+  color: inherit;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.05em;
+}
+
+.utt__gold { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; margin: 0; }
+.utt__gold div { display: flex; align-items: baseline; gap: 0.55rem; }
+.utt__gold dt {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-3);
+}
+.utt__gold dd { margin: 0; font-size: var(--t-13); }
+
+/* Conditions side by side so the same sentence can be heard clean then
+ * degraded without scrolling between them. */
+.utt__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: 1.75rem;
+}
+
+.cond { min-width: 0; }
+
+/* ---------------------------------------------------------------- player -- */
+
+.player { border-top: 1px solid var(--rule-strong); padding-top: 0.6rem; }
+.player--empty { opacity: 0.55; }
+
+.player__row { display: flex; align-items: center; gap: 0.6rem; }
+
+.player__btn {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+}
+.player__btn:hover { background: var(--ink); color: var(--paper); }
+.player--on .player__btn { background: var(--ink); color: var(--paper); }
+
+.player__label {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  letter-spacing: 0.01em;
+}
+.player__time {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+.player__track {
+  height: 2px;
+  background: var(--rule);
+  margin-top: 0.55rem;
+  cursor: pointer;
+  position: relative;
+}
+/* Widen the hit area without thickening the line. */
+.player__track::after {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+.player__fill { height: 100%; background: var(--ink); width: 0; }
+
+.player__hint {
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  margin: 0.5rem 0 0;
+  line-height: 1.45;
+}
+.player__missing {
+  font-size: var(--t-11);
+  color: var(--ink-4);
+  font-style: italic;
+  margin: 0.5rem 0 0;
+}
+
+/* ------------------------------------------------------------ hypothesis -- */
+
+.hyp { margin-top: 1.1rem; padding-top: 0.85rem; border-top: 1px solid var(--rule); }
+
+.hyp__head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
+.hyp__model { font-size: var(--t-11); color: var(--ink-3); margin-right: 0.2rem; }
+
+.hyp__text { font-size: var(--t-15); line-height: 1.6; margin: 0.5rem 0 0; }
+
+.hyp__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-top: 0.5rem;
+  font-size: var(--t-11);
+  color: var(--ink-3);
+}
+.hyp__got { font-size: var(--t-11); }
+.hyp__err { color: var(--accent-ink); }
+
+/* Digits vs number words: the finding, marked on every transcript. */
+.rend {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  padding: 0.02rem 0.3rem;
+  border: 1px dashed var(--rule-strong);
+  color: var(--ink-2);
+}
+.rend--digits { border-style: solid; }
+
+.tag--pending { border-style: dashed; color: var(--ink-4); }
+
+/* ======================================================== explainers ===== */
+
+.diagram {
+  margin: 0 0 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.diagram svg { min-width: 44rem; display: block; }
+
+.dg-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--ink);
+}
+.dg-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink-3);
+}
+.dg-gold {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  fill: var(--accent-ink);
+}
+.dg-note {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--ink-3);
+}
+
+.conds { margin-top: 2.25rem; }
+
+.condblock { padding-block: 1.75rem; border-top: 1px solid var(--rule); }
+
+.condblock__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+.condblock__name { font-size: var(--t-15); font-weight: 600; }
+
+.condblock__desc,
+.condblock__note {
+  max-width: var(--measure);
+  font-size: var(--t-15);
+  color: var(--ink-2);
+  margin: 0 0 0.75rem;
+}
+.condblock__desc { color: var(--ink); }
+.condblock__nocmd {
+  font-size: var(--t-12);
+  color: var(--ink-4);
+  font-style: italic;
+  margin: 0;
+}
+
+.condblock__chain { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.9rem; }
+
+.chip {
+  font-size: var(--t-11);
+  padding: 0.1rem 0.4rem;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.cmd {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  line-height: 1.65;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+}
+.cmd code { font-size: inherit; display: block; }
+.cmd__note { color: var(--ink-3); }
+.cmd--py { color: var(--ink-2); }
+
+/* ======================================================== markdown ======= */
+
+.md-list { max-width: var(--measure); padding-left: 1.1rem; margin: 0 0 1em; }
+.md-list li { margin-bottom: 0.5em; }
+.md-h4 { font-size: var(--t-17); margin: 1.75rem 0 0.5rem; }
+.prose code {
+  font-size: 0.92em;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 0.03em 0.28em;
+}
+
+@media (max-width: 46rem) {
+  .utt__grid { gap: 2rem; }
+  .utt__text { font-size: var(--t-17); }
+}
