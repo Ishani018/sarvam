@@ -14,7 +14,7 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.scripts]
-tee = "tee.cli:app"
+tee = "tee.cli:main"
 
 [build-system]
 requires = ["hatchling"]
