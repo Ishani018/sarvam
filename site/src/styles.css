@@ -791,6 +791,20 @@ td.cell-td { padding-left: 0.9rem; }
   color: var(--ink);
 }
 .result__v--teal { color: var(--accent-2); }
+
+/* Two figures in one cell. Kept on one line where there is room and broken
+ * cleanly where there is not, so "vs" never strands at the end of a line. */
+.result__v--pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2em 0.45em;
+}
+.result__vs {
+  font-family: var(--font-sans);
+  font-size: var(--t-17);
+  color: var(--ink-3);
+}
 .result__v--rust { color: var(--accent); }
 
 .result__sub {

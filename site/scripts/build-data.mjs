@@ -89,10 +89,42 @@ function loadRows() {
     );
     console.log(`  results: ${real.length} rows from ${files.length} file(s) ` +
                 `(${all.length - real.length} mock rows excluded)`);
-    return real;
+    return dedupe(real);
   }
   console.log(`  results: ${all.length} rows from ${files.length} file(s)`);
-  return all;
+  return dedupe(all);
+}
+
+/**
+ * Keep one row per (utterance, condition, model, mode), preferring the newest
+ * run.
+ *
+ * The corpus is prefix-stable by design, so a 5-utterance smoke run and a
+ * 40-utterance run share their first five utterances verbatim. Globbing
+ * results/ and summing therefore counted those five twice under every shared
+ * condition -- 456 entities became 476, and the duplicated rows also dragged
+ * the per-pair means around. Run ids are UTC timestamps, so the lexicographic
+ * maximum is the most recent measurement of that cell.
+ */
+function dedupe(rows) {
+  const best = new Map();
+  for (const r of rows) {
+    const key = [r.utterance_id, r.condition, r.asr_model ?? "-",
+                 r.asr_mode ?? "-"].join("\u001f");
+    const prev = best.get(key);
+    if (!prev || String(r.run_id) > String(prev.run_id)) best.set(key, r);
+  }
+  const kept = [...best.values()];
+  if (kept.length !== rows.length) {
+    const dropped = rows.length - kept.length;
+    warn(
+      `dropped ${dropped} duplicate row(s): the same (utterance, condition, ` +
+      `model, mode) measured in more than one run. The newest run wins. ` +
+      `Counting both would weight the overlapping utterances twice.`
+    );
+    console.log(`  deduped: ${rows.length} -> ${kept.length} rows`);
+  }
+  return kept;
 }
 
 function loadUtterances() {
@@ -721,13 +753,38 @@ function build() {
     // The headline pair. Both describe the same audio and disagree completely;
     // that disagreement is the argument, so it is derived here and never typed.
     headline: (() => {
-      const werValues = werAggregate(rows).map((w) => w.wer);
+      // WER is reported per model, pooled over conditions, because that is
+      // where the variance actually is: across conditions it moves by about
+      // 0.015, and between models by about 0.25 on identical audio. A range
+      // over model-condition pairs blends the two and implies the phone line
+      // is doing something it is not.
+      const byModel = new Map();
+      for (const r of rows) {
+        const k = r.asr_model ?? "-";
+        if (!byModel.has(k)) byModel.set(k, []);
+        byModel.get(k).push(r.wer);
+      }
+      const werByModel = [...byModel.entries()]
+        .map(([model, v]) => ({ model, wer: v.reduce((a, b) => a + b, 0) / v.length,
+                                n: v.length }))
+        .sort((a, b) => a.wer - b.wer);
+
+      const byCondition = new Map();
+      for (const r of rows) {
+        const k = r.condition;
+        if (!byCondition.has(k)) byCondition.set(k, []);
+        byCondition.get(k).push(r.wer);
+      }
+      const werByCondition = [...byCondition.values()]
+        .map((v) => v.reduce((a, b) => a + b, 0) / v.length);
+
       return {
         hits: totalHits,
         entities: totalEntities,
         hitRate: totalEntities ? totalHits / totalEntities : null,
-        werMin: werValues.length ? Math.min(...werValues) : null,
-        werMax: werValues.length ? Math.max(...werValues) : null,
+        werByModel,
+        werConditionMin: werByCondition.length ? Math.min(...werByCondition) : null,
+        werConditionMax: werByCondition.length ? Math.max(...werByCondition) : null,
         conditions: conditionsInResults.length,
         declaredConditions: cfg.conditions.length,
         models: models.length,

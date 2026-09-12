@@ -93,7 +93,8 @@ export interface GintiData {
   content: Record<string, { summary: string | null; body: string }>;
   headline: {
     hits: number; entities: number; hitRate: number | null;
-    werMin: number | null; werMax: number | null;
+    werByModel: Array<{ model: string; wer: number; n: number }>;
+    werConditionMin: number | null; werConditionMax: number | null;
     conditions: number; declaredConditions: number; models: number;
     modes: string[]; languages: string[]; utterances: number;
   };

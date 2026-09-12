@@ -153,9 +153,10 @@ export function App() {
 
       <Section id="results" no="05" title="Results"
                summary={
-                 `Word error rate moves between ${h.werMin?.toFixed(3)} and ` +
-                 `${h.werMax?.toFixed(3)} across these conditions while the ` +
-                 `entity hit rate does not move at all.`
+                 `Across the telephony conditions word error rate moves only ` +
+                 `${h.werConditionMin?.toFixed(3)}\u2013${h.werConditionMax?.toFixed(3)} ` +
+                 `and the entity hit rate not at all. The large gap is between ` +
+                 `the two models on identical audio.`
                }>
         <DisagreementChart
           matrix={data.matrix} wer={data.wer} conditions={data.conditions}

@@ -32,13 +32,17 @@ export function DisagreementChart({
     const total = cells.reduce((a, c) => a + c.total, 0);
     return { name: n, value: total ? hits / total : null, hits, total };
   });
-  const werAt = names.map((n) => {
-    const rows = wer.filter((w) => w.condition === n);
-    const value = rows.length
-      ? rows.reduce((a, w) => a + w.wer, 0) / rows.length
-      : null;
-    return { name: n, value };
-  });
+  // One WER line per model rather than a pooled average: pooling hides that
+  // the two models sit a quarter apart on identical audio, which is the larger
+  // effect by an order of magnitude.
+  const models = [...new Set(wer.map((w) => w.model))].sort();
+  const werByModel = models.map((m) => ({
+    model: m,
+    points: names.map((n) => ({
+      name: n,
+      value: wer.find((w) => w.model === m && w.condition === n)?.wer ?? null,
+    })),
+  }));
 
   const W = 640;
   const H = compact ? 170 : 220;
@@ -64,9 +68,11 @@ export function DisagreementChart({
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
            aria-label={
              `Entity hit rate stays flat at ${(hitAt[0].value ?? 0).toFixed(2)} ` +
-             `across ${names.length} conditions while mean word error rate sits ` +
-             `between ${Math.min(...werAt.map((w) => w.value ?? 1)).toFixed(2)} and ` +
-             `${Math.max(...werAt.map((w) => w.value ?? 0)).toFixed(2)} on the same audio.`
+             `across ${names.length} telephony conditions. Word error rate is ` +
+             `also flat across conditions but separates by model: ` +
+             werByModel.map((m) =>
+               `${m.model} near ${(m.points[0].value ?? 0).toFixed(2)}`).join(", ") +
+             `, on the same audio.`
            }>
         {[0, 0.25, 0.5, 0.75, 1].map((g) => (
           <g key={g}>
@@ -79,14 +85,27 @@ export function DisagreementChart({
         <line className="ch-axis" x1={padL} x2={W - padR} y1={y(0)} y2={y(0)} />
 
         <path className="ch-series-a" d={path(hitAt)} />
-        <path className="ch-series-b" d={path(werAt)} />
+        {werByModel.map((m, mi) => (
+          <path key={m.model} className="ch-series-b" d={path(m.points)}
+                strokeDasharray={mi === 0 ? undefined : "5 3"} />
+        ))}
 
         {hitAt.map((p, i) => p.value === null ? null : (
           <circle key={`a${i}`} className="ch-dot-a" cx={x(i)} cy={y(p.value)} r="3.5" />
         ))}
-        {werAt.map((p, i) => p.value === null ? null : (
-          <circle key={`b${i}`} className="ch-dot-b" cx={x(i)} cy={y(p.value)} r="3.5" />
-        ))}
+        {werByModel.flatMap((m, mi) => m.points.map((p, i) => p.value === null ? null : (
+          <circle key={`b${mi}-${i}`} className="ch-dot-b"
+                  cx={x(i)} cy={y(p.value)} r="3.5" />
+        )))}
+
+        {werByModel.map((m) => {
+          const last = m.points[m.points.length - 1];
+          return last.value === null ? null : (
+            <text key={`l${m.model}`} className="ch-value"
+                  x={x(names.length - 1) + 7} y={y(last.value) + 3}
+                  fill="var(--accent)">{m.model.replace("saaras:", "")}</text>
+          );
+        })}
 
         {names.map((n, i) => (
           <text key={n} className="ch-label" x={x(i)} y={H - 12} textAnchor="middle">
@@ -98,17 +117,18 @@ export function DisagreementChart({
       <div className="chart__legend">
         <span>
           <span className="chart__swatch chart__swatch--a" />
-          entity hit rate &mdash; did the number survive
+          entity hit rate, pooled over models
         </span>
         <span>
           <span className="chart__swatch chart__swatch--b" />
-          mean word error rate &mdash; averaged over models
+          word error rate, one line per model
         </span>
       </div>
       <figcaption className="result__scope">
-        Both are rates on the same recordings. They are not comparable in
-        magnitude, and that is the point: one is unmoved by the phone line and
-        the other never approaches it.
+        Both are rates over the same recordings, and neither line is moved much
+        by the phone line. The gap that does exist is between the two models,
+        on byte-identical audio, and it comes from how each writes numbers
+        rather than from what either heard.
       </figcaption>
     </figure>
   );

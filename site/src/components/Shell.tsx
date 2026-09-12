@@ -17,6 +17,8 @@ import type { ConditionDef, GintiData } from "../types";
 export function ResultBlock({ data }: { data: GintiData }) {
   const h = data.headline;
   const pct = (v: number | null) => (v === null ? "—" : v.toFixed(3));
+  const worst = h.werByModel[h.werByModel.length - 1];
+  const best = h.werByModel[0];
 
   return (
     <section className="result" aria-labelledby="result-heading">
@@ -34,20 +36,31 @@ export function ResultBlock({ data }: { data: GintiData }) {
             </div>
           </div>
           <div>
-            <div className="result__k">word error rate</div>
-            <div className="result__v result__v--rust">
-              {pct(h.werMin)} &ndash; {pct(h.werMax)}
+            {/* Sliced per model, not per condition. Across conditions WER moves
+                by about 0.015; between models it moves by ten times that on
+                byte-identical audio. A range spanning both would imply the
+                phone line is doing something it is not. */}
+            <div className="result__k">word error rate, per model</div>
+            <div className="result__v result__v--rust result__v--pair">
+              <span>{pct(best?.wer ?? null)}</span>
+              <span className="result__vs">vs</span>
+              <span>{pct(worst?.wer ?? null)}</span>
             </div>
-            <div className="result__sub">the same audio, the same run</div>
+            <div className="result__sub">
+              {best?.model} against {worst?.model}, identical audio
+            </div>
           </div>
         </div>
 
         <p className="result__says">
           Both numbers describe the same {h.entities} entities in the same
-          recordings, and they disagree completely. Nothing the phone line did
-          moved the entity hit rate; the word error rate never came near it.
-          One of these metrics is answering the question a voice agent actually
-          asks.
+          recordings. Every entity survived every condition, and the two models
+          still differ by{" "}
+          {((worst?.wer ?? 0) - (best?.wer ?? 0)).toFixed(3)} in word error rate
+          &mdash; not because one heard the audio better, but because they write
+          numbers differently. Across the telephony conditions themselves word
+          error rate moves only{" "}
+          {pct(h.werConditionMin)}&ndash;{pct(h.werConditionMax)}.
         </p>
 
         <p className="result__scope">

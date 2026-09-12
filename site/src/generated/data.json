@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-12T18:13:23.457Z",
+  "generatedAt": "2026-09-12T18:23:03.527Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
@@ -12,6 +12,7 @@
     ],
     "warnings": [
       "excluded 120 mock row(s) from mock-calib.jsonl: real results are present and the two cannot be mixed",
+      "dropped 20 duplicate row(s): the same (utterance, condition, model, mode) measured in more than one run. The newest run wins. Counting both would weight the overlapping utterances twice.",
       "declared but absent from results: gsm_fr, opus_low, packet_loss_2, packet_loss_10, noisy_line"
     ],
     "sourceFiles": {
@@ -28,31 +29,6 @@
     }
   },
   "runs": [
-    {
-      "runId": "run-20260912T112926Z",
-      "source": "run-20260912T112926Z.jsonl",
-      "asrImpls": [
-        "sarvam"
-      ],
-      "models": [
-        "saaras:v3",
-        "saaras:v4"
-      ],
-      "modes": [
-        "transcribe"
-      ],
-      "languages": [
-        "hi-IN"
-      ],
-      "conditions": [
-        "clean",
-        "g711_ulaw"
-      ],
-      "nUtterances": 5,
-      "nRows": 20,
-      "nEntities": 20,
-      "nErrors": 0
-    },
     {
       "runId": "run-20260912T174319Z",
       "source": "run-20260912T174319Z.jsonl",
@@ -71,8 +47,8 @@
       ],
       "conditions": [
         "clean",
-        "narrowband",
         "g711_ulaw",
+        "narrowband",
         "packet_loss_5"
       ],
       "nUtterances": 40,
@@ -600,9 +576,9 @@
   ],
   "summary": {
     "utterances": 40,
-    "rows": 340,
-    "entities": 476,
-    "hits": 476,
+    "rows": 320,
+    "entities": 456,
+    "hits": 456,
     "hitRate": 1,
     "conditions": 4,
     "models": 2
@@ -612,8 +588,8 @@
       "model": "saaras:v3",
       "condition": "clean",
       "entityType": "otp",
-      "hits": 14,
-      "total": 14,
+      "hits": 12,
+      "total": 12,
       "rate": 1,
       "lowN": false
     },
@@ -621,8 +597,8 @@
       "model": "saaras:v4",
       "condition": "clean",
       "entityType": "otp",
-      "hits": 14,
-      "total": 14,
+      "hits": 12,
+      "total": 12,
       "rate": 1,
       "lowN": false
     },
@@ -630,8 +606,8 @@
       "model": "saaras:v3",
       "condition": "g711_ulaw",
       "entityType": "otp",
-      "hits": 14,
-      "total": 14,
+      "hits": 12,
+      "total": 12,
       "rate": 1,
       "lowN": false
     },
@@ -639,6 +615,42 @@
       "model": "saaras:v4",
       "condition": "g711_ulaw",
       "entityType": "otp",
+      "hits": 12,
+      "total": 12,
+      "rate": 1,
+      "lowN": false
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "clean",
+      "entityType": "account_number",
+      "hits": 14,
+      "total": 14,
+      "rate": 1,
+      "lowN": false
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "clean",
+      "entityType": "account_number",
+      "hits": 14,
+      "total": 14,
+      "rate": 1,
+      "lowN": false
+    },
+    {
+      "model": "saaras:v3",
+      "condition": "g711_ulaw",
+      "entityType": "account_number",
+      "hits": 14,
+      "total": 14,
+      "rate": 1,
+      "lowN": false
+    },
+    {
+      "model": "saaras:v4",
+      "condition": "g711_ulaw",
+      "entityType": "account_number",
       "hits": 14,
       "total": 14,
       "rate": 1,
@@ -647,45 +659,9 @@
     {
       "model": "saaras:v3",
       "condition": "clean",
-      "entityType": "account_number",
-      "hits": 15,
-      "total": 15,
-      "rate": 1,
-      "lowN": false
-    },
-    {
-      "model": "saaras:v4",
-      "condition": "clean",
-      "entityType": "account_number",
-      "hits": 15,
-      "total": 15,
-      "rate": 1,
-      "lowN": false
-    },
-    {
-      "model": "saaras:v3",
-      "condition": "g711_ulaw",
-      "entityType": "account_number",
-      "hits": 15,
-      "total": 15,
-      "rate": 1,
-      "lowN": false
-    },
-    {
-      "model": "saaras:v4",
-      "condition": "g711_ulaw",
-      "entityType": "account_number",
-      "hits": 15,
-      "total": 15,
-      "rate": 1,
-      "lowN": false
-    },
-    {
-      "model": "saaras:v3",
-      "condition": "clean",
       "entityType": "pin_code",
-      "hits": 7,
-      "total": 7,
+      "hits": 6,
+      "total": 6,
       "rate": 1,
       "lowN": true
     },
@@ -693,8 +669,8 @@
       "model": "saaras:v4",
       "condition": "clean",
       "entityType": "pin_code",
-      "hits": 7,
-      "total": 7,
+      "hits": 6,
+      "total": 6,
       "rate": 1,
       "lowN": true
     },
@@ -702,8 +678,8 @@
       "model": "saaras:v3",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
-      "hits": 7,
-      "total": 7,
+      "hits": 6,
+      "total": 6,
       "rate": 1,
       "lowN": true
     },
@@ -711,8 +687,8 @@
       "model": "saaras:v4",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
-      "hits": 7,
-      "total": 7,
+      "hits": 6,
+      "total": 6,
       "rate": 1,
       "lowN": true
     },
@@ -720,8 +696,8 @@
       "model": "saaras:v3",
       "condition": "clean",
       "entityType": "currency",
-      "hits": 23,
-      "total": 23,
+      "hits": 22,
+      "total": 22,
       "rate": 1,
       "lowN": false
     },
@@ -729,8 +705,8 @@
       "model": "saaras:v4",
       "condition": "clean",
       "entityType": "currency",
-      "hits": 23,
-      "total": 23,
+      "hits": 22,
+      "total": 22,
       "rate": 1,
       "lowN": false
     },
@@ -738,8 +714,8 @@
       "model": "saaras:v3",
       "condition": "g711_ulaw",
       "entityType": "currency",
-      "hits": 23,
-      "total": 23,
+      "hits": 22,
+      "total": 22,
       "rate": 1,
       "lowN": false
     },
@@ -747,8 +723,8 @@
       "model": "saaras:v4",
       "condition": "g711_ulaw",
       "entityType": "currency",
-      "hits": 23,
-      "total": 23,
+      "hits": 22,
+      "total": 22,
       "rate": 1,
       "lowN": false
     },
@@ -974,26 +950,26 @@
     {
       "model": "saaras:v3",
       "condition": "clean",
-      "wer": 0.7029403452157077,
-      "n": 45
+      "wer": 0.6763336820184647,
+      "n": 40
     },
     {
       "model": "saaras:v4",
       "condition": "clean",
-      "wer": 0.4321676235734206,
-      "n": 45
+      "wer": 0.45415484636136805,
+      "n": 40
     },
     {
       "model": "saaras:v3",
       "condition": "g711_ulaw",
-      "wer": 0.7494711292464916,
-      "n": 45
+      "wer": 0.7111212902435728,
+      "n": 40
     },
     {
       "model": "saaras:v4",
       "condition": "g711_ulaw",
-      "wer": 0.4238757364482002,
-      "n": 45
+      "wer": 0.4448264733454951,
+      "n": 40
     },
     {
       "model": "saaras:v3",
@@ -1038,22 +1014,6 @@
           "hypothesis": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा ना करें।"
         },
         {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "words",
-          "hit": true,
-          "wer": 0.14285714285714285,
-          "hypothesis": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा ना करें।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.42857142857142855,
-          "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।"
-        },
-        {
           "model": "saaras:v4",
           "mode": "transcribe",
           "rendering": "digits",
@@ -1073,22 +1033,6 @@
       "models": [
         {
           "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.42857142857142855,
-          "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।"
-        },
-        {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.42857142857142855,
-          "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।"
-        },
-        {
-          "model": "saaras:v4",
           "mode": "transcribe",
           "rendering": "digits",
           "hit": true,
@@ -1174,22 +1118,6 @@
           "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।"
         },
         {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.375,
-          "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.125,
-          "hypothesis": "लॉगिन करने के लिए 5584 कोड दर्ज करें।"
-        },
-        {
           "model": "saaras:v4",
           "mode": "transcribe",
           "rendering": "digits",
@@ -1214,22 +1142,6 @@
           "hit": true,
           "wer": 0.375,
           "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।"
-        },
-        {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.375,
-          "hypothesis": "लॉग इन करने के लिए 5584 कोड दर्ज करें।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.125,
-          "hypothesis": "लॉगिन करने के लिए 5584 कोड दर्ज करें।"
         },
         {
           "model": "saaras:v4",
@@ -1310,22 +1222,6 @@
           "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।"
         },
         {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "words",
-          "hit": true,
-          "wer": 3.2,
-          "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.2,
-          "hypothesis": "आपका खाता नंबर 762600781019989 है।"
-        },
-        {
           "model": "saaras:v4",
           "mode": "transcribe",
           "rendering": "digits",
@@ -1350,22 +1246,6 @@
           "hit": true,
           "wer": 3.2,
           "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।"
-        },
-        {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "words",
-          "hit": true,
-          "wer": 3.2,
-          "hypothesis": "आपका खाता नंबर सात छह दो छह शून्य शून्य सात आठ एक शून्य एक नौ नौ आठ नौ है।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.2,
-          "hypothesis": "आपका खाता नंबर 762600781019989 है।"
         },
         {
           "model": "saaras:v4",
@@ -1446,22 +1326,6 @@
           "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।"
         },
         {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "words",
-          "hit": true,
-          "wer": 0.7777777777777778,
-          "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.1111111111111111,
-          "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।"
-        },
-        {
           "model": "saaras:v4",
           "mode": "transcribe",
           "rendering": "digits",
@@ -1486,22 +1350,6 @@
           "hit": true,
           "wer": 0.7777777777777778,
           "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।"
-        },
-        {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "words",
-          "hit": true,
-          "wer": 0.7777777777777778,
-          "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.1111111111111111,
-          "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।"
         },
         {
           "model": "saaras:v4",
@@ -1582,22 +1430,6 @@
           "hypothesis": "आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है।"
         },
         {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "words",
-          "hit": true,
-          "wer": 0.08333333333333333,
-          "hypothesis": "आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.4166666666666667,
-          "hypothesis": "आपके खाते में 76,74,000 रुपये की शेष राशि है।"
-        },
-        {
           "model": "saaras:v4",
           "mode": "transcribe",
           "rendering": "digits",
@@ -1622,22 +1454,6 @@
           "hit": true,
           "wer": 0.5,
           "hypothesis": "आपके खाते में 76,74,000 रुपए की शेष राशि है।"
-        },
-        {
-          "model": "saaras:v3",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.5,
-          "hypothesis": "आपके खाते में 76,74,000 रुपए की शेष राशि है।"
-        },
-        {
-          "model": "saaras:v4",
-          "mode": "transcribe",
-          "rendering": "digits",
-          "hit": true,
-          "wer": 0.4166666666666667,
-          "hypothesis": "आपके खाते में 76,74,000 रुपये की शेष राशि है।"
         },
         {
           "model": "saaras:v4",
@@ -7114,7 +6930,7 @@
     "pairs": 228,
     "disagreements": 154,
     "selfFlips": 17,
-    "rewrote": 248,
+    "rewrote": 238,
     "models": 2
   },
   "werSpread": {
@@ -8874,44 +8690,6 @@
                   "rendering": "digits"
                 }
               ]
-            },
-            {
-              "model": "saaras:v3",
-              "mode": "transcribe",
-              "hypothesis": "आपका ओटीपी दो एक आठ चार है, इसे किसी के साथ साझा ना करें।",
-              "wer": 0.14285714285714285,
-              "error": null,
-              "entities": [
-                {
-                  "type": "otp",
-                  "expected": "2184",
-                  "expectedSurface": "दो एक आठ चार",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "words"
-                }
-              ]
-            },
-            {
-              "model": "saaras:v4",
-              "mode": "transcribe",
-              "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।",
-              "wer": 0.42857142857142855,
-              "error": null,
-              "entities": [
-                {
-                  "type": "otp",
-                  "expected": "2184",
-                  "expectedSurface": "दो एक आठ चार",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "digits"
-                }
-              ]
             }
           ]
         },
@@ -9211,44 +8989,6 @@
           ],
           "durationS": 3.669375,
           "results": [
-            {
-              "model": "saaras:v3",
-              "mode": "transcribe",
-              "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।",
-              "wer": 0.42857142857142855,
-              "error": null,
-              "entities": [
-                {
-                  "type": "otp",
-                  "expected": "2184",
-                  "expectedSurface": "दो एक आठ चार",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "digits"
-                }
-              ]
-            },
-            {
-              "model": "saaras:v4",
-              "mode": "transcribe",
-              "hypothesis": "आपका ओटीपी 2184 है, इसे किसी के साथ साझा ना करें।",
-              "wer": 0.42857142857142855,
-              "error": null,
-              "entities": [
-                {
-                  "type": "otp",
-                  "expected": "2184",
-                  "expectedSurface": "दो एक आठ चार",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "digits"
-                }
-              ]
-            },
             {
               "model": "saaras:v3",
               "mode": "transcribe",
@@ -9643,44 +9383,6 @@
                   "rendering": "digits"
                 }
               ]
-            },
-            {
-              "model": "saaras:v3",
-              "mode": "transcribe",
-              "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।",
-              "wer": 0.7777777777777778,
-              "error": null,
-              "entities": [
-                {
-                  "type": "pin_code",
-                  "expected": "375022",
-                  "expectedSurface": "375022",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "words"
-                }
-              ]
-            },
-            {
-              "model": "saaras:v4",
-              "mode": "transcribe",
-              "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।",
-              "wer": 0.1111111111111111,
-              "error": null,
-              "entities": [
-                {
-                  "type": "pin_code",
-                  "expected": "375022",
-                  "expectedSurface": "375022",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "digits"
-                }
-              ]
             }
           ]
         },
@@ -9980,44 +9682,6 @@
           ],
           "durationS": 3.669375,
           "results": [
-            {
-              "model": "saaras:v3",
-              "mode": "transcribe",
-              "hypothesis": "डिलीवरी का पिन कोड तीन सात पाँच शून्य दो दो दर्ज किया गया है।",
-              "wer": 0.7777777777777778,
-              "error": null,
-              "entities": [
-                {
-                  "type": "pin_code",
-                  "expected": "375022",
-                  "expectedSurface": "375022",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "words"
-                }
-              ]
-            },
-            {
-              "model": "saaras:v4",
-              "mode": "transcribe",
-              "hypothesis": "डिलीवरी का पिन कोड 375022 दर्ज किया गया है।",
-              "wer": 0.1111111111111111,
-              "error": null,
-              "entities": [
-                {
-                  "type": "pin_code",
-                  "expected": "375022",
-                  "expectedSurface": "375022",
-                  "found": null,
-                  "foundSurface": null,
-                  "hit": true,
-                  "editDistance": 0,
-                  "rendering": "digits"
-                }
-              ]
-            },
             {
               "model": "saaras:v3",
               "mode": "transcribe",
@@ -11875,11 +11539,23 @@
     }
   },
   "headline": {
-    "hits": 476,
-    "entities": 476,
+    "hits": 456,
+    "entities": 456,
     "hitRate": 1,
-    "werMin": 0.4238757364482002,
-    "werMax": 0.7494711292464916,
+    "werByModel": [
+      {
+        "model": "saaras:v4",
+        "wer": 0.4474487451708923,
+        "n": 160
+      },
+      {
+        "model": "saaras:v3",
+        "wer": 0.700143942938101,
+        "n": 160
+      }
+    ],
+    "werConditionMin": 0.5652442641899162,
+    "werConditionMax": 0.5795454005535526,
     "conditions": 4,
     "declaredConditions": 9,
     "models": 2,
