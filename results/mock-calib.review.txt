@@ -1,0 +1,263 @@
+==============================================================================
+MANUAL REVIEW SAMPLE -- 30 of 120 rows
+(20 with at least one miss, 10 clean)
+==============================================================================
+
+Read top to bottom. The audio path is on each row so anything that
+looks wrong can be listened to directly.
+
+------------------------------------------------------------------------------
+  1. [ok] hi-IN-1337-00004  cond=g711_ulaw  lang=hi-IN  realization=words  template=hi_amount_01
+     reference   आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है
+     hypothesis  आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है
+     wer         0.000
+     [HIT ] currency         gold=INR:7674000.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00004/g711_ulaw.wav
+------------------------------------------------------------------------------
+  2. [MISS] hi-IN-1337-00020  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_acct_amount_01
+     reference   आपके खाते 6278500115396 में 15,62,00,000 रुपये जमा हुए हैं
+     hypothesis  आपके खाते 6270500115398 में 15,61330,000 रुपये जमा हुए हैं
+     wer         0.250
+     [MISS] account_number   gold=6278500115396
+                             got =6270500115398  dist=2
+     [MISS] currency         gold=INR:156200000.00
+                             got =INR:1561330000.00  dist=3
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00020/g711_ulaw.wav
+------------------------------------------------------------------------------
+  3. [MISS] hi-IN-1337-00009  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_pin_acct_01
+     reference   पिन कोड 797065 पर खाता 231305017820793 से भुगतान हुआ
+     hypothesis  पिन कोड 597065 पर खाता 231305010820773 से भुगतान हुआ
+     wer         0.222
+     [MISS] pin_code         gold=797065
+                             got =597065  dist=1
+     [MISS] account_number   gold=231305017820793
+                             got =231305010820773  dist=2
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00009/g711_ulaw.wav
+------------------------------------------------------------------------------
+  4. [MISS] hi-IN-1337-00030  cond=clean  lang=hi-IN  realization=digits  template=hi_acct_01
+     reference   आपका खाता नंबर 8673293032597314 है
+     hypothesis  आपका खाता नंबर 8673293032595314 है
+     wer         0.200
+     [MISS] account_number   gold=8673293032597314
+                             got =8673293032595314  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00030/clean.wav
+------------------------------------------------------------------------------
+  5. [ok] hi-IN-1337-00036  cond=packet_loss_5  lang=hi-IN  realization=words  template=hi_amount_date_01
+     reference   चार मई दो हज़ार छब्बीस तक चौहत्तर लाख बानवे हज़ार रुपये का भुगतान करना आवश्यक है
+     hypothesis  चार मई दो हज़ार छब्बीस तक चौहत्तर लाख बानवे हज़ार रुपये का भुगतान करना आवश्यक है
+     wer         0.000
+     [HIT ] date             gold=2026-05-04
+     [HIT ] currency         gold=INR:7492000.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00036/packet_loss_5.wav
+------------------------------------------------------------------------------
+  6. [ok] hi-IN-1337-00018  cond=g711_ulaw  lang=hi-IN  realization=words  template=hi_amount_01
+     reference   आपके खाते में सात करोड़ रुपये की शेष राशि है
+     hypothesis  आपके खाते में सात करोड़ रुपये की शेष राशि है
+     wer         0.000
+     [HIT ] currency         gold=INR:70000000.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00018/g711_ulaw.wav
+------------------------------------------------------------------------------
+  7. [ok] hi-IN-1337-00029  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_otp_02
+     reference   लॉगिन करने के लिए 2078 कोड दर्ज करें
+     hypothesis  लॉगिन करने के लिए 2078 कोड दर्ज करें
+     wer         0.000
+     [HIT ] otp              gold=2078
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00029/g711_ulaw.wav
+------------------------------------------------------------------------------
+  8. [MISS] hi-IN-1337-00020  cond=clean  lang=hi-IN  realization=digits  template=hi_acct_amount_01
+     reference   आपके खाते 6278500115396 में 15,62,00,000 रुपये जमा हुए हैं
+     hypothesis  आपके खाते 5278300115396 में 15,62,00,000 रुपये जमा हुए हैं
+     wer         0.083
+     [MISS] account_number   gold=6278500115396
+                             got =5278300115396  dist=2
+     [HIT ] currency         gold=INR:156200000.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00020/clean.wav
+------------------------------------------------------------------------------
+  9. [MISS] hi-IN-1337-00026  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_cm_acct_amount_01
+     reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+     hypothesis  Your account 18940170315790 में 9,66,000 rupees credit हुए हैं
+     wer         0.182
+     [MISS] account_number   gold=18340170315790
+                             got =18940170315790  dist=1
+     [MISS] currency         gold=INR:566000.00
+                             got =INR:966000.00  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 10. [MISS] hi-IN-1337-00030  cond=packet_loss_5  lang=hi-IN  realization=digits  template=hi_acct_01
+     reference   आपका खाता नंबर 8673293032597314 है
+     hypothesis  आपका खाता नंबर 8671293032597314 है
+     wer         0.200
+     [MISS] account_number   gold=8673293032597314
+                             got =8671293032597314  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00030/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 11. [ok] hi-IN-1337-00007  cond=packet_loss_5  lang=hi-IN  realization=words  template=hi_acct_amount_02
+     reference   खाता एक छह एक शून्य आठ दो आठ दो छह छह चार पाँच सात आठ पाँच तीन से सात सौ सत्तानवे रुपये काटे गए हैं
+     hypothesis  खाता एक छह एक शून्य आठ दो आठ दो छह छह चार पाँच सात आठ पाँच तीन से सात सौ सत्तानवे रुपये काटे गए हैं
+     wer         0.000
+     [HIT ] account_number   gold=1610828266457853
+     [HIT ] currency         gold=INR:797.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00007/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 12. [ok] hi-IN-1337-00034  cond=packet_loss_5  lang=hi-IN  realization=words  template=hi_acct_amount_01
+     reference   आपके खाते तीन एक एक छह तीन एक आठ तीन पाँच सात छह सात सात में पंद्रह करोड़ पचहत्तर लाख रुपये जमा हुए हैं
+     hypothesis  आपके खाते तीन एक एक छह तीन एक आठ तीन पाँच सात छह सात सात में पंद्रह करोड़ पचहत्तर लाख रुपये जमा हुए हैं
+     wer         0.000
+     [HIT ] account_number   gold=3116318357677
+     [HIT ] currency         gold=INR:157500000.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00034/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 13. [ok] hi-IN-1337-00017  cond=g711_ulaw  lang=hi-IN  realization=words  template=hi_pin_01
+     reference   डिलीवरी का पिन कोड आठ एक छह शून्य शून्य पाँच दर्ज किया गया है
+     hypothesis  डिलीवरी का पिन कोड आठ एक छह शून्य शून्य पाँच दर्ज किया गया है
+     wer         0.000
+     [HIT ] pin_code         gold=816005
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00017/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 14. [ok] hi-IN-1337-00023  cond=clean  lang=hi-IN  realization=words  template=hi_pin_acct_01
+     reference   पिन कोड आठ तीन आठ छह आठ एक पर खाता चार चार पाँच आठ छह सात आठ पाँच पाँच सात एक एक पाँच छह आठ से भुगतान हुआ
+     hypothesis  पिन कोड आठ तीन आठ छह आठ एक पर खाता चार चार पाँच आठ छह सात आठ पाँच पाँच सात एक एक पाँच छह आठ से भुगतान हुआ
+     wer         0.000
+     [HIT ] pin_code         gold=838681
+     [HIT ] account_number   gold=445867855711568
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00023/clean.wav
+------------------------------------------------------------------------------
+ 15. [MISS] hi-IN-1337-00021  cond=clean  lang=hi-IN  realization=digits  template=hi_acct_amount_02
+     reference   खाता 49246354964 से 9,500 रुपये काटे गए हैं
+     hypothesis  खाता 45246353914 से 9,500 रुपये काटे गए हैं
+     wer         0.111
+     [MISS] account_number   gold=49246354964
+                             got =45246353914  dist=3
+     [HIT ] currency         gold=INR:9500.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00021/clean.wav
+------------------------------------------------------------------------------
+ 16. [MISS] hi-IN-1337-00008  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_amount_date_01
+     reference   17/11/2026 तक 8,00,00,000 रुपये का भुगतान करना आवश्यक है
+     hypothesis  17/11/2526 तक 8,00,003000 रुपये का भुगतान करना आवश्यक है
+     wer         0.214
+     [MISS] date             gold=2026-11-17
+                             got =2526-11-17  dist=1
+     [MISS] currency         gold=INR:80000000.00
+                             got =INR:800003000.00  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00008/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 17. [MISS] hi-IN-1337-00003  cond=clean  lang=hi-IN  realization=digits  template=hi_pin_01
+     reference   डिलीवरी का पिन कोड 375022 दर्ज किया गया है
+     hypothesis  डिलीवरी का पिन कोड 875052 दर्ज किया गया है
+     wer         0.111
+     [MISS] pin_code         gold=375022
+                             got =875052  dist=2
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00003/clean.wav
+------------------------------------------------------------------------------
+ 18. [MISS] hi-IN-1337-00026  cond=clean  lang=hi-IN  realization=digits  template=hi_cm_acct_amount_01
+     reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+     hypothesis  Your account 16340171316790 में 5265,000 rupees credit हुए हैं
+     wer         0.273
+     [MISS] account_number   gold=18340170315790
+                             got =16340171316790  dist=3
+     [MISS] currency         gold=INR:566000.00
+                             got =INR:5265000.00  dist=2
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/clean.wav
+------------------------------------------------------------------------------
+ 19. [ok] hi-IN-1337-00005  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_amount_02
+     reference   आपकी बकाया राशि 28,00,000 रुपये है, कृपया भुगतान करें
+     hypothesis  आपकी बकाया राशि 28,00,000 रुपये है, कृपया भुगतान करें
+     wer         0.000
+     [HIT ] currency         gold=INR:2800000.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00005/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 20. [MISS] hi-IN-1337-00026  cond=packet_loss_5  lang=hi-IN  realization=digits  template=hi_cm_acct_amount_01
+     reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+     hypothesis  Your account 18340170315790 में 86765000 rupees credit हुए हैं
+     wer         0.273
+     [HIT ] account_number   gold=18340170315790
+     [MISS] currency         gold=INR:566000.00
+                             got =INR:86765000.00  dist=3
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 21. [MISS] hi-IN-1337-00009  cond=packet_loss_5  lang=hi-IN  realization=digits  template=hi_pin_acct_01
+     reference   पिन कोड 797065 पर खाता 231305017820793 से भुगतान हुआ
+     hypothesis  पिन कोड 697465 पर खाता 231305017820793 से भुगतान हुआ
+     wer         0.111
+     [MISS] pin_code         gold=797065
+                             got =697465  dist=2
+     [HIT ] account_number   gold=231305017820793
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00009/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 22. [MISS] hi-IN-1337-00021  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_acct_amount_02
+     reference   खाता 49246354964 से 9,500 रुपये काटे गए हैं
+     hypothesis  खाता 49646304764 से 92500 रुपये काटे गए हैं
+     wer         0.333
+     [MISS] account_number   gold=49246354964
+                             got =49646304764  dist=3
+     [MISS] currency         gold=INR:9500.00
+                             got =INR:92500.00  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00021/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 23. [MISS] hi-IN-1337-00006  cond=packet_loss_5  lang=hi-IN  realization=digits  template=hi_acct_amount_01
+     reference   आपके खाते 65335720185281 में 5,00,000 रुपये जमा हुए हैं
+     hypothesis  आपके खाते 65335720185281 में 5,20,000 रुपये जमा हुए हैं
+     wer         0.091
+     [HIT ] account_number   gold=65335720185281
+     [MISS] currency         gold=INR:500000.00
+                             got =INR:520000.00  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00006/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 24. [MISS] hi-IN-1337-00033  cond=packet_loss_5  lang=hi-IN  realization=digits  template=hi_amount_02
+     reference   आपकी बकाया राशि 446 रुपये है, कृपया भुगतान करें
+     hypothesis  आपकी बकाया राशि 447 रुपये है, कृपया भुगतान करें
+     wer         0.111
+     [MISS] currency         gold=INR:446.00
+                             got =INR:447.00  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00033/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 25. [MISS] hi-IN-1337-00003  cond=packet_loss_5  lang=hi-IN  realization=digits  template=hi_pin_01
+     reference   डिलीवरी का पिन कोड 375022 दर्ज किया गया है
+     hypothesis  डिलीवरी का पिन कोड 375025 दर्ज किया गया है
+     wer         0.111
+     [MISS] pin_code         gold=375022
+                             got =375025  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00003/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 26. [MISS] hi-IN-1337-00012  cond=packet_loss_5  lang=hi-IN  realization=digits  template=hi_cm_acct_amount_01
+     reference   Your account 787360285383 में 4,69,000 rupees credit हुए हैं
+     hypothesis  Your account 787360285389 में 4,49,000 rupees credit हुए हैं
+     wer         0.182
+     [MISS] account_number   gold=787360285383
+                             got =787360285389  dist=1
+     [MISS] currency         gold=INR:469000.00
+                             got =INR:449000.00  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00012/packet_loss_5.wav
+------------------------------------------------------------------------------
+ 27. [ok] hi-IN-1337-00033  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_amount_02
+     reference   आपकी बकाया राशि 446 रुपये है, कृपया भुगतान करें
+     hypothesis  आपकी बकाया राशि 446 रुपये है, कृपया भुगतान करें
+     wer         0.000
+     [HIT ] currency         gold=INR:446.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00033/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 28. [MISS] hi-IN-1337-00019  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_amount_02
+     reference   आपकी बकाया राशि 7,00,00,000 रुपये है, कृपया भुगतान करें
+     hypothesis  आपकी बकाया राशि 7,20,00,000 रुपये है, कृपया भुगतान करें
+     wer         0.083
+     [MISS] currency         gold=INR:70000000.00
+                             got =INR:72000000.00  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00019/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 29. [MISS] hi-IN-1337-00012  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_cm_acct_amount_01
+     reference   Your account 787360285383 में 4,69,000 rupees credit हुए हैं
+     hypothesis  Your account 907360285383 में 4,69,000 rupees credit हुए हैं
+     wer         0.091
+     [MISS] account_number   gold=787360285383
+                             got =907360285383  dist=2
+     [HIT ] currency         gold=INR:469000.00
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00012/g711_ulaw.wav
+------------------------------------------------------------------------------
+ 30. [MISS] hi-IN-1337-00030  cond=g711_ulaw  lang=hi-IN  realization=digits  template=hi_acct_01
+     reference   आपका खाता नंबर 8673293032597314 है
+     hypothesis  आपका खाता नंबर 7673293032597314 है
+     wer         0.200
+     [MISS] account_number   gold=8673293032597314
+                             got =7673293032597314  dist=1
+     audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00030/g711_ulaw.wav
+------------------------------------------------------------------------------

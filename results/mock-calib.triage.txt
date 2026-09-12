@@ -1,0 +1,491 @@
+==============================================================================
+TRIAGE REPORT
+==============================================================================
+run(s)          run-20260912T093951Z
+rows            120  (40 utterances x 3 conditions)
+asr             mock  model=mock  mode=mock
+
+entities        171   hits 125   misses 46   hit rate 0.731
+
+MISSES BY CAUSE
+  asr_error        (a real result)                   46
+
+TOP PATTERNS
+     7  asr_error::currency::d1::packet_loss_5
+     4  asr_error::currency::d1::g711_ulaw
+     3  asr_error::account_number::d1::clean
+     3  asr_error::account_number::d2::g711_ulaw
+     2  asr_error::account_number::d3::g711_ulaw
+     2  asr_error::currency::d1::clean
+     2  asr_error::date::d1::g711_ulaw
+     2  asr_error::currency::d2::clean
+     2  asr_error::account_number::d1::packet_loss_5
+     2  asr_error::account_number::d2::packet_loss_5
+     2  asr_error::account_number::d3::clean
+     2  asr_error::account_number::d1::g711_ulaw
+     2  asr_error::otp::d1::clean
+     1  asr_error::pin_code::d2::clean
+     1  asr_error::pin_code::d1::packet_loss_5
+
+==============================================================================
+ASR_ERROR   (46 misses)
+==============================================================================
+
+[hi-IN-1337-00006] packet_loss_5   type=currency   realization=digits   template=hi_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपके खाते 65335720185281 में 5,00,000 रुपये जमा हुए हैं
+  hypothesis  आपके खाते 65335720185281 में 5,20,000 रुपये जमा हुए हैं
+  gold        INR:500000.00   (surface: '5,00,000')
+  extracted   INR:520000.00   (surface: '520000')
+  edit dist   1
+  candidates  ['INR:520000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00006/packet_loss_5.wav
+
+[hi-IN-1337-00012] packet_loss_5   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   Your account 787360285383 में 4,69,000 rupees credit हुए हैं
+  hypothesis  Your account 787360285389 में 4,49,000 rupees credit हुए हैं
+  gold        INR:469000.00   (surface: '4,69,000')
+  extracted   INR:449000.00   (surface: '449000')
+  edit dist   1
+  candidates  ['INR:449000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00012/packet_loss_5.wav
+
+[hi-IN-1337-00020] packet_loss_5   type=currency   realization=digits   template=hi_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपके खाते 6278500115396 में 15,62,00,000 रुपये जमा हुए हैं
+  hypothesis  आपके खाते 6278508315396 में 16,62,00,000 रुपये जमा हुए हैं
+  gold        INR:156200000.00   (surface: '15,62,00,000')
+  extracted   INR:166200000.00   (surface: '166200000')
+  edit dist   1
+  candidates  ['INR:166200000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00020/packet_loss_5.wav
+
+[hi-IN-1337-00021] packet_loss_5   type=currency   realization=digits   template=hi_acct_amount_02
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   खाता 49246354964 से 9,500 रुपये काटे गए हैं
+  hypothesis  खाता 40246354962 से 9,530 रुपये काटे गए हैं
+  gold        INR:9500.00   (surface: '9,500')
+  extracted   INR:9530.00   (surface: '9530')
+  edit dist   1
+  candidates  ['INR:9530.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00021/packet_loss_5.wav
+
+[hi-IN-1337-00022] packet_loss_5   type=currency   realization=digits   template=hi_amount_date_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   10/12/2026 तक 75,08,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  10/12/2026 तक 75,06,000 रुपये का भुगतान करना आवश्यक है
+  gold        INR:7508000.00   (surface: '75,08,000')
+  extracted   INR:7506000.00   (surface: '7506000')
+  edit dist   1
+  candidates  ['INR:7506000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00022/packet_loss_5.wav
+
+[hi-IN-1337-00032] packet_loss_5   type=currency   realization=digits   template=hi_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपके खाते में 13,00,00,000 रुपये की शेष राशि है
+  hypothesis  आपके खाते में 13,01,00,000 रुपये की शेष राशि है
+  gold        INR:130000000.00   (surface: '13,00,00,000')
+  extracted   INR:130100000.00   (surface: '130100000')
+  edit dist   1
+  candidates  ['INR:130100000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00032/packet_loss_5.wav
+
+[hi-IN-1337-00033] packet_loss_5   type=currency   realization=digits   template=hi_amount_02
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपकी बकाया राशि 446 रुपये है, कृपया भुगतान करें
+  hypothesis  आपकी बकाया राशि 447 रुपये है, कृपया भुगतान करें
+  gold        INR:446.00   (surface: '446')
+  extracted   INR:447.00   (surface: '447')
+  edit dist   1
+  candidates  ['INR:447.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00033/packet_loss_5.wav
+
+[hi-IN-1337-00008] g711_ulaw   type=currency   realization=digits   template=hi_amount_date_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   17/11/2026 तक 8,00,00,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  17/11/2526 तक 8,00,003000 रुपये का भुगतान करना आवश्यक है
+  gold        INR:80000000.00   (surface: '8,00,00,000')
+  extracted   INR:800003000.00   (surface: '800003000')
+  edit dist   1
+  candidates  ['INR:800003000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00008/g711_ulaw.wav
+
+[hi-IN-1337-00019] g711_ulaw   type=currency   realization=digits   template=hi_amount_02
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपकी बकाया राशि 7,00,00,000 रुपये है, कृपया भुगतान करें
+  hypothesis  आपकी बकाया राशि 7,20,00,000 रुपये है, कृपया भुगतान करें
+  gold        INR:70000000.00   (surface: '7,00,00,000')
+  extracted   INR:72000000.00   (surface: '72000000')
+  edit dist   1
+  candidates  ['INR:72000000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00019/g711_ulaw.wav
+
+[hi-IN-1337-00021] g711_ulaw   type=currency   realization=digits   template=hi_acct_amount_02
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   खाता 49246354964 से 9,500 रुपये काटे गए हैं
+  hypothesis  खाता 49646304764 से 92500 रुपये काटे गए हैं
+  gold        INR:9500.00   (surface: '9,500')
+  extracted   INR:92500.00   (surface: '92500')
+  edit dist   1
+  candidates  ['INR:92500.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00021/g711_ulaw.wav
+
+[hi-IN-1337-00026] g711_ulaw   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  Your account 18940170315790 में 9,66,000 rupees credit हुए हैं
+  gold        INR:566000.00   (surface: '5,66,000')
+  extracted   INR:966000.00   (surface: '966000')
+  edit dist   1
+  candidates  ['INR:966000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/g711_ulaw.wav
+
+[hi-IN-1337-00002] clean   type=account_number   realization=digits   template=hi_acct_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपका खाता नंबर 762600781019989 है
+  hypothesis  आपका खाता नंबर 762600783019989 है
+  gold        762600781019989   (surface: '762600781019989')
+  extracted   762600783019989   (surface: '762600783019989')
+  edit dist   1
+  candidates  ['762600783019989']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00002/clean.wav
+
+[hi-IN-1337-00012] clean   type=account_number   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   Your account 787360285383 में 4,69,000 rupees credit हुए हैं
+  hypothesis  Your account 787360285343 में 6069,000 rupees credit हुए हैं
+  gold        787360285383   (surface: '787360285383')
+  extracted   787360285343   (surface: '787360285343')
+  edit dist   1
+  candidates  ['787360285343']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00012/clean.wav
+
+[hi-IN-1337-00030] clean   type=account_number   realization=digits   template=hi_acct_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपका खाता नंबर 8673293032597314 है
+  hypothesis  आपका खाता नंबर 8673293032595314 है
+  gold        8673293032597314   (surface: '8673293032597314')
+  extracted   8673293032595314   (surface: '8673293032595314')
+  edit dist   1
+  candidates  ['8673293032595314']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00030/clean.wav
+
+[hi-IN-1337-00009] g711_ulaw   type=account_number   realization=digits   template=hi_pin_acct_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   पिन कोड 797065 पर खाता 231305017820793 से भुगतान हुआ
+  hypothesis  पिन कोड 597065 पर खाता 231305010820773 से भुगतान हुआ
+  gold        231305017820793   (surface: '231305017820793')
+  extracted   231305010820773   (surface: '231305010820773')
+  edit dist   2
+  candidates  ['597065', '231305010820773']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00009/g711_ulaw.wav
+
+[hi-IN-1337-00012] g711_ulaw   type=account_number   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   Your account 787360285383 में 4,69,000 rupees credit हुए हैं
+  hypothesis  Your account 907360285383 में 4,69,000 rupees credit हुए हैं
+  gold        787360285383   (surface: '787360285383')
+  extracted   907360285383   (surface: '907360285383')
+  edit dist   2
+  candidates  ['907360285383']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00012/g711_ulaw.wav
+
+[hi-IN-1337-00020] g711_ulaw   type=account_number   realization=digits   template=hi_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   आपके खाते 6278500115396 में 15,62,00,000 रुपये जमा हुए हैं
+  hypothesis  आपके खाते 6270500115398 में 15,61330,000 रुपये जमा हुए हैं
+  gold        6278500115396   (surface: '6278500115396')
+  extracted   6270500115398   (surface: '6270500115398')
+  edit dist   2
+  candidates  ['6270500115398']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00020/g711_ulaw.wav
+
+[hi-IN-1337-00026] g711_ulaw   type=account_number   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  Your account 18940170315790 में 9,66,000 rupees credit हुए हैं
+  gold        18340170315790   (surface: '18340170315790')
+  extracted   18940170315790   (surface: '18940170315790')
+  edit dist   1
+  candidates  ['18940170315790']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/g711_ulaw.wav
+
+[hi-IN-1337-00030] g711_ulaw   type=account_number   realization=digits   template=hi_acct_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपका खाता नंबर 8673293032597314 है
+  hypothesis  आपका खाता नंबर 7673293032597314 है
+  gold        8673293032597314   (surface: '8673293032597314')
+  extracted   7673293032597314   (surface: '7673293032597314')
+  edit dist   1
+  candidates  ['7673293032597314']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00030/g711_ulaw.wav
+
+[hi-IN-1337-00012] packet_loss_5   type=account_number   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   Your account 787360285383 में 4,69,000 rupees credit हुए हैं
+  hypothesis  Your account 787360285389 में 4,49,000 rupees credit हुए हैं
+  gold        787360285383   (surface: '787360285383')
+  extracted   787360285389   (surface: '787360285389')
+  edit dist   1
+  candidates  ['787360285389']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00012/packet_loss_5.wav
+
+[hi-IN-1337-00030] packet_loss_5   type=account_number   realization=digits   template=hi_acct_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   आपका खाता नंबर 8673293032597314 है
+  hypothesis  आपका खाता नंबर 8671293032597314 है
+  gold        8673293032597314   (surface: '8673293032597314')
+  extracted   8671293032597314   (surface: '8671293032597314')
+  edit dist   1
+  candidates  ['8671293032597314']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00030/packet_loss_5.wav
+
+[hi-IN-1337-00020] packet_loss_5   type=account_number   realization=digits   template=hi_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   आपके खाते 6278500115396 में 15,62,00,000 रुपये जमा हुए हैं
+  hypothesis  आपके खाते 6278508315396 में 16,62,00,000 रुपये जमा हुए हैं
+  gold        6278500115396   (surface: '6278500115396')
+  extracted   6278508315396   (surface: '6278508315396')
+  edit dist   2
+  candidates  ['6278508315396']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00020/packet_loss_5.wav
+
+[hi-IN-1337-00021] packet_loss_5   type=account_number   realization=digits   template=hi_acct_amount_02
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   खाता 49246354964 से 9,500 रुपये काटे गए हैं
+  hypothesis  खाता 40246354962 से 9,530 रुपये काटे गए हैं
+  gold        49246354964   (surface: '49246354964')
+  extracted   40246354962   (surface: '40246354962')
+  edit dist   2
+  candidates  ['40246354962']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00021/packet_loss_5.wav
+
+[hi-IN-1337-00021] clean   type=account_number   realization=digits   template=hi_acct_amount_02
+  reason      hypothesis carries a different value (edit distance 3)
+  reference   खाता 49246354964 से 9,500 रुपये काटे गए हैं
+  hypothesis  खाता 45246353914 से 9,500 रुपये काटे गए हैं
+  gold        49246354964   (surface: '49246354964')
+  extracted   45246353914   (surface: '45246353914')
+  edit dist   3
+  candidates  ['45246353914']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00021/clean.wav
+
+[hi-IN-1337-00026] clean   type=account_number   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 3)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  Your account 16340171316790 में 5265,000 rupees credit हुए हैं
+  gold        18340170315790   (surface: '18340170315790')
+  extracted   16340171316790   (surface: '16340171316790')
+  edit dist   3
+  candidates  ['16340171316790']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/clean.wav
+
+[hi-IN-1337-00002] g711_ulaw   type=account_number   realization=digits   template=hi_acct_01
+  reason      hypothesis carries a different value (edit distance 3)
+  reference   आपका खाता नंबर 762600781019989 है
+  hypothesis  आपका खाता नंबर 762610731019987 है
+  gold        762600781019989   (surface: '762600781019989')
+  extracted   762610731019987   (surface: '762610731019987')
+  edit dist   3
+  candidates  ['762610731019987']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00002/g711_ulaw.wav
+
+[hi-IN-1337-00021] g711_ulaw   type=account_number   realization=digits   template=hi_acct_amount_02
+  reason      hypothesis carries a different value (edit distance 3)
+  reference   खाता 49246354964 से 9,500 रुपये काटे गए हैं
+  hypothesis  खाता 49646304764 से 92500 रुपये काटे गए हैं
+  gold        49246354964   (surface: '49246354964')
+  extracted   49646304764   (surface: '49646304764')
+  edit dist   3
+  candidates  ['49646304764']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00021/g711_ulaw.wav
+
+[hi-IN-1337-00008] clean   type=currency   realization=digits   template=hi_amount_date_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   17/11/2026 तक 8,00,00,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  17/11/2026 तक 8,07,00,000 रुपये का भुगतान करना आवश्यक है
+  gold        INR:80000000.00   (surface: '8,00,00,000')
+  extracted   INR:80700000.00   (surface: '80700000')
+  edit dist   1
+  candidates  ['INR:80700000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00008/clean.wav
+
+[hi-IN-1337-00038] clean   type=currency   realization=digits   template=hi_otp_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   78,36,000 रुपये के लेनदेन के लिए आपका ओटीपी 466956 है
+  hypothesis  78,16,000 रुपये के लेनदेन के लिए आपका ओटीपी 766956 है
+  gold        INR:7836000.00   (surface: '78,36,000')
+  extracted   INR:7816000.00   (surface: '7816000')
+  edit dist   1
+  candidates  ['INR:7816000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00038/clean.wav
+
+[hi-IN-1337-00012] clean   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   Your account 787360285383 में 4,69,000 rupees credit हुए हैं
+  hypothesis  Your account 787360285343 में 6069,000 rupees credit हुए हैं
+  gold        INR:469000.00   (surface: '4,69,000')
+  extracted   INR:6069000.00   (surface: '6069000')
+  edit dist   2
+  candidates  ['INR:6069000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00012/clean.wav
+
+[hi-IN-1337-00026] clean   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  Your account 16340171316790 में 5265,000 rupees credit हुए हैं
+  gold        INR:566000.00   (surface: '5,66,000')
+  extracted   INR:5265000.00   (surface: '5265000')
+  edit dist   2
+  candidates  ['INR:5265000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/clean.wav
+
+[hi-IN-1337-00008] g711_ulaw   type=date   realization=digits   template=hi_amount_date_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   17/11/2026 तक 8,00,00,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  17/11/2526 तक 8,00,003000 रुपये का भुगतान करना आवश्यक है
+  gold        2026-11-17   (surface: '17/11/2026')
+  extracted   2526-11-17   (surface: '17/11/2526')
+  edit dist   1
+  candidates  ['2526-11-17']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00008/g711_ulaw.wav
+
+[hi-IN-1337-00022] g711_ulaw   type=date   realization=digits   template=hi_amount_date_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   10/12/2026 तक 75,08,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  10/12/2076 तक 75,08,000 रुपये का भुगतान करना आवश्यक है
+  gold        2026-12-10   (surface: '10/12/2026')
+  extracted   2076-12-10   (surface: '10/12/2076')
+  edit dist   1
+  candidates  ['2076-12-10']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00022/g711_ulaw.wav
+
+[hi-IN-1337-00029] clean   type=otp   realization=digits   template=hi_otp_02
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   लॉगिन करने के लिए 2078 कोड दर्ज करें
+  hypothesis  लॉगिन करने के लिए 2088 कोड दर्ज करें
+  gold        2078   (surface: '2078')
+  extracted   2088   (surface: '2088')
+  edit dist   1
+  candidates  ['2088']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00029/clean.wav
+
+[hi-IN-1337-00038] clean   type=otp   realization=digits   template=hi_otp_amount_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   78,36,000 रुपये के लेनदेन के लिए आपका ओटीपी 466956 है
+  hypothesis  78,16,000 रुपये के लेनदेन के लिए आपका ओटीपी 766956 है
+  gold        466956   (surface: '466956')
+  extracted   766956   (surface: '766956')
+  edit dist   1
+  candidates  ['766956']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00038/clean.wav
+
+[hi-IN-1337-00020] clean   type=account_number   realization=digits   template=hi_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   आपके खाते 6278500115396 में 15,62,00,000 रुपये जमा हुए हैं
+  hypothesis  आपके खाते 5278300115396 में 15,62,00,000 रुपये जमा हुए हैं
+  gold        6278500115396   (surface: '6278500115396')
+  extracted   5278300115396   (surface: '5278300115396')
+  edit dist   2
+  candidates  ['5278300115396']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00020/clean.wav
+
+[hi-IN-1337-00008] packet_loss_5   type=currency   realization=digits   template=hi_amount_date_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   17/11/2026 तक 8,00,00,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  17/11/2006 तक 8702,00,000 रुपये का भुगतान करना आवश्यक है
+  gold        INR:80000000.00   (surface: '8,00,00,000')
+  extracted   INR:870200000.00   (surface: '870200000')
+  edit dist   2
+  candidates  ['INR:870200000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00008/packet_loss_5.wav
+
+[hi-IN-1337-00019] clean   type=currency   realization=digits   template=hi_amount_02
+  reason      hypothesis carries a different value (edit distance 3)
+  reference   आपकी बकाया राशि 7,00,00,000 रुपये है, कृपया भुगतान करें
+  hypothesis  आपकी बकाया राशि 7,207004000 रुपये है, कृपया भुगतान करें
+  gold        INR:70000000.00   (surface: '7,00,00,000')
+  extracted   INR:7207004000.00   (surface: '7207004000')
+  edit dist   3
+  candidates  ['INR:7207004000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00019/clean.wav
+
+[hi-IN-1337-00020] g711_ulaw   type=currency   realization=digits   template=hi_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 3)
+  reference   आपके खाते 6278500115396 में 15,62,00,000 रुपये जमा हुए हैं
+  hypothesis  आपके खाते 6270500115398 में 15,61330,000 रुपये जमा हुए हैं
+  gold        INR:156200000.00   (surface: '15,62,00,000')
+  extracted   INR:1561330000.00   (surface: '1561330000')
+  edit dist   3
+  candidates  ['INR:1561330000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00020/g711_ulaw.wav
+
+[hi-IN-1337-00026] packet_loss_5   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 3)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  Your account 18340170315790 में 86765000 rupees credit हुए हैं
+  gold        INR:566000.00   (surface: '5,66,000')
+  extracted   INR:86765000.00   (surface: '86765000')
+  edit dist   3
+  candidates  ['INR:86765000.00']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00026/packet_loss_5.wav
+
+[hi-IN-1337-00008] packet_loss_5   type=date   realization=digits   template=hi_amount_date_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   17/11/2026 तक 8,00,00,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  17/11/2006 तक 8702,00,000 रुपये का भुगतान करना आवश्यक है
+  gold        2026-11-17   (surface: '17/11/2026')
+  extracted   2006-11-17   (surface: '17/11/2006')
+  edit dist   1
+  candidates  ['2006-11-17']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00008/packet_loss_5.wav
+
+[hi-IN-1337-00022] clean   type=date   realization=digits   template=hi_amount_date_01
+  reason      entity absent from the hypothesis entirely
+  reference   10/12/2026 तक 75,08,000 रुपये का भुगतान करना आवश्यक है
+  hypothesis  20/32/6026 तक 75,08,000 रुपये का भुगतान करना आवश्यक है
+  gold        2026-12-10   (surface: '10/12/2026')
+  extracted   (nothing of this type)
+  edit dist   None
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00022/clean.wav
+
+[hi-IN-1337-00009] g711_ulaw   type=pin_code   realization=digits   template=hi_pin_acct_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   पिन कोड 797065 पर खाता 231305017820793 से भुगतान हुआ
+  hypothesis  पिन कोड 597065 पर खाता 231305010820773 से भुगतान हुआ
+  gold        797065   (surface: '797065')
+  extracted   597065   (surface: '597065')
+  edit dist   1
+  candidates  ['597065']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00009/g711_ulaw.wav
+
+[hi-IN-1337-00003] packet_loss_5   type=pin_code   realization=digits   template=hi_pin_01
+  reason      hypothesis carries a different value (edit distance 1)
+  reference   डिलीवरी का पिन कोड 375022 दर्ज किया गया है
+  hypothesis  डिलीवरी का पिन कोड 375025 दर्ज किया गया है
+  gold        375022   (surface: '375022')
+  extracted   375025   (surface: '375025')
+  edit dist   1
+  candidates  ['375025']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00003/packet_loss_5.wav
+
+[hi-IN-1337-00003] clean   type=pin_code   realization=digits   template=hi_pin_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   डिलीवरी का पिन कोड 375022 दर्ज किया गया है
+  hypothesis  डिलीवरी का पिन कोड 875052 दर्ज किया गया है
+  gold        375022   (surface: '375022')
+  extracted   875052   (surface: '875052')
+  edit dist   2
+  candidates  ['875052']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00003/clean.wav
+
+[hi-IN-1337-00009] packet_loss_5   type=pin_code   realization=digits   template=hi_pin_acct_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   पिन कोड 797065 पर खाता 231305017820793 से भुगतान हुआ
+  hypothesis  पिन कोड 697465 पर खाता 231305017820793 से भुगतान हुआ
+  gold        797065   (surface: '797065')
+  extracted   697465   (surface: '697465')
+  edit dist   2
+  candidates  ['697465']
+  audio       .tee/work/run-20260912T093951Z/hi-IN-1337-00009/packet_loss_5.wav
