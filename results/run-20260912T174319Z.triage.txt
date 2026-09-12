@@ -1,0 +1,78 @@
+==============================================================================
+TRIAGE REPORT
+==============================================================================
+run(s)          run-20260912T174319Z
+rows            320  (40 utterances x 4 conditions)
+asr             sarvam  model=saaras:v3, saaras:v4  mode=transcribe
+
+entities        456   hits 451   misses 5   hit rate 0.989
+
+MISSES BY CAUSE
+  extractor_error  (my bug -- fix me)                 1
+  asr_error        (a real result)                    4
+
+  Extractor and gold errors are bugs, not findings. Only the
+  asr_error count is a measurement.
+
+TOP PATTERNS
+     1  extractor_error::currency::words::hi_amount_01
+     1  asr_error::currency::d2::clean
+     1  asr_error::currency::d2::narrowband
+     1  asr_error::currency::d2::g711_ulaw
+     1  asr_error::currency::d2::packet_loss_5
+
+==============================================================================
+EXTRACTOR_ERROR   (1 misses)
+==============================================================================
+
+[hi-IN-1337-00004] packet_loss_5   type=currency   realization=words   template=hi_amount_01
+  reason      amount parseable from hypothesis but not extracted
+  reference   आपके खाते में छिहत्तर लाख चौहत्तर हज़ार रुपये की शेष राशि है
+  hypothesis  आपके खाते में 76,74,000 की शेष राशि है।
+  gold        INR:7674000.00   (surface: 'छिहत्तर लाख चौहत्तर हज़ार')
+  extracted   (nothing of this type)
+  edit dist   None
+  audio       .tee/work/run-20260912T174319Z/hi-IN-1337-00004/packet_loss_5.wav
+==============================================================================
+ASR_ERROR   (4 misses)
+==============================================================================
+
+[hi-IN-1337-00026] clean   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  योर अकाउंट एक आठ तीन चार शून्य एक सात शून्य तीन एक पाँच सात नौ शून्य में पाँच लाख छयासठ हज़ार रुपये क्रेडिट हुए हैं।
+  gold        INR:566000.00   (surface: '5,66,000')
+  extracted   INR:500000.00   (surface: 'पाँच लाख')
+  edit dist   2
+  candidates  ['INR:500000.00', 'INR:1000.00']
+  audio       .tee/work/run-20260912T174319Z/hi-IN-1337-00026/clean.wav
+
+[hi-IN-1337-00026] g711_ulaw   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  योर अकाउंट एक आठ तीन चार शून्य एक सात शून्य तीन एक पाँच सात नौ शून्य में पाँच लाख छयासठ हज़ार रुपये क्रेडिट हुए हैं।
+  gold        INR:566000.00   (surface: '5,66,000')
+  extracted   INR:500000.00   (surface: 'पाँच लाख')
+  edit dist   2
+  candidates  ['INR:500000.00', 'INR:1000.00']
+  audio       .tee/work/run-20260912T174319Z/hi-IN-1337-00026/g711_ulaw.wav
+
+[hi-IN-1337-00026] narrowband   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  योर अकाउंट एक आठ तीन चार शून्य एक सात शून्य तीन एक पाँच सात नौ शून्य में पाँच लाख छयासठ हज़ार रुपये क्रेडिट हुए हैं।
+  gold        INR:566000.00   (surface: '5,66,000')
+  extracted   INR:500000.00   (surface: 'पाँच लाख')
+  edit dist   2
+  candidates  ['INR:500000.00', 'INR:1000.00']
+  audio       .tee/work/run-20260912T174319Z/hi-IN-1337-00026/narrowband.wav
+
+[hi-IN-1337-00026] packet_loss_5   type=currency   realization=digits   template=hi_cm_acct_amount_01
+  reason      hypothesis carries a different value (edit distance 2)
+  reference   Your account 18340170315790 में 5,66,000 rupees credit हुए हैं
+  hypothesis  योर अकाउंट एक आठ तीन चार शून्य एक सात शून्य तीन एक पाँच सात नौ शून्य में पाँच लाख छयासठ हज़ार रुपये क्रेडिट हुए हैं।
+  gold        INR:566000.00   (surface: '5,66,000')
+  extracted   INR:500000.00   (surface: 'पाँच लाख')
+  edit dist   2
+  candidates  ['INR:500000.00', 'INR:1000.00']
+  audio       .tee/work/run-20260912T174319Z/hi-IN-1337-00026/packet_loss_5.wav
