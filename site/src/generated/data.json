@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T05:53:07.460Z",
+  "generatedAt": "2026-09-13T06:33:49.771Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
@@ -28531,6 +28531,56 @@
       "body": "The generator samples the value first — an account number, an amount, an OTP, a\nPIN code, a date — and then builds a sentence around it. The correct answer is\ntherefore known by construction, before any audio exists.\n\nThat ordering is the point. A benchmark built by transcribing recordings and\nannotating them afterwards has two fallible steps between the truth and the\nscore, and a disagreement between them is ambiguous: the model may have erred, or\nthe annotator may have. Here there is nothing to disagree with. The value that\nwent in is the value being looked for, so every miss is attributable.\n\nScoring is exact match on a normalised form, with no partial credit. Indic and\nLatin numerals compare equal, `3,50,000` and *teen lakh pachaas hazaar* both\nnormalise to the same amount, and Indian digit grouping is handled as 2-2-3\nrather than 3-3-3. But `50100234567890` and `50100234567891` are simply\ndifferent: character similarity would score that pair at 0.93, and it is a\ntransfer to a stranger."
     }
   },
+  "lossPairs": [
+    {
+      "rate": 0.1,
+      "meanBurstMs": 100,
+      "scattered": {
+        "condition": "packet_loss_10",
+        "hits": 113,
+        "total": 114,
+        "wer": 0.5348653410297431,
+        "accounts": {
+          "hits": 28,
+          "total": 28
+        }
+      },
+      "bursty": {
+        "condition": "packet_loss_burst_10",
+        "hits": 88,
+        "total": 114,
+        "wer": 0.5839874584956107,
+        "accounts": {
+          "hits": 17,
+          "total": 28
+        }
+      }
+    },
+    {
+      "rate": 0.05,
+      "meanBurstMs": 100,
+      "scattered": {
+        "condition": "packet_loss_5",
+        "hits": 114,
+        "total": 114,
+        "wer": 0.5795454005535526,
+        "accounts": {
+          "hits": 28,
+          "total": 28
+        }
+      },
+      "bursty": {
+        "condition": "packet_loss_burst_5",
+        "hits": 103,
+        "total": 114,
+        "wer": 0.5994783495490018,
+        "accounts": {
+          "hits": 22,
+          "total": 28
+        }
+      }
+    }
+  ],
   "headline": {
     "hits": 1087,
     "entities": 1140,

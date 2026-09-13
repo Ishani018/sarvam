@@ -91,6 +91,12 @@ export interface GintiData {
   listen: ListenEntry[];
   method: Record<string, unknown>;
   content: Record<string, { summary: string | null; body: string }>;
+  lossPairs: Array<{
+    rate: number;
+    meanBurstMs: number | null;
+    scattered: LossSide;
+    bursty: LossSide;
+  }>;
   headline: {
     hits: number; entities: number; hitRate: number | null;
     werByModel: Array<{ model: string; wer: number; n: number }>;
@@ -150,4 +156,13 @@ export interface ListenEntry {
   codeMixed: boolean;
   entities: ListenEntity[];
   conditions: ListenCondition[];
+}
+
+
+export interface LossSide {
+  condition: string;
+  hits: number;
+  total: number;
+  wer: number | null;
+  accounts: { hits: number; total: number };
 }

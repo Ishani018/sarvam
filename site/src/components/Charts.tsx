@@ -23,7 +23,31 @@ export function DisagreementChart({
   conditions: ConditionDef[];
   compact?: boolean;
 }) {
-  const names = conditions.filter((c) => c.exercised).map((c) => c.name);
+  // Split into two blocks at the one axis that matters: whether the loss is
+  // clustered. Read left to right, the teal line holds through the first block
+  // and drops at the boundary -- which is the finding, and is invisible in
+  // config order where the two kinds of loss are interleaved.
+  //
+  // Within each block, conditions that drop no packets come first and the lossy
+  // ones follow in rate order, so the whole loss ramp runs contiguously across
+  // the boundary rather than being interrupted by the noisy line.
+  const exercised = conditions.filter((c) => c.exercised);
+  const lossOp = (c: ConditionDef) => c.chain.find((o) => o.op === "packet_loss");
+  const isBursty = (c: ConditionDef) => lossOp(c)?.model === "gilbert";
+  const byRate = (a: ConditionDef, b: ConditionDef) =>
+    Number(lossOp(a)?.rate ?? 0) - Number(lossOp(b)?.rate ?? 0);
+  const groups = [
+    {
+      label: "no loss, or loss scattered",
+      items: exercised.filter((c) => !isBursty(c)).sort(byRate),
+    },
+    {
+      label: "same loss, clustered into bursts",
+      items: exercised.filter(isBursty).sort(byRate),
+    },
+  ].filter((g) => g.items.length);
+  const ordered = groups.flatMap((g) => g.items);
+  const names = ordered.map((c) => c.name);
   if (names.length === 0) return null;
 
   const hitAt = names.map((n) => {
@@ -44,14 +68,23 @@ export function DisagreementChart({
     })),
   }));
 
+  // Condition names are long, monospaced and there are ten of them, so the
+  // labels lean. How far they then reach below the axis depends on the longest
+  // one, and the group rule has to clear that -- measured rather than guessed,
+  // or a new condition with a longer name silently draws over it.
+  const LABEL_DEG = 38;
+  const labelDrop =
+    Math.max(...names.map((n) => n.length)) * 6 *
+    Math.sin((LABEL_DEG * Math.PI) / 180);
+  const groupY = labelDrop + 20;   // below the axis
   const W = 640;
-  const H = compact ? 170 : 220;
   const padL = 34;
-  const padR = 12;
+  const padR = 26;
   const padT = 14;
-  const padB = 34;
+  const padB = groupY + 18;
   const plotW = W - padL - padR;
-  const plotH = H - padT - padB;
+  const plotH = compact ? 150 : 190;
+  const H = padT + plotH + padB;
 
   const x = (i: number) =>
     padL + (names.length === 1 ? plotW / 2 : (i / (names.length - 1)) * plotW);
@@ -67,9 +100,13 @@ export function DisagreementChart({
     <figure className="chart">
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
            aria-label={
-             `Entity hit rate stays flat at ${(hitAt[0].value ?? 0).toFixed(2)} ` +
-             `across ${names.length} telephony conditions. Word error rate is ` +
-             `also flat across conditions but separates by model: ` +
+             `Entity hit rate across ${names.length} telephony conditions, ` +
+             `ordered with scattered loss first and bursty loss last. It holds ` +
+             `near ${(hitAt[0].value ?? 0).toFixed(2)} through the scattered ` +
+             `conditions and falls to ` +
+             `${Math.min(...hitAt.map((p) => p.value ?? 1)).toFixed(2)} under ` +
+             `bursty loss. Word error rate stays flat across the whole range ` +
+             `and separates by model instead: ` +
              werByModel.map((m) =>
                `${m.model} near ${(m.points[0].value ?? 0).toFixed(2)}`).join(", ") +
              `, on the same audio.`
@@ -108,10 +145,33 @@ export function DisagreementChart({
         })}
 
         {names.map((n, i) => (
-          <text key={n} className="ch-label" x={x(i)} y={H - 12} textAnchor="middle">
+          <text key={n} className="ch-label" x={x(i)} y={y(0) + 8}
+                textAnchor="end"
+                transform={`rotate(-${LABEL_DEG} ${x(i)} ${y(0) + 8})`}>
             {n}
           </text>
         ))}
+
+        {/* Group rules, clear of the labels: the boundary between them is where
+            clustering turns on, which is where the teal line drops. */}
+        {groups.length > 1 && (() => {
+          let at = 0;
+          return groups.map((g) => {
+            const from = at;
+            const to = at + g.items.length - 1;
+            at += g.items.length;
+            const x1 = x(from) - 6;
+            const x2 = x(to) + 6;
+            return (
+              <g key={g.label}>
+                <line className="ch-group" x1={x1} x2={x2}
+                      y1={y(0) + groupY} y2={y(0) + groupY} />
+                <text className="ch-group-label" x={(x1 + x2) / 2}
+                      y={y(0) + groupY + 13} textAnchor="middle">{g.label}</text>
+              </g>
+            );
+          });
+        })()}
       </svg>
 
       <div className="chart__legend">
@@ -125,10 +185,12 @@ export function DisagreementChart({
         </span>
       </div>
       <figcaption className="result__scope">
-        Both are rates over the same recordings, and neither line is moved much
-        by the phone line. The gap that does exist is between the two models,
-        on byte-identical audio, and it comes from how each writes numbers
-        rather than from what either heard.
+        Conditions are split by whether packet loss is scattered or clustered,
+        and ordered by loss rate within each half, so the loss ramp runs
+        unbroken across the boundary. Entity accuracy holds through bandwidth
+        loss, codecs and scattered packet loss, then falls where clustering
+        begins. Word error rate does not track it, and separates by model rather
+        than by condition.
       </figcaption>
     </figure>
   );

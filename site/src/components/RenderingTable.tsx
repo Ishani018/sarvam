@@ -4,10 +4,10 @@ import type { RenderingRow, WerRow } from "../types";
  * How each side chose to write the number, and the word error rate that follows
  * from that choice alone.
  *
- * This is an observation about metrics and about output formatting. It is not a
- * claim about transcription accuracy, and at a small sample size it could not
- * be: in the calibration run every entity was recovered correctly by both
- * models, and only the spelling of the number differed.
+ * This is an observation about metrics and about output formatting, separate
+ * from the entity losses under bursty packet loss. The model-to-model gap here
+ * is rendering: both models recovered the same entities and wrote them
+ * differently.
  *
  * Two views, because the useful one changes with corpus size. At a handful of
  * utterances every row is worth reading. At forty across nine conditions the
@@ -211,7 +211,8 @@ export function RenderingTable({ rendering, wer, models }: Props) {
       <div className="tablewrap">
         <table>
           <caption>
-            Read alongside the entity hit rate above, not instead of it.
+            Read alongside the entity hit rate above, not instead of it: the
+            two do not move together.
           </caption>
           <thead>
             <tr>

@@ -153,10 +153,11 @@ export function App() {
 
       <Section id="results" no="05" title="Results"
                summary={
-                 `Across the telephony conditions word error rate moves only ` +
+                 `Entity accuracy is unaffected by bandwidth, codecs and ` +
+                 `scattered packet loss, and falls sharply once the same loss ` +
+                 `arrives in bursts. Word error rate moves ` +
                  `${h.werConditionMin?.toFixed(3)}\u2013${h.werConditionMax?.toFixed(3)} ` +
-                 `and the entity hit rate not at all. The large gap is between ` +
-                 `the two models on identical audio.`
+                 `across all of it and does not track the failure.`
                }>
         <DisagreementChart
           matrix={data.matrix} wer={data.wer} conditions={data.conditions}
@@ -203,9 +204,10 @@ export function App() {
         />
 
         <div className="note note--warn" style={{ marginTop: "2rem" }}>
-          This is an observation about output formatting and about what word
-          error rate measures. It is not a claim about recognition accuracy.
-          Every entity in this run was recovered correctly by both models.
+          This part is an observation about output formatting, not about
+          recognition accuracy: the model-to-model gap above comes from how each
+          writes numbers. The entity losses under bursty packet loss are a
+          separate effect, and a real one.
         </div>
       </Section>
 

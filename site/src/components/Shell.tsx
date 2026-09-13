@@ -17,57 +17,89 @@ import type { ConditionDef, GintiData } from "../types";
 export function ResultBlock({ data }: { data: GintiData }) {
   const h = data.headline;
   const pct = (v: number | null) => (v === null ? "—" : v.toFixed(3));
-  const worst = h.werByModel[h.werByModel.length - 1];
-  const best = h.werByModel[0];
+
+  // The controlled comparison, widest gap first: two conditions differing only
+  // in whether the same nominal loss is scattered or clustered. A pooled total
+  // across ten conditions would average this catastrophe with eight perfect
+  // ones and hide the only thing the run actually found.
+  const pair = data.lossPairs[0];
 
   return (
     <section className="result" aria-labelledby="result-heading">
       <div className="wrap">
         <h2 id="result-heading" className="visually-hidden">The result</h2>
 
-        <div className="result__pair">
-          <div>
-            <div className="result__k">entity hit rate</div>
-            <div className="result__v result__v--teal">
-              {h.hits} / {h.entities}
-            </div>
-            <div className="result__sub">
-              every account number, amount, OTP and PIN code, every condition
-            </div>
-          </div>
-          <div>
-            {/* Sliced per model, not per condition. Across conditions WER moves
-                by about 0.015; between models it moves by ten times that on
-                byte-identical audio. A range spanning both would imply the
-                phone line is doing something it is not. */}
-            <div className="result__k">word error rate, per model</div>
-            <div className="result__v result__v--rust result__v--pair">
-              <span>{pct(best?.wer ?? null)}</span>
-              <span className="result__vs">vs</span>
-              <span>{pct(worst?.wer ?? null)}</span>
-            </div>
-            <div className="result__sub">
-              {best?.model} against {worst?.model}, identical audio
-            </div>
-          </div>
-        </div>
+        {pair ? (
+          <>
+            <p className="result__lede">
+              At {(pair.rate * 100).toFixed(0)}% packet loss, account numbers
+              survive or do not depending entirely on whether the loss is
+              scattered or arrives in bursts.
+            </p>
 
-        <p className="result__says">
-          Both numbers describe the same {h.entities} entities in the same
-          recordings. Every entity survived every condition, and the two models
-          still differ by{" "}
-          {((worst?.wer ?? 0) - (best?.wer ?? 0)).toFixed(3)} in word error rate
-          &mdash; not because one heard the audio better, but because they write
-          numbers differently. Across the telephony conditions themselves word
-          error rate moves only{" "}
-          {pct(h.werConditionMin)}&ndash;{pct(h.werConditionMax)}.
-        </p>
+            <div className="result__pair">
+              <div>
+                <div className="result__k">
+                  scattered loss &mdash; {pair.scattered.condition}
+                </div>
+                <div className="result__v result__v--teal">
+                  {pair.scattered.accounts.hits} / {pair.scattered.accounts.total}
+                </div>
+                <div className="result__sub">
+                  account numbers recovered, both models
+                </div>
+              </div>
+              <div>
+                <div className="result__k">
+                  bursty loss &mdash; {pair.bursty.condition}
+                </div>
+                <div className="result__v result__v--rust">
+                  {pair.bursty.accounts.hits} / {pair.bursty.accounts.total}
+                </div>
+                <div className="result__sub">
+                  same rate, same audio, same codec
+                </div>
+              </div>
+            </div>
+
+            <p className="result__says">
+              Independent per-frame loss leaves intact context either side of
+              every 20&nbsp;ms hole, and the number comes through. Clustering the
+              same {(pair.rate * 100).toFixed(0)}% into bursts averaging{" "}
+              {pair.meanBurstMs ?? 100}&nbsp;ms removes about a syllable at a
+              time, and in these sentences a syllable is a digit. Nothing else
+              about the two conditions differs.
+            </p>
+
+            <p className="result__says result__says--quiet">
+              Word error rate barely registers it: {pct(pair.scattered.wer)}{" "}
+              against {pct(pair.bursty.wer)} over the same two conditions. Across
+              all {h.conditions} conditions it moves{" "}
+              {pct(h.werConditionMin)}&ndash;{pct(h.werConditionMax)} while the
+              entity hit rate falls as far as{" "}
+              {(Math.min(...data.lossPairs.map(
+                (p) => p.bursty.hits / p.bursty.total))).toFixed(3)}.
+            </p>
+          </>
+        ) : (
+          <div className="result__pair">
+            <div>
+              <div className="result__k">entity hit rate</div>
+              <div className="result__v result__v--teal">
+                {h.hits} / {h.entities}
+              </div>
+            </div>
+          </div>
+        )}
 
         <p className="result__scope">
-          Scope: {h.utterances} synthetic {h.languages.join(", ")} utterances,{" "}
-          {h.models} models, {h.conditions} of {h.declaredConditions} declared
-          conditions, {h.modes.join(" and ")} mode only. A calibration run, not
-          a benchmark.
+          Overall {h.hits} of {h.entities} entities recovered across{" "}
+          {h.conditions} conditions &mdash; a total that averages the failures
+          above with the conditions that lost nothing, which is why it is not the
+          headline. Scope: {h.utterances} synthetic {h.languages.join(", ")}{" "}
+          utterances, {h.models} models, {h.conditions} of{" "}
+          {h.declaredConditions} declared conditions, {h.modes.join(" and ")}{" "}
+          mode only. A calibration run, not a benchmark.
         </p>
 
         <DisagreementChart
@@ -153,10 +185,17 @@ export function Nav({ sections }: { sections: SectionDef[] }) {
 
   return (
     <>
+      {/* Reading position, at the very top edge of the viewport rather than
+          under the bar: it is ambient, and it should not read as a border. */}
+      <div className="progress" role="presentation">
+        <div className="progress__bar" style={{ width: `${progress * 100}%` }} />
+      </div>
+
       <nav className="nav" aria-label="Sections">
         <div className="wrap nav__inner">
           <span className="nav__mark">
             Ginti<span className="deva">गिनती</span>
+            {/* Duplicated by the rail wherever the rail is visible. */}
             <span className="nav__pos">
               {current.no} / {String(sections.length).padStart(2, "0")}
             </span>
@@ -169,7 +208,6 @@ export function Nav({ sections }: { sections: SectionDef[] }) {
               </a>
             ))}
           </div>
-          <div className="nav__progress" style={{ width: `${progress * 100}%` }} />
         </div>
       </nav>
 
@@ -180,9 +218,9 @@ export function Nav({ sections }: { sections: SectionDef[] }) {
           {sections.map((s, i) => (
             <li key={s.id}>
               <a href={`#${s.id}`} className={i === active ? "is-active" : undefined}
-                 aria-current={i === active ? "true" : undefined}>
+                 aria-current={i === active ? "page" : undefined}>
                 <span className="rail__no">{s.no}</span>
-                <span>{s.title}</span>
+                <span className="rail__title">{s.title}</span>
               </a>
             </li>
           ))}

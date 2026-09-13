@@ -461,6 +461,63 @@ function renderingTable(rows) {
 // Build
 // ---------------------------------------------------------------------------
 
+/**
+ * Refuse to build a page that claims every entity survived when some did not.
+ *
+ * This is not hypothetical. "Every entity survived every condition" sat under
+ * the result block, hardcoded, and stayed there when bursty loss started
+ * costing 53 entities -- directly above a chart showing the line at 0.90. A
+ * sentence the reader can falsify in three seconds does more damage than any
+ * missing feature, so the build checks rather than trusting review.
+ */
+function assertNoStaleSurvivalClaim(data) {
+  const rate = data.headline.hitRate;
+  if (rate === null || rate >= 1) return;
+
+  const CLAIMS = [
+    /every entity (survived|was recovered)/i,
+    /all entities (survived|were recovered)/i,
+    /entities survived/i,
+    /recovered correctly by both models/i,
+    /(hit rate|entity accuracy) (does not|did not) move/i,
+    /nothing .{0,30}moved the entity hit rate/i,
+  ];
+
+  const sources = [];
+  const walk = (dir) => {
+    for (const f of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, f.name);
+      if (f.isDirectory()) { if (f.name !== "generated") walk(full); }
+      else if (/\.(tsx?|md)$/.test(f.name)) sources.push(full);
+    }
+  };
+  walk(join(SITE, "src"));
+  if (existsSync(PATHS.content)) walk(PATHS.content);
+
+  const offences = [];
+  for (const file of sources) {
+    const text = readFileSync(file, "utf8");
+    text.split("\n").forEach((line, i) => {
+      // A comment explaining the check is not itself a claim.
+      if (/^\s*(\*|\/\/|#)/.test(line)) return;
+      for (const re of CLAIMS) {
+        if (re.test(line)) offences.push(`${basename(file)}:${i + 1}  ${line.trim()}`);
+      }
+    });
+  }
+
+  if (offences.length) {
+    throw new Error(
+      `the measured hit rate is ${(rate * 100).toFixed(1)}% ` +
+      `(${data.headline.hits}/${data.headline.entities}), but ` +
+      `${offences.length} line(s) still claim every entity survived:\n\n` +
+      offences.map((o) => `    ${o}`).join("\n") +
+      `\n\n  Derive the sentence from the data or delete it. A claim the ` +
+      `reader can falsify from the chart beside it is worse than no claim.`
+    );
+  }
+}
+
 function build() {
   console.log("ginti: building site data");
   const rows = loadRows();
@@ -752,6 +809,55 @@ function build() {
     content,
     // The headline pair. Both describe the same audio and disagree completely;
     // that disagreement is the argument, so it is derived here and never typed.
+    // The controlled comparison: conditions that differ ONLY in whether loss
+    // is clustered. Same nominal rate, same source audio, same codec chain.
+    lossPairs: (() => {
+      const cellsFor = (cond, type) => {
+        const cs = hitRateMatrix(rows).filter(
+          (m) => m.condition === cond && (!type || m.entityType === type));
+        return {
+          hits: cs.reduce((a, c) => a + c.hits, 0),
+          total: cs.reduce((a, c) => a + c.total, 0),
+        };
+      };
+      const werFor = (cond) => {
+        const v = rows.filter((r) => r.condition === cond).map((r) => r.wer);
+        return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
+      };
+
+      // Pair a bernoulli condition with the gilbert one at the same rate.
+      const loss = cfg.conditions
+        .map((c) => ({ c, op: c.chain.find((o) => o.op === "packet_loss") }))
+        .filter((x) => x.op && conditionsInResults.includes(x.c.name));
+
+      const pairs = [];
+      for (const a of loss.filter((x) => (x.op.model ?? "bernoulli") === "bernoulli")) {
+        for (const b of loss.filter((x) => x.op.model === "gilbert")) {
+          if (a.op.rate !== b.op.rate) continue;
+          if ((b.op.fill ?? "silence") !== (a.op.fill ?? "silence")) continue;
+          pairs.push({
+            rate: a.op.rate,
+            meanBurstMs: b.op.mean_burst_ms ?? null,
+            scattered: {
+              condition: a.c.name, ...cellsFor(a.c.name, null),
+              wer: werFor(a.c.name),
+              accounts: cellsFor(a.c.name, "account_number"),
+            },
+            bursty: {
+              condition: b.c.name, ...cellsFor(b.c.name, null),
+              wer: werFor(b.c.name),
+              accounts: cellsFor(b.c.name, "account_number"),
+            },
+          });
+        }
+      }
+      // Widest gap first: that is the pair the page should lead with.
+      pairs.sort((x, y) =>
+        (y.scattered.hits / y.scattered.total - y.bursty.hits / y.bursty.total) -
+        (x.scattered.hits / x.scattered.total - x.bursty.hits / x.bursty.total));
+      return pairs;
+    })(),
+
     headline: (() => {
       // WER is reported per model, pooled over conditions, because that is
       // where the variance actually is: across conditions it moves by about
@@ -795,6 +901,8 @@ function build() {
     })(),
     audioBundle: { files: copied, bytes },
   };
+
+  assertNoStaleSurvivalClaim(data);
 
   mkdirSync(dirname(PATHS.outData), { recursive: true });
   writeFileSync(PATHS.outData, JSON.stringify(data, null, 2));
