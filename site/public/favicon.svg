@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Ginti: five tally strokes, the fifth broken. Kept in sync by hand with
+       src/components/Mark.tsx; scripts/check-mark.mjs fails the build if the
+       two geometries drift apart. -->
+  <g fill="none" stroke="#1f5c63" stroke-width="6.5" stroke-linecap="round">
+    <line x1="3.25" y1="8" x2="3.25" y2="56"/>
+    <line x1="17.625" y1="8" x2="17.625" y2="56"/>
+    <line x1="32" y1="8" x2="32" y2="56"/>
+    <line x1="46.375" y1="8" x2="46.375" y2="56"/>
+    <line x1="60.75" y1="8" x2="60.75" y2="22"/>
+    <line x1="60.75" y1="42" x2="60.75" y2="56"/>
+  </g>
+</svg>

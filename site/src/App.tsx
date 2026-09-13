@@ -11,6 +11,7 @@ import { Reveal } from "./components/Reveal";
 import { Ambient } from "./components/Ambient";
 import { WhyItMatters } from "./components/WhyItMatters";
 import { Markdown } from "./components/Markdown";
+import { Mark } from "./components/Mark";
 import { MethodTable } from "./components/MethodTable";
 import raw from "./generated/data.json";
 import type { GintiData } from "./types";
@@ -109,7 +110,10 @@ function Footer() {
     <footer className="foot">
       <div className="foot__inner">
         <div className="foot__brand">
-          <span className="foot__mark">Ginti<span className="deva">गिनती</span></span>
+          <span className="foot__mark">
+            <Mark className="foot__logo" size="1em" />
+            Ginti<span className="deva">गिनती</span>
+          </span>
           <p>{data.project.tagline}</p>
           {repo && (
             <a className="foot__link" href={repo} target="_blank" rel="noreferrer noopener">
@@ -119,6 +123,16 @@ function Footer() {
         </div>
 
         <dl className="foot__meta">
+          <div><dt>scope</dt><dd>
+            {data.headline.utterances} synthetic {data.headline.languages.join(", ")}{" "}
+            utterances, {data.headline.models} models,{" "}
+            {data.headline.conditions} of {data.headline.declaredConditions}{" "}
+            declared conditions, {data.headline.modes.join(" and ")} mode.
+            A calibration run, not a benchmark.
+          </dd></div>
+          <div><dt>entities recovered</dt><dd>
+            {data.headline.hits} of {data.headline.entities}
+          </dd></div>
           <div><dt>built</dt><dd>{built}Z</dd></div>
           <div><dt>runs</dt><dd>{runs}</dd></div>
           <div><dt>result rows</dt><dd>{data.summary.rows}</dd></div>
@@ -157,7 +171,7 @@ export function App() {
         </Detail>
       </Section>
 
-      <Section id="what" no="02" title="What Ginti does" tone="tint" wide
+      <Section id="what" no="02" title="What Ginti does" tone="cool" wide
                summary={md("what-ginti-does").summary}>
         <PipelineDiagram />
         <Detail>
@@ -166,11 +180,11 @@ export function App() {
       </Section>
 
       <Section id="listen" no="03" title="Hear it break" wide
-               summary="Pick a sentence and a kind of damage, then swap between the clean take and the damaged one on the same playhead. What each model returned updates underneath.">
+               summary="One sentence, read aloud. Put it through a phone line and switch between the two takes on the same playhead.">
         <Playground listen={data.listen} conditions={data.conditions} />
       </Section>
 
-      <Section id="degradation" no="04" title="How the degradation works" tone="tint" wide
+      <Section id="degradation" no="04" title="How the degradation works" tone="warm" wide
                summary={md("degradation").summary}>
         <ConditionLadder conditions={data.conditions} matrix={data.matrix} />
         <Detail>
@@ -181,7 +195,7 @@ export function App() {
         </Detail>
       </Section>
 
-      <Section id="results" no="05" title="Results" wide
+      <Section id="results" no="05" title="Results" tone="cool-deep" wide
                summary={
                  `Entity accuracy is unaffected by bandwidth, codecs and ` +
                  `scattered packet loss, and falls sharply once the same loss ` +
@@ -189,6 +203,20 @@ export function App() {
                  `${h.werConditionMin?.toFixed(3)}–${h.werConditionMax?.toFixed(3)} ` +
                  `across all of it and does not track the failure.`
                }>
+        {pair && (
+          <Reveal className="prose lede">
+            <p>
+              Both conditions drop {(pair.rate * 100).toFixed(0)}% of the
+              20&nbsp;ms packets the audio travels in. The only difference is
+              when: independently in one, and in runs averaging{" "}
+              {pair.meanBurstMs ?? 100}&nbsp;ms in the other. Word error rate
+              moves {pair.scattered.wer?.toFixed(3) ?? "—"} to{" "}
+              {pair.bursty.wer?.toFixed(3) ?? "—"} across that and would not
+              tell you anything had happened.
+            </p>
+          </Reveal>
+        )}
+
         {pair && (
           <Reveal className="pairbox">
             {data.lossPairs.map((p) => {
@@ -290,7 +318,7 @@ export function App() {
         </Reveal>
       </Section>
 
-      <Section id="method" no="06" title="Exact parameters" tone="tint"
+      <Section id="method" no="06" title="Exact parameters" tone="warm-deep"
                summary={md("method").summary}>
         <Detail label="Read how it is scored">
           <Markdown source={md("method").body} />

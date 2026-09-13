@@ -278,163 +278,113 @@ function Answer({ r, damaged }: { r: ListenResult; damaged: boolean }) {
 const lostIn = (c: ListenCondition | undefined) =>
   !!c?.results.some((r) => r.entities.some((e) => !e.hit));
 
+/** A small disclosure: a label that turns into its own content. */
+function More({ label, open, onToggle, children }: {
+  label: string; open: boolean; onToggle: () => void; children: React.ReactNode;
+}) {
+  return (
+    <div className={`more ${open ? "is-open" : ""}`}>
+      <button type="button" className="more__btn" aria-expanded={open}
+              onClick={onToggle}>
+        <span className="more__sign" aria-hidden="true">{open ? "−" : "+"}</span>
+        {label}
+      </button>
+      {open && <div className="more__body">{children}</div>}
+    </div>
+  );
+}
+
+/**
+ * The playground, revealed in stages.
+ *
+ * It opens on one thing: a sentence, its gold value, and a play button. The
+ * only control offered is what kind of damage to do to it. Choosing one brings
+ * in the A/B, which is the best thing in the section and gets the room to say
+ * so. Models, waveforms, transcripts and the sentence picker are each one
+ * disclosure away -- present for a reader who reaches, absent for one who has
+ * not yet asked.
+ */
 export function Playground({ listen, conditions }: {
   listen: ListenEntry[]; conditions: ConditionDef[];
 }) {
   const byName = useMemo(
     () => new Map(conditions.map((c) => [c.name, c])), [conditions]);
 
-  // Default to a broken example rather than a working one: the reader came to
-  // see a failure, and a playground that opens on a perfect result reads as a
-  // claim that nothing goes wrong.
-  const fallback = useMemo<Sel>(() => {
-    for (const u of listen) {
-      for (const c of u.conditions) {
-        const def = byName.get(c.condition);
-        if (def && kindOf(def) === "bursty" && lostIn(c)) {
-          return { u: u.utteranceId, c: c.condition, m: "all" };
-        }
-      }
-    }
-    const first = listen[0];
-    const firstDamaged = first?.conditions.find((c) => c.condition !== "clean");
-    return {
-      u: first?.utteranceId ?? "",
-      c: firstDamaged?.condition ?? first?.conditions[0]?.condition ?? "",
-      m: "all",
-    };
-  }, [listen, byName]);
-
-  const [sel, setSel] = useState<Sel>(() => ({ ...fallback, ...INITIAL_HASH }));
-
-  const utt = listen.find((u) => u.utteranceId === sel.u) ?? listen[0];
-  const damagedConds = utt?.conditions.filter((c) => c.condition !== "clean") ?? [];
-  const clean = utt?.conditions.find((c) => c.condition === "clean");
-  const chosen =
-    damagedConds.find((c) => c.condition === sel.c) ?? damagedConds[0];
-
   const models = useMemo(
     () => [...new Set(listen.flatMap((u) =>
       u.conditions.flatMap((c) => c.results.map((r) => r.model))))].sort(),
     [listen]);
-  const shown = sel.m === "all" ? models : models.filter((m) => m === sel.m);
 
-  // The hash follows what is actually on screen, not what was asked for: a
-  // stale link naming a condition this run does not have still produces a
-  // shareable URL for what the reader ended up seeing.
-  const live: Sel = {
-    u: utt?.utteranceId ?? "",
-    c: chosen?.condition ?? "",
-    m: sel.m,
-  };
-  useEffect(() => { if (live.u && live.c) writeHash(live); },
-    [live.u, live.c, live.m]);
+  // Open on a sentence that has something to find. A playground whose default
+  // sentence survives everything reads as a claim that nothing goes wrong.
+  const firstBroken = useMemo(
+    () => listen.find((u) => u.conditions.some(lostIn)) ?? listen[0],
+    [listen]);
+
+  const [sel, setSel] = useState<Sel>(() => ({
+    u: firstBroken?.utteranceId ?? "",
+    // No condition chosen: the reader picks the damage, and that choice is the
+    // moment the section turns from a recording into a comparison.
+    c: "",
+    m: "all",
+    ...INITIAL_HASH,
+  }));
+
+  const [showUtts, setShowUtts] = useState(false);
+  const [showWaves, setShowWaves] = useState(false);
+  const [showText, setShowText] = useState(false);
+  const [pickedKind, setPickedKind] = useState<string | null>(null);
+
+  const utt = listen.find((u) => u.utteranceId === sel.u) ?? listen[0];
+  const damagedConds = utt?.conditions.filter((c) => c.condition !== "clean") ?? [];
+  const clean = utt?.conditions.find((c) => c.condition === "clean");
+  const chosen = sel.c ? damagedConds.find((c) => c.condition === sel.c) : undefined;
+
+  const groups = useMemo(
+    () => groupByKind(conditions, damagedConds.map((c) => c.condition)),
+    [conditions, damagedConds]);
+
+  // Within a kind, offer the harshest first: a reader clicking "bursty loss"
+  // wants to hear what bursty loss does, not its mildest setting.
+  const worstIn = (names: string[]) =>
+    names.slice().sort((a, b) => {
+      const la = lostIn(damagedConds.find((c) => c.condition === a)) ? 0 : 1;
+      const lb = lostIn(damagedConds.find((c) => c.condition === b)) ? 0 : 1;
+      return la - lb;
+    })[0];
+
+  const shown = sel.m === "all" ? models : models.filter((m) => m === sel.m);
+  const ab = useAB(clean?.audio ?? null, chosen?.audio ?? null);
+
+  useEffect(() => {
+    if (utt?.utteranceId) writeHash({ u: utt.utteranceId, c: sel.c, m: sel.m });
+  }, [utt?.utteranceId, sel.c, sel.m]);
 
   // A link pasted into a new tab lands at the top of the page; take it to the
-  // section it was pointing at. Once, and only for a hash that was actually in
-  // the URL on arrival.
+  // section it was pointing at. Once, and only for a hash that was in the URL
+  // on arrival -- an inbound link also arrives with a condition already chosen,
+  // so open the comparison rather than the resting state.
   useEffect(() => {
     if (restoredScroll || Object.keys(INITIAL_HASH).length === 0) return;
     restoredScroll = true;
     document.getElementById("listen")?.scrollIntoView({ block: "start" });
   }, []);
+  useEffect(() => {
+    if (INITIAL_HASH.c) {
+      const def = byName.get(INITIAL_HASH.c);
+      if (def) setPickedKind(kindOf(def));
+    }
+  }, [byName]);
 
-  const ab = useAB(clean?.audio ?? null, chosen?.audio ?? null);
-  const groups = useMemo(
-    () => groupByKind(conditions, damagedConds.map((c) => c.condition)),
-    [conditions, damagedConds]);
+  if (!utt) return null;
 
-  const openKind = chosen ? kindOf(byName.get(chosen.condition)!) : null;
-  const [expanded, setExpanded] = useState<string | null>(openKind);
-  useEffect(() => { setExpanded(openKind); }, [openKind]);
-
-  if (!utt || !chosen) return null;
-
-  const active = ab.side === "clean" ? clean : chosen;
   const damagedLost = lostIn(chosen);
+  const active = ab.side === "clean" ? clean : chosen;
+  const kindGroup = groups.find((g) => g.kind === pickedKind);
 
   return (
-    <div className="pg">
-      {/* ---- utterance selector -------------------------------------- */}
-      <div className="pg__bar">
-        <span className="pg__lab">Sentence</span>
-        <div className="pg__utts" role="group" aria-label="Choose a sentence">
-          {listen.map((u) => {
-            const broken = u.conditions.some(lostIn);
-            const on = u.utteranceId === utt.utteranceId;
-            return (
-              <button key={u.utteranceId} type="button"
-                      className={`utb ${on ? "is-on" : ""}`}
-                      aria-pressed={on}
-                      onClick={() => setSel((s) => ({ ...s, u: u.utteranceId }))}>
-                <span className="utb__types">
-                  {u.entities.map((e) => entityNoun(e.type)).join(" + ")}
-                </span>
-                <span className="utb__id">{u.utteranceId.slice(-5)}</span>
-                {broken && <span className="utb__dot" title="has failures" />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ---- condition selector, grouped ----------------------------- */}
-      <div className="pg__bar">
-        <span className="pg__lab">Damage</span>
-        <div className="pg__kinds">
-          {groups.map((g) => {
-            const open = expanded === g.kind;
-            const holds = g.names.includes(chosen.condition);
-            return (
-              <div className={`kind ${open ? "is-open" : ""} ${holds ? "is-holding" : ""}`}
-                   key={g.kind}>
-                <button type="button" className="kind__head"
-                        aria-expanded={open}
-                        onClick={() => setExpanded(open ? null : g.kind)}>
-                  <span className="kind__name">{g.label}</span>
-                  <span className="kind__n">{g.names.length}</span>
-                </button>
-                {open && (
-                  <div className="kind__body">
-                    <p className="kind__blurb">{g.blurb}</p>
-                    <div className="kind__opts">
-                      {g.names.map((n) => {
-                        const c = damagedConds.find((x) => x.condition === n);
-                        const broken = lostIn(c);
-                        return (
-                          <button key={n} type="button"
-                                  className={`opt ${n === chosen.condition ? "is-on" : ""} ${broken ? "opt--broken" : ""}`}
-                                  aria-pressed={n === chosen.condition}
-                                  onClick={() => setSel((s) => ({ ...s, c: n }))}>
-                            {n}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ---- model toggle -------------------------------------------- */}
-      <div className="pg__bar">
-        <span className="pg__lab">Model</span>
-        <div className="pg__models" role="group" aria-label="Choose models">
-          {[...models, "all"].map((m) => (
-            <button key={m} type="button"
-                    className={`seg ${sel.m === m ? "is-on" : ""}`}
-                    aria-pressed={sel.m === m}
-                    onClick={() => setSel((s) => ({ ...s, m }))}>
-              {m === "all" ? "both, side by side" : m}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* ---- the sentence -------------------------------------------- */}
+    <div className={`pg ${chosen ? "pg--compare" : ""}`}>
+      {/* ---- the sentence under test ------------------------------- */}
       <div className="pg__sent">
         <p className="pg__deva deva">{marked(utt.text, utt.entities)}</p>
         {utt.gloss && <p className="pg__gloss">{marked(utt.gloss, utt.entities)}</p>}
@@ -448,39 +398,40 @@ export function Playground({ listen, conditions }: {
         </dl>
       </div>
 
-      {/* ---- transport ----------------------------------------------- */}
+      {/* ---- transport --------------------------------------------- */}
       <div className="pg__deck">
         <div className="pg__transport">
           <button type="button" className="pg__play" onClick={ab.toggle}
                   aria-label={ab.playing ? "Pause" : "Play"}>
             {ab.playing ? (
-              <svg viewBox="0 0 10 12" width="11" height="13" aria-hidden="true">
-                <rect x="0" y="0" width="3.2" height="12" fill="currentColor" />
-                <rect x="6.8" y="0" width="3.2" height="12" fill="currentColor" />
+              <svg viewBox="0 0 10 12" width="12" height="14" aria-hidden="true">
+                <rect x="0" y="0" width="3.2" height="12" rx="1.2" fill="currentColor" />
+                <rect x="6.8" y="0" width="3.2" height="12" rx="1.2" fill="currentColor" />
               </svg>
             ) : (
-              <svg viewBox="0 0 10 12" width="11" height="13" aria-hidden="true">
-                <path d="M0 0 L10 6 L0 12 Z" fill="currentColor" />
+              <svg viewBox="0 0 12 13" width="12" height="14" aria-hidden="true">
+                <path d="M1.5 1 L10.5 6.5 L1.5 12 Z" fill="currentColor"
+                      strokeWidth="2.4" stroke="currentColor" strokeLinejoin="round" />
               </svg>
             )}
           </button>
 
-          <div className="pg__ab" role="group" aria-label="Which take is audible">
-            <button type="button"
-                    className={`ab ${ab.side === "clean" ? "is-on" : ""}`}
-                    onClick={() => { if (ab.side !== "clean") ab.flip(); }}>
-              A &middot; clean
-            </button>
-            <button type="button"
-                    className={`ab ${ab.side === "damaged" ? "is-on" : ""}`}
-                    onClick={() => { if (ab.side !== "damaged") ab.flip(); }}>
-              B &middot; {chosen.condition}
-            </button>
-            <button type="button" className="ab ab--swap" onClick={ab.flip}
-                    title="Swap without moving the playhead">
-              swap
-            </button>
-          </div>
+          {chosen ? (
+            <div className="pg__ab" role="group" aria-label="Which take is audible">
+              <button type="button"
+                      className={`ab ${ab.side === "clean" ? "is-on" : ""}`}
+                      onClick={() => { if (ab.side !== "clean") ab.flip(); }}>
+                A &middot; clean
+              </button>
+              <button type="button"
+                      className={`ab ${ab.side === "damaged" ? "is-on" : ""}`}
+                      onClick={() => { if (ab.side !== "damaged") ab.flip(); }}>
+                B &middot; damaged
+              </button>
+            </div>
+          ) : (
+            <span className="pg__nowplaying">the clean recording</span>
+          )}
 
           <span className="pg__time">{fmt(ab.at)} / {fmt(ab.duration)}</span>
         </div>
@@ -493,66 +444,173 @@ export function Playground({ listen, conditions }: {
           <span style={{ transform: `scaleX(${ab.pos})` }} />
         </div>
 
-        <p className="pg__hint">
-          Playing <b>{active?.condition}</b>. Swap keeps the playhead where it
-          is, so the same instant is heard both ways.
-        </p>
-
-        {/* ---- waveforms, aligned ------------------------------------ */}
-        <div className="pg__waves">
-          <div className={`pg__wrow ${ab.side === "clean" ? "is-live" : ""}`}>
-            <span className="pg__wlab">A clean</span>
-            <Wave peaks={clean?.peaks ?? null} pos={ab.pos}
-                  live={ab.side === "clean"} label="clean" marksGaps={false} />
-          </div>
-          <div className={`pg__wrow ${ab.side === "damaged" ? "is-live" : ""}`}>
-            <span className="pg__wlab">B {chosen.condition}</span>
-            <Wave peaks={chosen.peaks} pos={ab.pos}
-                  live={ab.side === "damaged"} label={chosen.condition}
-                  marksGaps={!!lossOp(byName.get(chosen.condition)!)} />
-          </div>
-        </div>
-        <p className="figcap">
-          {lossOp(byName.get(chosen.condition)!)
-            ? "Rust marks frames the network dropped. "
-            : "This condition drops no frames; it damages the ones that arrive. "}
-          {byName.get(chosen.condition)?.description}
-        </p>
+        {chosen && (
+          <p className="pg__hint">
+            Hearing <b>{active?.condition}</b>. Switching keeps the playhead
+            where it is, so the same instant is heard both ways.
+          </p>
+        )}
 
         {clean?.audio && <audio ref={ab.cleanRef} src={clean.audio} preload="auto" />}
-        {chosen.audio && <audio ref={ab.dmgRef} src={chosen.audio} preload="auto" />}
+        {chosen?.audio && <audio ref={ab.dmgRef} src={chosen.audio} preload="auto" />}
       </div>
 
-      {/* ---- what came back ------------------------------------------ */}
-      <div className="pg__out">
-        <div className="pg__col">
-          <h4 className="pg__colhead">
-            <span className="pg__side">A</span> clean
-            <span className="tag tag--hit">reference</span>
-          </h4>
-          {shown.map((m) => {
-            const r = clean?.results.find((x) => x.model === m);
-            return r
-              ? <Answer key={m} r={r} damaged={false} />
-              : <p key={m} className="pg__none">{m}: not in this run</p>;
+      {/* ---- the one control: what damage ------------------------- */}
+      <div className="pg__choose">
+        <p className="pg__ask">
+          {chosen ? "Try another kind of damage" : "Now put it through a phone line"}
+        </p>
+        <div className="pg__kinds" role="group" aria-label="Choose a kind of damage">
+          {groups.map((g) => {
+            const on = pickedKind === g.kind;
+            const name = worstIn(g.names);
+            const breaks = lostIn(damagedConds.find((c) => c.condition === name));
+            return (
+              <button key={g.kind} type="button"
+                      className={`dmg ${on ? "is-on" : ""} ${breaks ? "dmg--breaks" : ""}`}
+                      aria-pressed={on}
+                      onClick={() => {
+                        setPickedKind(g.kind);
+                        setSel((p) => ({ ...p, c: name }));
+                      }}>
+                <span className="dmg__name">{g.label}</span>
+                <span className="dmg__blurb">{g.blurb}</span>
+              </button>
+            );
           })}
+          {chosen && (
+            <button type="button" className="dmg dmg--reset"
+                    onClick={() => { setPickedKind(null); setSel((p) => ({ ...p, c: "" })); }}>
+              <span className="dmg__name">Back to clean</span>
+            </button>
+          )}
         </div>
 
-        <div className={`pg__col ${damagedLost ? "pg__col--lost" : ""}`}>
-          <h4 className="pg__colhead">
-            <span className="pg__side">B</span> {chosen.condition}
+        {/* The specific conditions inside the chosen kind, once there is more
+            than one to choose between. */}
+        {chosen && kindGroup && kindGroup.names.length > 1 && (
+          <div className="pg__variants">
+            <span className="pg__vlab">exactly which</span>
+            {kindGroup.names.map((n) => {
+              const broken = lostIn(damagedConds.find((c) => c.condition === n));
+              return (
+                <button key={n} type="button"
+                        className={`opt ${n === chosen.condition ? "is-on" : ""} ${broken ? "opt--broken" : ""}`}
+                        aria-pressed={n === chosen.condition}
+                        onClick={() => setSel((p) => ({ ...p, c: n }))}>
+                  {n}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ---- the verdict, once there is a comparison --------------- */}
+      {chosen && (
+        <div className={`pg__verdict ${damagedLost ? "is-lost" : "is-kept"}`}>
+          <span className="pg__vk">{damagedLost ? "entity lost" : "entity kept"}</span>
+          <p>
             {damagedLost
-              ? <span className="tag tag--miss">entity lost</span>
-              : <span className="tag tag--hit">entity kept</span>}
-          </h4>
-          {shown.map((m) => {
-            const r = chosen.results.find((x) => x.model === m);
-            return r
-              ? <Answer key={m} r={r} damaged />
-              : <p key={m} className="pg__none">{m}: not in this run</p>;
+              ? `Under ${chosen.condition}, at least one model no longer returns the value that was said.`
+              : `Under ${chosen.condition}, every model still returns the value that was said.`}
+          </p>
+        </div>
+      )}
+
+      {/* ---- everything else, on request --------------------------- */}
+      {chosen && (
+        <div className="pg__mores">
+          <More label="See the waveforms" open={showWaves}
+                onToggle={() => setShowWaves((v) => !v)}>
+            <div className="pg__waves">
+              <div className={`pg__wrow ${ab.side === "clean" ? "is-live" : ""}`}>
+                <span className="pg__wlab">A clean</span>
+                <Wave peaks={clean?.peaks ?? null} pos={ab.pos}
+                      live={ab.side === "clean"} label="clean" marksGaps={false} />
+              </div>
+              <div className={`pg__wrow ${ab.side === "damaged" ? "is-live" : ""}`}>
+                <span className="pg__wlab">B {chosen.condition}</span>
+                <Wave peaks={chosen.peaks} pos={ab.pos}
+                      live={ab.side === "damaged"} label={chosen.condition}
+                      marksGaps={!!lossOp(byName.get(chosen.condition)!)} />
+              </div>
+            </div>
+            <p className="figcap">
+              {lossOp(byName.get(chosen.condition)!)
+                ? "Rust marks frames the network dropped. "
+                : "This condition drops no frames; it damages the ones that arrive. "}
+              {byName.get(chosen.condition)?.description}
+            </p>
+          </More>
+
+          <More label="See what each model returned" open={showText}
+                onToggle={() => setShowText((v) => !v)}>
+            <div className="pg__models" role="group" aria-label="Choose models">
+              {[...models, "all"].map((m) => (
+                <button key={m} type="button"
+                        className={`seg ${sel.m === m ? "is-on" : ""}`}
+                        aria-pressed={sel.m === m}
+                        onClick={() => setSel((p) => ({ ...p, m }))}>
+                  {m === "all" ? "both" : m}
+                </button>
+              ))}
+            </div>
+
+            <div className="pg__out">
+              <div className="pg__col">
+                <h4 className="pg__colhead">
+                  <span className="pg__side">A</span> clean
+                  <span className="tag tag--hit">reference</span>
+                </h4>
+                {shown.map((m) => {
+                  const r = clean?.results.find((x) => x.model === m);
+                  return r
+                    ? <Answer key={m} r={r} damaged={false} />
+                    : <p key={m} className="pg__none">{m}: not in this run</p>;
+                })}
+              </div>
+
+              <div className={`pg__col ${damagedLost ? "pg__col--lost" : ""}`}>
+                <h4 className="pg__colhead">
+                  <span className="pg__side">B</span> {chosen.condition}
+                  {damagedLost
+                    ? <span className="tag tag--miss">entity lost</span>
+                    : <span className="tag tag--hit">entity kept</span>}
+                </h4>
+                {shown.map((m) => {
+                  const r = chosen.results.find((x) => x.model === m);
+                  return r
+                    ? <Answer key={m} r={r} damaged />
+                    : <p key={m} className="pg__none">{m}: not in this run</p>;
+                })}
+              </div>
+            </div>
+          </More>
+        </div>
+      )}
+
+      <More label={`Try another sentence (${listen.length})`} open={showUtts}
+            onToggle={() => setShowUtts((v) => !v)}>
+        <div className="pg__utts" role="group" aria-label="Choose a sentence">
+          {listen.map((u) => {
+            const broken = u.conditions.some(lostIn);
+            const on = u.utteranceId === utt.utteranceId;
+            return (
+              <button key={u.utteranceId} type="button"
+                      className={`utb ${on ? "is-on" : ""}`}
+                      aria-pressed={on}
+                      onClick={() => setSel((p) => ({ ...p, u: u.utteranceId }))}>
+                <span className="utb__types">
+                  {u.entities.map((e) => entityNoun(e.type)).join(" + ")}
+                </span>
+                <span className="utb__id">{u.utteranceId.slice(-5)}</span>
+                {broken && <span className="utb__dot" title="has failures" />}
+              </button>
+            );
           })}
         </div>
-      </div>
+      </More>
     </div>
   );
 }

@@ -31,9 +31,10 @@ export function WhyItMatters({ data }: { data: GintiData }) {
         <Reveal className="why__head">
           <h2>Why this exists</h2>
           <p>
-            A voice agent that mishears a word can be forgiven. One that
-            mishears a digit cannot, and the two failures look identical to
-            every metric in common use.
+            Voice agents in India read account numbers, OTPs and payment
+            amounts down phone lines that drop audio. A voice agent that
+            mishears a word can be forgiven. One that mishears a digit cannot,
+            and the two failures look identical to every metric in common use.
           </p>
         </Reveal>
 

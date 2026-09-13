@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Mark } from "./Mark";
 
 export interface SectionDef { id: string; no: string; title: string; nav: string; }
 
@@ -78,6 +79,7 @@ export function Header({
     <header className={`hdr ${pastHero ? "hdr--stuck" : ""}`}>
       <div className="hdr__inner">
         <a className="hdr__mark" href="#top">
+          <Mark className="hdr__logo" size="1.15em" />
           Ginti<span className="deva">गिनती</span>
         </a>
 

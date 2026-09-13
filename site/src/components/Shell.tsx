@@ -47,7 +47,11 @@ export function Section({
 }: {
   id: string; no: string; title: string;
   summary?: ReactNode;
-  tone?: "paper" | "tint";
+  /** Which ground this section sits on. Warm and cool are two families off
+   *  the same paper, far enough apart that scrolling reads as moving between
+   *  rooms. Passed rather than computed from position, because the rhythm
+   *  should follow the argument, not the parity of an index. */
+  tone?: "paper" | "warm" | "warm-deep" | "cool" | "cool-deep";
   wide?: boolean;
   children?: ReactNode;
 }) {
