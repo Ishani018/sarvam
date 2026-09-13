@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T05:52:44.810Z",
+  "generatedAt": "2026-09-13T05:53:07.460Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
@@ -28561,7 +28561,7 @@
     "utterances": 40
   },
   "audioBundle": {
-    "files": 48,
-    "bytes": 7151020
+    "files": 0,
+    "bytes": 0
   }
 }
