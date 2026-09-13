@@ -10,6 +10,7 @@ from typing import Optional
 import typer
 
 from .asr import build_asr
+from .audio import available_encoders
 from .cache import ResponseCache
 from .config import load_config
 from .corpus import load_utterances, write_utterances
@@ -36,14 +37,39 @@ def _setup_logging(verbose: bool) -> None:
 
 
 @app.command()
-def conditions(config: str = CONFIG) -> None:
+def conditions(
+    config: str = CONFIG,
+    check: bool = typer.Option(
+        False, "--check",
+        help="Verify every declared codec exists in the local ffmpeg build."),
+) -> None:
     """List the telephony conditions declared in the config."""
     cfg = load_config(config)
+    encoders = available_encoders() if check else set()
+    missing: list[tuple[str, str]] = []
+
     for c in cfg.conditions:
         chain = " -> ".join(op.op for op in c.chain)
-        typer.echo(f"{c.name:16s} {chain}")
+        status = ""
+        if check:
+            needed = [getattr(op, "codec", None) for op in c.chain]
+            absent = [n for n in needed if n and n not in encoders]
+            status = "  [MISSING: " + ", ".join(absent) + "]" if absent else "  [ok]"
+            missing.extend((c.name, n) for n in absent)
+        typer.echo(f"{c.name:26s} {chain}{status}")
         if c.description:
-            typer.echo(f"{'':16s} {c.description.strip()}")
+            typer.echo(f"{'':26s} {c.description.strip()}")
+
+    if check:
+        typer.echo("")
+        if missing:
+            typer.echo(
+                f"{len(missing)} condition(s) declare a codec this ffmpeg cannot "
+                f"encode. Codec support is a build option, so this differs "
+                f"between machines.", err=True)
+            raise typer.Exit(1)
+        typer.echo(f"all {len(cfg.conditions)} conditions runnable "
+                   f"({len(encoders)} encoders available)")
 
 
 @app.command()
@@ -104,7 +130,9 @@ def run(
     if models:
         cfg.providers.asr.sarvam.models = [m.strip() for m in models.split(",")]
     run_id = make_run_id()
-    plan = plan_run(cfg, utterances, conds, run_id=run_id)
+    cache = ResponseCache(cfg.providers.cache.dir, cfg.providers.cache.raw_dir,
+                          cfg.providers.cache.enabled)
+    plan = plan_run(cfg, utterances, conds, run_id=run_id, cache=cache)
 
     if dry_run:
         typer.echo(plan.render())
@@ -123,8 +151,6 @@ def run(
             abort=True,
         )
 
-    cache = ResponseCache(cfg.providers.cache.dir, cfg.providers.cache.raw_dir,
-                          cfg.providers.cache.enabled)
     guard = CostGuard(cfg.cost)
     tts = build_tts(cfg, cache, guard)
     asr_providers = build_asr(cfg, cache, guard, mock_error_rate=mock_error_rate)

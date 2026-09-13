@@ -152,64 +152,122 @@ def _noise(src: Path, dst: Path, op: NoiseOp, cl: CommandLog, tmp: Path, seed: i
     )
 
 
+def _loss_plan(n_frames: int, op: PacketLossOp, seed: int) -> list[int]:
+    """Which frame indices the network dropped.
+
+    bernoulli: each frame is lost independently with probability ``rate``.
+
+    gilbert: a two-state Markov chain. In the good state frames arrive, in the
+    bad state they do not, and the parameters are derived from the two numbers
+    an engineer actually has -- a target average loss rate and a mean burst
+    length::
+
+        r = P(bad -> good)  = 1 / (mean burst length in frames)
+        p = P(good -> bad)  = r * rate / (1 - rate)
+
+    which gives a stationary loss rate of p/(p+r) = rate and a mean run of 1/r
+    frames, so the two models can be compared at the same nominal rate.
+
+    Both are driven from one seeded RNG, so a rerun reproduces the plan exactly.
+    """
+    rng = random.Random(seed)
+    dropped: list[int] = []
+
+    if op.model == "bernoulli":
+        for i in range(n_frames):
+            if rng.random() < op.rate:
+                dropped.append(i)
+        return dropped
+
+    burst_frames = max(1.0, op.mean_burst_ms / op.frame_ms)
+    r = 1.0 / burst_frames
+    # rate == 1 would mean never leaving the bad state; clamp so p stays finite.
+    p = r * op.rate / max(1e-9, 1.0 - op.rate)
+
+    bad = False
+    for i in range(n_frames):
+        if bad:
+            dropped.append(i)
+            if rng.random() < r:
+                bad = False
+        elif rng.random() < p:
+            bad = True
+    return dropped
+
+
+def _burst_stats(dropped: list[int], frame_ms: int) -> tuple[int, float]:
+    """(number of runs, mean run length in ms) over a sorted index list."""
+    if not dropped:
+        return 0, 0.0
+    runs = 1
+    for a, b in zip(dropped, dropped[1:]):
+        if b != a + 1:
+            runs += 1
+    return runs, len(dropped) / runs * frame_ms
+
+
 def _packet_loss(
     src: Path, dst: Path, op: PacketLossOp, cl: CommandLog, tmp: Path, seed: int
 ) -> None:
-    """Drop whole audio frames, the way a jitter buffer with no PLC would.
+    """Drop whole audio frames, the way a jitter buffer would.
 
     Implemented as byte slicing over raw s16le rather than an ffmpeg filter
     graph: this is frame gating, not signal processing, and doing it here is the
     only way to guarantee a seed reproduces the output bit for bit.
     """
-    rate = probe_sample_rate(src)
+    rate_hz = probe_sample_rate(src)
     raw = tmp / "pl_in.raw"
     run(
         ["ffmpeg", "-hide_banner", "-nostdin", "-y",
          "-i", str(src), "-f", "s16le", "-acodec", "pcm_s16le",
-         "-ac", "1", "-ar", str(rate), *audio_bitexact_flags(), str(raw)],
+         "-ac", "1", "-ar", str(rate_hz), *audio_bitexact_flags(), str(raw)],
         log_to=cl,
         note="export raw pcm for frame gating",
     )
 
     pcm = bytearray(raw.read_bytes())
-    bytes_per_frame = int(rate * op.frame_ms / 1000) * 2  # s16le mono
+    bytes_per_frame = int(rate_hz * op.frame_ms / 1000) * 2  # s16le mono
     n_frames = len(pcm) // bytes_per_frame if bytes_per_frame else 0
 
-    rng = random.Random(seed)
-    dropped: list[int] = []
-    i = 0
-    while i < n_frames:
-        if rng.random() < op.rate:
-            for k in range(op.burst):
-                if i + k < n_frames:
-                    dropped.append(i + k)
-            i += op.burst
-        else:
-            i += 1
+    dropped = _loss_plan(n_frames, op, seed)
+    runs, mean_run_ms = _burst_stats(dropped, op.frame_ms)
 
     for idx in dropped:
         start = idx * bytes_per_frame
         if op.fill == "silence":
             pcm[start : start + bytes_per_frame] = b"\x00" * bytes_per_frame
-        else:  # "hold": repeat the last good frame
-            prev = max(idx - 1, 0) * bytes_per_frame
-            pcm[start : start + bytes_per_frame] = bytes(
-                pcm[prev : prev + bytes_per_frame]
-            )
+        else:
+            # "repeat": hold the last frame that actually arrived. Walking back
+            # matters inside a burst -- repeating the frame immediately before
+            # would copy a frame that was itself dropped.
+            prev = idx - 1
+            while prev in set(dropped) and prev >= 0:
+                prev -= 1
+            if prev < 0:
+                pcm[start : start + bytes_per_frame] = b"\x00" * bytes_per_frame
+            else:
+                at = prev * bytes_per_frame
+                pcm[start : start + bytes_per_frame] = bytes(
+                    pcm[at : at + bytes_per_frame]
+                )
 
     gated = tmp / "pl_out.raw"
     gated.write_bytes(bytes(pcm))
+    actual = len(dropped) / n_frames if n_frames else 0.0
     cl.record(
-        ["<python>", "frame_gate", f"frames={n_frames}", f"dropped={len(dropped)}",
-         f"rate={op.rate}", f"frame_ms={op.frame_ms}", f"fill={op.fill}",
-         f"seed={seed}"],
+        ["<python>", "frame_gate", f"model={op.model}", f"frames={n_frames}",
+         f"dropped={len(dropped)}", f"target_rate={op.rate}",
+         f"actual_rate={actual:.4f}", f"bursts={runs}",
+         f"mean_burst_ms={mean_run_ms:.1f}", f"frame_ms={op.frame_ms}",
+         f"fill={op.fill}", f"seed={seed}"],
         0,
-        note=f"dropped {len(dropped)}/{n_frames} frames",
+        note=(f"dropped {len(dropped)}/{n_frames} frames in {runs} burst(s), "
+              f"mean {mean_run_ms:.0f} ms, {op.model} model, fill={op.fill}"),
     )
 
     run(
         ["ffmpeg", "-hide_banner", "-nostdin", "-y",
-         "-f", "s16le", "-ar", str(rate), "-ac", "1", "-i", str(gated),
+         "-f", "s16le", "-ar", str(rate_hz), "-ac", "1", "-i", str(gated),
          "-c:a", "pcm_s16le", *audio_bitexact_flags(), str(dst)],
         log_to=cl,
         note="reassemble gated pcm",

@@ -76,37 +76,75 @@ conditions:
       - {op: resample, rate: 8000}
       - {op: codec, codec: pcm_mulaw, container: wav}
 
-  - name: gsm_fr
-    description: 8 kHz + GSM full rate round trip (2G mobile)
+  # Was gsm_fr. libgsm is an optional ffmpeg dependency and is absent from
+  # stock macOS and many distro builds, so the condition could be declared but
+  # not run. G.726 is ITU-standard telephony ADPCM, compiled into ffmpeg with
+  # no external library, and at 16 kbit/s it is comparably aggressive.
+  - name: g726_16k
+    description: 8 kHz + G.726 ADPCM at 16 kbit/s (DECT and legacy trunk codec)
     chain:
       - {op: resample, rate: 8000}
-      - {op: codec, codec: libgsm, container: gsm}
+      - {op: codec, codec: g726, container: wav, bitrate: 16k}
 
   - name: opus_low
     description: low bitrate Opus round trip (VoIP / WebRTC under congestion)
     chain:
       - {op: codec, codec: libopus, container: ogg, bitrate: 12k, application: voip}
 
+  # Loss conditions come in matched pairs: the same nominal rate under
+  # independent per-frame loss and under bursty loss. The comparison is the
+  # point. Scattered 20 ms dropouts leave intact context either side of every
+  # hole; a 100 ms burst removes about a syllable, which is roughly one spoken
+  # digit. If the first survives and the second does not, that says something
+  # about how much the model is recovering from context rather than from audio.
   - name: packet_loss_2
-    description: g711_ulaw + 2% frame loss
+    description: g711_ulaw + 2% frame loss, independent per frame
     chain:
       - {op: resample, rate: 8000}
       - {op: codec, codec: pcm_mulaw, container: wav}
-      - {op: packet_loss, rate: 0.02, frame_ms: 20, fill: silence}
+      - {op: packet_loss, rate: 0.02, frame_ms: 20, fill: silence, model: bernoulli}
 
   - name: packet_loss_5
-    description: g711_ulaw + 5% frame loss
+    description: g711_ulaw + 5% frame loss, independent per frame
     chain:
       - {op: resample, rate: 8000}
       - {op: codec, codec: pcm_mulaw, container: wav}
-      - {op: packet_loss, rate: 0.05, frame_ms: 20, fill: silence}
+      - {op: packet_loss, rate: 0.05, frame_ms: 20, fill: silence, model: bernoulli}
+
+  - name: packet_loss_burst_5
+    description: >
+      g711_ulaw + 5% frame loss arriving in bursts (Gilbert, mean 100 ms).
+      The same nominal loss as packet_loss_5, in roughly a fifth as many holes.
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+      - {op: packet_loss, rate: 0.05, frame_ms: 20, fill: silence,
+         model: gilbert, mean_burst_ms: 100}
 
   - name: packet_loss_10
-    description: g711_ulaw + 10% frame loss
+    description: g711_ulaw + 10% frame loss, independent per frame
     chain:
       - {op: resample, rate: 8000}
       - {op: codec, codec: pcm_mulaw, container: wav}
-      - {op: packet_loss, rate: 0.10, frame_ms: 20, fill: silence}
+      - {op: packet_loss, rate: 0.10, frame_ms: 20, fill: silence, model: bernoulli}
+
+  - name: packet_loss_burst_10
+    description: g711_ulaw + 10% frame loss in bursts (Gilbert, mean 100 ms)
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+      - {op: packet_loss, rate: 0.10, frame_ms: 20, fill: silence,
+         model: gilbert, mean_burst_ms: 100}
+
+  - name: packet_loss_burst_5_repeat
+    description: >
+      packet_loss_burst_5 with the previous good frame held over the gap
+      instead of silence, which is what many jitter buffers actually do.
+    chain:
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+      - {op: packet_loss, rate: 0.05, frame_ms: 20, fill: repeat,
+         model: gilbert, mean_burst_ms: 100}
 
   - name: noisy_line
     description: >
@@ -114,6 +152,15 @@ conditions:
       codec because that is the physical order: noisy room, then G.711.
     chain:
       - {op: noise, source: pink, snr_db: 15}
+      - {op: resample, rate: 8000}
+      - {op: codec, codec: pcm_mulaw, container: wav}
+
+  - name: noisy_line_snr5
+    description: >
+      pink noise at 5 dB SNR, then the phone line. Ten decibels harsher than
+      noisy_line: a call from a street or a busy branch rather than a room.
+    chain:
+      - {op: noise, source: pink, snr_db: 5}
       - {op: resample, rate: 8000}
       - {op: codec, codec: pcm_mulaw, container: wav}
 

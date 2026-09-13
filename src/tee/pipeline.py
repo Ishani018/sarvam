@@ -14,7 +14,7 @@ from typing import Callable, Sequence
 
 from .asr import ASRProvider, MockASR
 from .audio import sha256_file
-from .cache import ResponseCache
+from .cache import ResponseCache, request_key
 from .config import Condition, Config
 from .corpus import Utterance
 from .costs import CostGuard
@@ -32,6 +32,7 @@ class RunPlan:
     conditions: list[Condition]
     tts_calls: int
     asr_calls: int
+    tts_cached: int
     tts_chars: int
     estimated_audio_seconds: float
     estimated_cost: float
@@ -44,7 +45,8 @@ class RunPlan:
 
     @property
     def total_calls(self) -> int:
-        return self.tts_calls + self.asr_calls
+        """Calls that will actually be made. Cached TTS is not a call."""
+        return (self.tts_calls - self.tts_cached) + self.asr_calls
 
     @property
     def over_budget(self) -> bool:
@@ -67,7 +69,9 @@ class RunPlan:
             + (f"   ({len(self.asr_models)}x the ASR calls)"
                if len(self.asr_models) > 1 else ""),
             "",
-            f"  TTS calls         {self.tts_calls}  ({self.tts_chars} chars)",
+            f"  TTS calls         {self.tts_calls}  ({self.tts_chars} chars)"
+            + (f"   [{self.tts_cached} already cached, not charged]"
+               if self.tts_cached else ""),
             f"  ASR calls         {self.asr_calls}",
             f"  total API calls   {self.total_calls}   (cap: {self.max_api_calls})",
             f"  est. audio        {self.estimated_audio_seconds:.0f}s"
@@ -100,6 +104,7 @@ def plan_run(
     run_id: str | None = None,
     chars_per_second: float = 14.0,
     asr_models: Sequence[str] | None = None,
+    cache: ResponseCache | None = None,
 ) -> RunPlan:
     """Cost a run without performing it.
 
@@ -114,10 +119,32 @@ def plan_run(
     seconds_each = [max(1.0, len(u.text) / chars_per_second) for u in utterances]
     asr_seconds = sum(seconds_each) * len(conditions) * len(models)
 
+    # TTS is keyed on the text alone, so re-running new CONDITIONS against a
+    # corpus already synthesised costs nothing in TTS. Counting those as spend
+    # would overstate the bill and, worse, could trip the guard into refusing a
+    # run that is almost entirely free. ASR cannot be predicted the same way:
+    # its key includes the audio checksum, and the degraded audio for a new
+    # condition does not exist yet.
+    tts_cached = 0
+    if cache is not None and cfg.providers.tts.impl == "sarvam":
+        sarvam = cfg.providers.tts.sarvam
+        for u in utterances:
+            key = request_key({
+                "provider": "sarvam-tts", "endpoint": sarvam.endpoint,
+                "text": u.text, "target_language_code": u.language,
+                "model": sarvam.model, "speaker": sarvam.speaker,
+                "pace": sarvam.pace,
+                "speech_sample_rate": sarvam.speech_sample_rate,
+                **sarvam.extra_params,
+            })
+            if cache.get(key) is not None:
+                tts_cached += 1
+
     tts_calls = len(utterances)
     asr_calls = len(utterances) * len(conditions) * len(models)
+    billable_chars = tts_chars * (1 - tts_cached / max(1, len(utterances)))
     cost = (
-        tts_chars / 1000.0 * cfg.cost.tts_inr_per_1k_chars
+        billable_chars / 1000.0 * cfg.cost.tts_inr_per_1k_chars
         + asr_seconds * cfg.cost.asr_inr_per_audio_second
     )
     return RunPlan(
@@ -126,6 +153,7 @@ def plan_run(
         conditions=list(conditions),
         tts_calls=tts_calls,
         asr_calls=asr_calls,
+        tts_cached=tts_cached,
         tts_chars=tts_chars,
         estimated_audio_seconds=asr_seconds,
         estimated_cost=cost,

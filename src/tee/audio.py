@@ -166,3 +166,26 @@ def make_silence(path: str | Path, seconds: float, rate: int) -> None:
         "-f", "lavfi", "-i", f"anullsrc=r={rate}:cl=mono",
         "-t", f"{seconds:.3f}", "-c:a", "pcm_s16le", str(path),
     ])
+
+
+def available_encoders() -> set[str]:
+    """Encoder names this ffmpeg build can actually use.
+
+    Codec support is a build-time option and differs between machines: libgsm
+    and AMR-NB are absent from stock macOS and many distro builds, so a
+    condition can be declared in config and be unrunnable where it matters.
+    Checking beats discovering it mid-run.
+    """
+    if shutil.which("ffmpeg") is None:
+        return set()
+    proc = subprocess.run(["ffmpeg", "-hide_banner", "-encoders"],
+                          capture_output=True, text=True)
+    names: set[str] = set()
+    for line in proc.stdout.splitlines():
+        parts = line.split()
+        # Rows look like " A....D libgsm  libgsm GSM (codec gsm)"
+        if len(parts) >= 2 and len(parts[0]) == 6 and parts[0][0] in "AVS":
+            names.add(parts[1])
+            if "(codec " in line:
+                names.add(line.split("(codec ", 1)[1].split(")", 1)[0].strip())
+    return names

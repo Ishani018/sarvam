@@ -48,11 +48,29 @@ class CodecOp(BaseModel):
 
 
 class PacketLossOp(BaseModel):
+    """Frames the network never delivered.
+
+    ``model`` picks how losses are distributed in time, which matters more than
+    the rate. Independent per-frame loss at 5% is a scattered sprinkle of 20 ms
+    dropouts with intact context on either side of every one. Real networks lose
+    packets in runs, so real 5% loss is a handful of 100 ms holes -- long enough
+    to swallow a whole digit. Both are kept so the same nominal rate can be
+    compared under each.
+    """
+
     op: Literal["packet_loss"]
+    #: Target average loss rate, as a fraction of frames.
     rate: float = Field(ge=0.0, le=1.0)
     frame_ms: int = 20
-    fill: Literal["silence", "hold"] = "silence"
-    burst: int = 1
+    #: How a lost frame is concealed. "silence" punches a hole; "repeat" holds
+    #: the previous good frame, which is what many jitter buffers actually do
+    #: and is usually kinder to a recogniser.
+    fill: Literal["silence", "repeat"] = "silence"
+    #: "bernoulli": independent per frame. "gilbert": two-state Markov chain,
+    #: losses arrive in runs.
+    model: Literal["bernoulli", "gilbert"] = "bernoulli"
+    #: Mean length of a loss burst, in milliseconds. Gilbert model only.
+    mean_burst_ms: float = 100.0
 
 
 class NoiseOp(BaseModel):

@@ -131,3 +131,58 @@ def test_provider_failure_is_recorded_not_swallowed(cfg, small, tmp_path):
     rows = execute_run(cfg, plan, MockTTS(), [Boom()], CostGuard(cfg.cost))
     assert len(rows) == 3
     assert all(r.error and "HTTP 500" in r.error for r in rows)
+
+
+def test_dry_run_does_not_charge_for_tts_already_in_the_cache(cfg, tmp_path):
+    """Re-running new CONDITIONS against an already-synthesised corpus is
+    almost entirely free: TTS is keyed on the text alone. Counting those as
+    spend overstates the bill and can trip the guard into refusing a run that
+    costs nothing."""
+    from tee.cache import ResponseCache, request_key
+    from tee.generate import generate
+
+    cfg = cfg.model_copy(deep=True)
+    cfg.providers.tts.impl = "sarvam"
+    cfg.providers.asr.impl = "sarvam"
+    utts = generate("hi-IN", 10, 1337)
+    conds = cfg.select_conditions(["packet_loss_burst_5"])
+    cache = ResponseCache(tmp_path / "c", tmp_path / "r")
+
+    cold = plan_run(cfg, utts, conds, asr_models=["saaras:v3"], cache=cache)
+    assert cold.tts_cached == 0
+    assert cold.tts_calls == 10
+    assert cold.total_calls == 10 + 10  # 10 TTS + 10 ASR
+
+    sarvam = cfg.providers.tts.sarvam
+    for u in utts:
+        cache.put(request_key({
+            "provider": "sarvam-tts", "endpoint": sarvam.endpoint,
+            "text": u.text, "target_language_code": u.language,
+            "model": sarvam.model, "speaker": sarvam.speaker,
+            "pace": sarvam.pace,
+            "speech_sample_rate": sarvam.speech_sample_rate,
+            **sarvam.extra_params,
+        }), {"path": "x", "sha256": "y"})
+
+    warm = plan_run(cfg, utts, conds, asr_models=["saaras:v3"], cache=cache)
+    assert warm.tts_cached == 10
+    assert warm.total_calls == 10, "only the ASR calls remain"
+    assert warm.estimated_cost < cold.estimated_cost
+    assert "already cached" in warm.render()
+
+
+def test_asr_calls_are_never_predicted_as_cached(cfg, tmp_path):
+    """ASR keys include the audio checksum, and degraded audio for a condition
+    that has not run yet does not exist. Claiming an ASR cache hit at plan time
+    would be a guess."""
+    from tee.cache import ResponseCache
+    from tee.generate import generate
+
+    cfg = cfg.model_copy(deep=True)
+    cfg.providers.asr.impl = "sarvam"
+    cfg.providers.tts.impl = "sarvam"
+    p = plan_run(cfg, generate("hi-IN", 5, 1337),
+                 cfg.select_conditions(["packet_loss_burst_5", "noisy_line_snr5"]),
+                 asr_models=["saaras:v3", "saaras:v4"],
+                 cache=ResponseCache(tmp_path / "c", tmp_path / "r"))
+    assert p.asr_calls == 5 * 2 * 2
