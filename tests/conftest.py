@@ -22,3 +22,15 @@ def tone_wav(tmp_path_factory) -> Path:
 def cfg():
     from tee.config import load_config
     return load_config("configs/default.yaml")
+
+
+@pytest.fixture
+def utterances():
+    """A couple of real corpus rows, for arithmetic that only needs a count."""
+    from tee.corpus import Utterance
+    return [
+        Utterance(id="hi-IN-1-00000", language="hi-IN", source="synthetic",
+                  text="आपके खाते 65335720185281 में 5,00,000 रुपये जमा हुए हैं"),
+        Utterance(id="hi-IN-1-00001", language="hi-IN", source="synthetic",
+                  text="लॉगिन करने के लिए 5584 कोड दर्ज करें"),
+    ]

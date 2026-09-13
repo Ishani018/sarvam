@@ -663,6 +663,21 @@ function build() {
     ...(commandsByCondition[c.name] ??
       { commands: [], tools: {}, seed: null, durationS: null }),
   }));
+  // The per-cell aggregations below key on (model, condition, type) and do not
+  // carry mode, so rows from two modes would pool into one number. Dedupe does
+  // include mode, so the rows survive as distinct -- it is only the summing
+  // that is wrong. Refuse rather than publish a matrix that silently averages
+  // transcribe and verbatim together; making the site mode-aware is the fix,
+  // and it is not done yet.
+  const modesPresent = [...new Set(rows.map((r) => r.asr_mode ?? "-"))].sort();
+  if (modesPresent.length > 1) {
+    throw new Error(
+      `results carry ${modesPresent.length} ASR modes (${modesPresent.join(", ")}) ` +
+      "and this build pools them into one cell.\n" +
+      "  The matrix, WER and rendering aggregations are not mode-aware yet.\n" +
+      "  Until they are, build from one mode at a time.");
+  }
+
   const notExercised = conditions.filter((c) => !c.exercised).map((c) => c.name);
   if (notExercised.length) {
     warn(`declared but absent from results: ${notExercised.join(", ")}`);

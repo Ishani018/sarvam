@@ -41,7 +41,7 @@ class RunPlan:
     asr_impl: str
     tts_impl: str
     asr_models: list[str]
-    asr_mode: str | None
+    asr_modes: list[str]
 
     @property
     def total_calls(self) -> int:
@@ -63,16 +63,22 @@ class RunPlan:
             f"  languages         {', '.join(sorted({u.language for u in self.utterances}))}",
             "",
             f"  TTS provider      {self.tts_impl}",
-            f"  ASR provider      {self.asr_impl}"
-            + (f"  mode={self.asr_mode}" if self.asr_impl != "mock" else ""),
+            f"  ASR provider      {self.asr_impl}",
             f"  ASR models        {', '.join(self.asr_models)}"
-            + (f"   ({len(self.asr_models)}x the ASR calls)"
-               if len(self.asr_models) > 1 else ""),
+            + (f"   (x{len(self.asr_models)})" if len(self.asr_models) > 1 else ""),
+            f"  ASR modes         {', '.join(self.asr_modes)}"
+            + (f"   (x{len(self.asr_modes)})" if len(self.asr_modes) > 1 else ""),
             "",
             f"  TTS calls         {self.tts_calls}  ({self.tts_chars} chars)"
             + (f"   [{self.tts_cached} already cached, not charged]"
                if self.tts_cached else ""),
-            f"  ASR calls         {self.asr_calls}",
+            # The arithmetic, not just the total: a reader approving spend
+            # should see which axis is multiplying it.
+            f"  ASR calls         {len(self.utterances)} utterances"
+            f" x {len(self.conditions)} conditions"
+            f" x {len(self.asr_models)} models"
+            f" x {len(self.asr_modes)} modes"
+            f"  =  {self.asr_calls}",
             f"  total API calls   {self.total_calls}   (cap: {self.max_api_calls})",
             f"  est. audio        {self.estimated_audio_seconds:.0f}s"
             f" ({self.estimated_audio_seconds / 60:.1f} min)",
@@ -104,6 +110,7 @@ def plan_run(
     run_id: str | None = None,
     chars_per_second: float = 14.0,
     asr_models: Sequence[str] | None = None,
+    asr_modes: Sequence[str] | None = None,
     cache: ResponseCache | None = None,
 ) -> RunPlan:
     """Cost a run without performing it.
@@ -111,13 +118,19 @@ def plan_run(
     Audio duration is estimated from text length, since the audio does not
     exist yet. It is an estimate and labelled as one.
     """
+    sarvam_asr = cfg.providers.asr.impl == "sarvam"
     models = list(asr_models or (
-        cfg.providers.asr.sarvam.models if cfg.providers.asr.impl == "sarvam"
-        else ["mock"]
+        cfg.providers.asr.sarvam.models if sarvam_asr else ["mock"]
+    ))
+    # Mode multiplies the ASR calls exactly as model does: the same audio is
+    # posted once per mode. Counting it is the difference between a dry run
+    # that predicts the bill and one that halves it.
+    modes = list(asr_modes or (
+        cfg.providers.asr.sarvam.modes if sarvam_asr else ["mock"]
     ))
     tts_chars = sum(len(u.text) for u in utterances)
     seconds_each = [max(1.0, len(u.text) / chars_per_second) for u in utterances]
-    asr_seconds = sum(seconds_each) * len(conditions) * len(models)
+    asr_seconds = sum(seconds_each) * len(conditions) * len(models) * len(modes)
 
     # TTS is keyed on the text alone, so re-running new CONDITIONS against a
     # corpus already synthesised costs nothing in TTS. Counting those as spend
@@ -141,7 +154,7 @@ def plan_run(
                 tts_cached += 1
 
     tts_calls = len(utterances)
-    asr_calls = len(utterances) * len(conditions) * len(models)
+    asr_calls = len(utterances) * len(conditions) * len(models) * len(modes)
     billable_chars = tts_chars * (1 - tts_cached / max(1, len(utterances)))
     cost = (
         billable_chars / 1000.0 * cfg.cost.tts_inr_per_1k_chars
@@ -162,7 +175,7 @@ def plan_run(
         asr_impl=cfg.providers.asr.impl,
         tts_impl=cfg.providers.tts.impl,
         asr_models=models,
-        asr_mode=cfg.providers.asr.sarvam.mode,
+        asr_modes=modes,
     )
 
 

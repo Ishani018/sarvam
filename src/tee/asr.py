@@ -124,12 +124,14 @@ class SarvamASR:
     name = "sarvam"
 
     def __init__(self, cfg: SarvamASRConfig, cache: ResponseCache,
-                 guard: CostGuard, model: str | None = None):
+                 guard: CostGuard, model: str | None = None,
+                 mode: str | None = None):
         self.cfg = cfg
         self.cache = cache
         self.guard = guard
-        #: One instance per model, so a run can compare models as an axis.
+        #: One instance per (model, mode), so a run can compare both as axes.
         self.model = model or cfg.models[0]
+        self.mode = mode or cfg.modes[0]
 
     def transcribe(self, audio_path: Path, language: str,
                    hint: str | None = None) -> ASRResult:
@@ -140,7 +142,7 @@ class SarvamASR:
             "provider": "sarvam-asr",
             "endpoint": self.cfg.endpoint,
             "model": self.model,
-            "mode": self.cfg.mode,
+            "mode": self.mode,
             "language_code": language,
             "audio_sha256": audio_sha,
         })
@@ -150,7 +152,7 @@ class SarvamASR:
             self.guard.note_cached()
             return ASRResult(text=cached["transcript"], language=language,
                              cached=True, provider="sarvam", request_key=key,
-                             model=self.model, mode=self.cfg.mode,
+                             model=self.model, mode=self.mode,
                              raw_path=Path(cached["raw_path"]) if cached.get("raw_path") else None)
 
         self.guard.spend_asr(probe_duration(audio_path))
@@ -174,13 +176,13 @@ class SarvamASR:
             "transcript": transcript,
             "raw_path": str(raw_path),
             "model": self.model,
-            "mode": self.cfg.mode,
+            "mode": self.mode,
             "language_code": language,
             "audio_sha256": audio_sha,
         })
         return ASRResult(text=transcript, language=language, cached=False,
                          provider="sarvam", request_key=key, model=self.model,
-                         mode=self.cfg.mode, raw_path=raw_path)
+                         mode=self.mode, raw_path=raw_path)
 
     def _post(self, audio_path: Path, language: str) -> bytes:
         headers = {"api-subscription-key": api_key()}
@@ -189,10 +191,10 @@ class SarvamASR:
         # `mode` is only honoured on saaras:v3 and later. Sending it to a
         # legacy model is at best ignored and at worst a 400.
         if self.model.startswith("saaras"):
-            data["mode"] = self.cfg.mode
+            data["mode"] = self.mode
         else:
             log.warning("model %s predates the `mode` parameter; not sending "
-                        "mode=%s", self.model, self.cfg.mode)
+                        "mode=%s", self.model, self.mode)
         last: Exception | None = None
         for attempt in range(self.cfg.max_retries + 1):
             try:
@@ -226,10 +228,17 @@ class _Retryable(Exception):
 
 def build_asr(cfg, cache: ResponseCache, guard: CostGuard,
               mock_error_rate: float = 0.0) -> list[ASRProvider]:
-    """One provider per model. Models are an axis, so this returns a list."""
+    """One provider per (model, mode).
+
+    Both are axes, so this is their product and the list it returns is what
+    multiplies the ASR call count. Model varies fastest so that a run's output
+    reads as one block per mode.
+    """
     if cfg.providers.asr.impl == "sarvam":
         sarvam = cfg.providers.asr.sarvam
-        return [SarvamASR(sarvam, cache, guard, model=m) for m in sarvam.models]
+        return [SarvamASR(sarvam, cache, guard, model=m, mode=mode)
+                for mode in sarvam.modes
+                for m in sarvam.models]
     return [MockASR(error_rate=mock_error_rate)]
 
 

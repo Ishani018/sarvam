@@ -101,6 +101,11 @@ class Condition(BaseModel):
 # --------------------------------------------------------------------------
 
 
+#: The transcription modes Sarvam accepts. Only the first two are meaningful
+#: for this harness; the rest are listed so a typo in config fails loudly.
+AsrMode = Literal["transcribe", "verbatim", "translit", "codemix", "translate"]
+
+
 class SarvamASRConfig(BaseModel):
     endpoint: str = "https://api.sarvam.ai/speech-to-text"
     #: Model is an axis, not a setting. v4 adds telephony-tuned handling and
@@ -108,12 +113,13 @@ class SarvamASRConfig(BaseModel):
     #: has to be compared against v3 rather than swapped in. Every extra model
     #: multiplies the ASR call count -- the dry run shows the total.
     models: list[str] = Field(default_factory=lambda: ["saaras:v3"])
-    #: saaras:v3+ only. "transcribe" normalizes numbers to digits;
-    #: "verbatim" preserves spoken number words. This materially changes what
-    #: the entity extractor sees -- see README.
-    mode: Literal["transcribe", "verbatim", "translit", "codemix", "translate"] = (
-        "transcribe"
-    )
+    #: Mode is an axis too, for the same reason model is. "transcribe" applies
+    #: Sarvam's own number normalization, so a miss may be the normalizer
+    #: disagreeing rather than the audio failing; "verbatim" returns the words
+    #: as spoken. Running both over identical audio is the only way to separate
+    #: the two, so a run can carry several. Each one multiplies the ASR calls --
+    #: the dry run shows the total.
+    modes: list[AsrMode] = Field(default_factory=lambda: ["transcribe"])
     timeout_s: float = 120.0
     max_retries: int = 4
     backoff_base_s: float = 2.0
@@ -121,6 +127,34 @@ class SarvamASRConfig(BaseModel):
     #: added or renamed upstream, so a field-name change is a config edit
     #: rather than a code change.
     extra_params: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _accept_singular_mode(cls, data: Any) -> Any:
+        """Accept the old scalar `mode:` and read it as a one-element axis.
+
+        Every config and every cached response written before mode became an
+        axis used the singular key. Silently rejecting it would strand them;
+        silently ignoring it would run transcribe while the file says verbatim,
+        which is worse. Specifying both is a contradiction, so it is an error.
+        """
+        if not isinstance(data, dict):
+            return data
+        if "mode" in data:
+            if "modes" in data:
+                raise ValueError(
+                    "set either `mode` (one value) or `modes` (a list), not both")
+            data = {**data, "modes": [data["mode"]]}
+            data.pop("mode", None)
+        return data
+
+    @model_validator(mode="after")
+    def _modes_are_distinct(self) -> "SarvamASRConfig":
+        if not self.modes:
+            raise ValueError("providers.asr.sarvam.modes must list at least one mode")
+        if len(set(self.modes)) != len(self.modes):
+            raise ValueError(f"duplicate ASR modes: {self.modes}")
+        return self
 
 
 class SarvamTTSConfig(BaseModel):

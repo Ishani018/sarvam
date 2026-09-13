@@ -44,7 +44,11 @@ def test_each_extra_model_multiplies_the_asr_calls_not_the_tts_calls():
     two = plan_run(cfg, utts, conds, asr_models=["saaras:v3", "saaras:v4"])
     assert two.tts_calls == one.tts_calls == 40
     assert two.asr_calls == 240
-    assert "2x the ASR calls" in two.render()
+    # The dry run shows the arithmetic, not just the total, so a reader can see
+    # which axis is multiplying the bill before they approve it.
+    out = two.render()
+    assert "saaras:v3, saaras:v4   (x2)" in out
+    assert "40 utterances x 3 conditions x 2 models x 1 modes  =  240" in out
 
 
 def test_default_config_compares_v3_and_v4():

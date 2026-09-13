@@ -108,6 +108,10 @@ def run(
         None, "--models",
         help="Comma-separated ASR models, overriding config. Each one multiplies "
              "the ASR call count."),
+    modes: Optional[str] = typer.Option(
+        None, "--modes",
+        help="Comma-separated ASR modes, overriding config: transcribe, "
+             "verbatim. Each one multiplies the ASR call count."),
     mock_error_rate: float = typer.Option(
         0.0, "--mock-error-rate",
         help="Digit corruption rate for the mock ASR, to exercise scoring offline."),
@@ -129,6 +133,13 @@ def run(
 
     if models:
         cfg.providers.asr.sarvam.models = [m.strip() for m in models.split(",")]
+    if modes:
+        # Validated through the model so a typo fails here, before anything is
+        # synthesised, rather than as a 400 on the first real call.
+        cfg.providers.asr.sarvam = cfg.providers.asr.sarvam.model_copy(
+            update={"modes": [m.strip() for m in modes.split(",")]})
+        cfg.providers.asr.sarvam = type(cfg.providers.asr.sarvam).model_validate(
+            cfg.providers.asr.sarvam.model_dump())
     run_id = make_run_id()
     cache = ResponseCache(cfg.providers.cache.dir, cfg.providers.cache.raw_dir,
                           cfg.providers.cache.enabled)
@@ -194,6 +205,34 @@ def triage_cmd(
     if len(report) > 4000:
         typer.echo(f"... (truncated)\n")
     typer.echo(f"full report: {path}")
+
+
+@app.command(name="modes")
+def modes_cmd(
+    results: list[Path] = typer.Argument(
+        ..., help="One or more results JSONL files. The transcribe rows and the "
+                  "verbatim rows are usually separate runs, so pass both."),
+    out: Optional[Path] = typer.Option(None, "--out", help="Report path."),
+) -> None:
+    """Split transcribe misses into acoustic and rendering, per condition.
+
+    Needs rows in both modes over the same audio. The two normally come from
+    different runs -- the transcribe rows already exist -- so this takes
+    several files and pairs across them. Misses with no verbatim twin are
+    reported as unpaired rather than counted as either.
+    """
+    from .modes import render as render_modes, split_by_condition
+
+    rows = [r for path_ in results for r in read_rows(path_)]
+    modes_seen = sorted({r.asr_mode or "-" for r in rows})
+    typer.echo(f"{len(rows)} row(s) from {len(results)} file(s); "
+               f"modes present: {', '.join(modes_seen)}\n")
+    report = render_modes(split_by_condition(rows))
+    path = out or results[0].with_suffix(".modes.txt")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(report, encoding="utf-8")
+    typer.echo(report)
+    typer.echo(f"\nfull report: {path}")
 
 
 @app.command()
