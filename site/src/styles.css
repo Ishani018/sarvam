@@ -399,18 +399,30 @@ code, .mono, .t-mono { font-family: var(--font-mono); font-variant-numeric: tabu
   margin-left: 0.45rem;
 }
 
-/* The second biggest thing on the page, and the only sentence in the hero. */
+/* Line one: what this is. The second biggest thing on the page after the
+ * wordmark, and the thing the eye lands on. */
 .hero__line {
-  font-size: clamp(1.5rem, 0.95rem + 2.1vw, 2.4rem);
-  line-height: 1.22;
-  letter-spacing: -0.022em;
+  font-size: clamp(1.4rem, 0.9rem + 1.85vw, 2.15rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
   font-weight: 400;
   color: var(--on-deep);
-  max-width: 24ch;
+  max-width: 26ch;
+  margin: 0 0 clamp(1rem, 2.5vh, 1.6rem);
+  text-wrap: pretty;
+}
+
+/* Line two: the finding, in supporting weight. It has to read as the answer
+ * to the line above rather than as a second headline competing with it. */
+.hero__finding {
+  font-size: clamp(1rem, 0.93rem + 0.35vw, 1.1875rem);
+  line-height: 1.5;
+  color: var(--on-deep-2);
+  max-width: 46ch;
   margin: 0 0 clamp(1.75rem, 4.5vh, 3rem);
   text-wrap: pretty;
 }
-.hero__line em { font-style: normal; font-weight: 600; color: var(--accent-light); }
+.hero__finding em { font-style: normal; font-weight: 600; color: var(--accent-light); }
 
 .verdict {
   display: flex;

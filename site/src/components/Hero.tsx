@@ -4,12 +4,18 @@ import { pickHeroExample } from "../conditionKind";
 import type { GintiData } from "../types";
 
 /**
- * Three things, and space around them.
+ * The title, two lines, and the two numbers, with space around them.
  *
- * The title, one sentence, and the two numbers. Everything that used to live
- * here -- the preamble, the packet mechanics, the run metadata, the chart --
- * moved to where it is actually read: the orientation section, Results, and
- * the footer. A hero that needs studying is not a hero.
+ * The order is what a stranger needs, not what is most interesting. Line one
+ * says what this is, in a situation anyone recognises; line two says what was
+ * found. Led with the other way round, "came back wrong" is the result of an
+ * experiment the reader has not been told exists -- wrong from what, recorded
+ * by whom, counted against what.
+ *
+ * Everything else that used to live here -- the preamble, the packet mechanics,
+ * the run metadata, the chart -- moved to where it is actually read: the
+ * orientation section, Results, and the footer. A hero that needs studying is
+ * not a hero.
  *
  * The dark ground is the one on the page. It gives a long document a spine and
  * makes the numbers the brightest thing a reader sees.
@@ -45,20 +51,23 @@ export function Hero({ data }: { data: GintiData }) {
           <span>Ginti<span className="deva">गिनती</span></span>
         </h1>
 
+        {/* Line one: what this is. It has to work with no prior knowledge, so
+            it names the situation -- a bank, a phone, an account number -- and
+            no part of the method. */}
         <p className="hero__line">
-          {pair ? (
-            <>
-              <em>{inWords(lost)} of {inWords(pair.bursty.accounts.total)}</em>{" "}
-              account numbers came back wrong &mdash; from a recording that lost
-              no more audio than one where every single number survived.
-            </>
-          ) : (
-            <>
-              Whether the number survives the phone line. An entity-level
-              evaluation of Indic speech recognition.
-            </>
-          )}
+          When a bank&rsquo;s voice agent reads your account number back to you
+          over the phone, does it get it right?
         </p>
+
+        {/* Line two: the finding. Only now does it have something to land
+            against; on its own it was a result with no experiment attached. */}
+        {pair && (
+          <p className="hero__finding">
+            <em>{inWords(lost)} of {inWords(pair.bursty.accounts.total)}</em>{" "}
+            came back wrong &mdash; from audio that lost no more than audio
+            where every number survived.
+          </p>
+        )}
 
         {pair && (
           <div className="verdict">
