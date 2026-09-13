@@ -76,10 +76,10 @@ export interface HeroExample {
 
 /**
  * A real failure to put above the fold, chosen from the data rather than
- * pinned by id: the first bursty-loss miss where the model returned a wrong
- * value rather than nothing, because a wrong value that still looks like an
- * account number is the failure worth showing. Account numbers are preferred --
- * they are the longest entities and the damage is most visible in them.
+ * pinned by id: a bursty-loss miss where the model returned a wrong value
+ * rather than nothing, because a wrong value that still looks valid is the
+ * failure worth showing. See `rank` below for the ordering -- a same-length
+ * substitution beats a truncation, and no entity type is preferred.
  *
  * Returns null if nothing in the run qualifies, and the hero then simply omits
  * the block rather than inventing one.

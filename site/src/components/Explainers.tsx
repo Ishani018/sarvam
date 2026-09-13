@@ -88,21 +88,29 @@ export function PipelineDiagram() {
  * ---------------------------------------------------------------------- */
 
 /**
- * The entity types this run actually scored, with the call each one shows up
- * on. Read from the results rather than listed by hand, so the page cannot
- * claim coverage the corpus does not have -- and so a type added to the
- * generator appears here without anyone remembering to add it.
+ * The entity types this run actually scored, with who says each one out loud.
+ * Read from the results rather than listed by hand, so the page cannot claim
+ * coverage the corpus does not have -- and so a type added to the generator
+ * appears here without anyone remembering to add it.
+ *
+ * The direction is named because it is not symmetric and it is easy to get
+ * wrong. An agent reads back the last four digits of an account, never the
+ * whole number: saying it aloud is the security problem the masking exists to
+ * avoid. Full account numbers travel the other way, from the caller. Money,
+ * dates and reference numbers are what an agent says in full. Both directions
+ * are the same measurement problem -- a number has to survive a phone line --
+ * which is why both are in the corpus.
  *
  * Why names of people and places are absent belongs in Known issues, which
  * already says it; repeating it here was the third time the page explained the
  * same omission.
  */
 const WHERE: Record<string, string> = {
-  account_number: "read back on a collections or servicing call",
-  currency: "the amount in a payment confirmation",
-  otp: "the code on a login or a transaction",
-  pin_code: "the PIN a courier reads out at the door",
-  date: "the due date on a reminder call",
+  account_number: "spoken by the caller, to identify the account",
+  currency: "spoken by the agent: a balance, an instalment, an amount owed",
+  otp: "spoken by the caller, to authorise a transaction",
+  pin_code: "spoken by the customer to a courier at the door",
+  date: "spoken by the agent: a due date on a reminder call",
 };
 
 export function ScoredTypes({ types }: { types: string[] }) {

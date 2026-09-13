@@ -4,9 +4,9 @@ import type { GintiData } from "../types";
 /**
  * The next question after the hero, not the same one.
  *
- * The hero establishes the setting -- a phone call, a bank, an account number
- * read back. A reader arriving here already has that, so this section does not
- * restate what a voice agent is or what it reads. It answers why the failure is
+ * The hero establishes the setting -- a phone call, a voice agent, an amount
+ * that has to be right. A reader arriving here already has that, so this
+ * section does not restate it. It answers why the failure is
  * hard to see: the line does more damage than it sounds like, the standard
  * metric averages it away, and nobody publishes the number that would show it.
  *
@@ -61,17 +61,17 @@ export function WhyItMatters({ data }: { data: GintiData }) {
             <h3>The usual metric counts the wrong thing</h3>
             <p>
               Word error rate treats every word alike. A dropped postposition
-              and a wrong digit cost the same. Worse, a model that reads the
-              number back correctly but spells the digits out, where the
-              reference wrote them as digits, is charged an error for every
-              digit &mdash; so the score collapses while the answer is perfect.
+              and a wrong digit cost the same. Worse, a model that hears the
+              number perfectly but spells the digits out, where the reference
+              wrote them as digits, is charged an error for every digit &mdash;
+              so the score collapses while the answer is right.
             </p>
             {perfectButPenalised && (
               <p className="why__aside">
                 The worst case on this page: a transcript that returned every
                 value exactly right and still scored{" "}
                 {perfectButPenalised.wer.toFixed(2)} on word error rate. Nothing
-                about that number tells you the account number survived.
+                about that number tells you the amount survived.
               </p>
             )}
           </Reveal>

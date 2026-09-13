@@ -22,7 +22,9 @@ import type { GintiData } from "../types";
  */
 
 /** Small numbers in words: a sentence meant to land in one glance should not
- *  open with a numeral. Above the range this covers, digits are fine. */
+ *  open with a numeral. Only up to ninety-nine -- past that the words are
+ *  longer than the thing they spell, and mixing the two in one phrase
+ *  ("twenty-six of 114") reads worse than either. */
 const WORDS = [
   "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
   "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
@@ -41,7 +43,16 @@ function inWords(n: number): string {
 export function Hero({ data }: { data: GintiData }) {
   const pair = data.lossPairs[0];
   const example = pickHeroExample(data.listen, data.conditions);
-  const lost = pair ? pair.bursty.accounts.total - pair.bursty.accounts.hits : 0;
+
+  // Every scored entity type, not account numbers alone. The question above is
+  // about an amount, and the failure shown below is an amount; narrowing the
+  // figures to account numbers would put a number on screen that does not
+  // answer the sentence it sits under.
+  const lost = pair ? pair.bursty.total - pair.bursty.hits : 0;
+  const total = pair ? pair.bursty.total : 0;
+  // Words only when both halves fit in words, or the phrase mixes the two.
+  const pairInWords = lost <= 99 && total <= 99;
+  const say = (n: number) => (pairInWords ? inWords(n) : String(n));
 
   return (
     <section className="hero" id="top">
@@ -52,20 +63,23 @@ export function Hero({ data }: { data: GintiData }) {
         </h1>
 
         {/* Line one: what this is. It has to work with no prior knowledge, so
-            it names the situation -- a bank, a phone, an account number -- and
-            no part of the method. */}
+            it names a situation anyone recognises and no part of the method.
+            An amount owed, deliberately: a bank's agent reads back the last
+            four digits of an account, never the whole thing -- saying it aloud
+            is the security problem the masking exists to avoid. What an agent
+            does say in full is money, dates and reference numbers. */}
         <p className="hero__line">
-          When a bank&rsquo;s voice agent reads your account number back to you
-          over the phone, does it get it right?
+          When a voice agent tells you how much you owe, does it get the number
+          right?
         </p>
 
         {/* Line two: the finding. Only now does it have something to land
             against; on its own it was a result with no experiment attached. */}
         {pair && (
           <p className="hero__finding">
-            <em>{inWords(lost)} of {inWords(pair.bursty.accounts.total)}</em>{" "}
-            came back wrong &mdash; from audio that lost no more than audio
-            where every number survived.
+            <em>{say(lost)} of {say(total)}</em> numbers came back wrong &mdash;
+            from audio that lost no more than audio where almost every number
+            survived.
           </p>
         )}
 
@@ -74,13 +88,13 @@ export function Hero({ data }: { data: GintiData }) {
             <div className="verdict__side verdict__side--keep">
               <span className="verdict__k">damage spread out</span>
               <span className="verdict__n">
-                {pair.scattered.accounts.hits}<i>/</i>{pair.scattered.accounts.total}
+                {pair.scattered.hits}<i>/</i>{pair.scattered.total}
               </span>
             </div>
             <div className="verdict__side verdict__side--lose">
               <span className="verdict__k">damage in clumps</span>
               <span className="verdict__n">
-                {pair.bursty.accounts.hits}<i>/</i>{pair.bursty.accounts.total}
+                {pair.bursty.hits}<i>/</i>{pair.bursty.total}
               </span>
             </div>
           </div>
