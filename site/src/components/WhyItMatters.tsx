@@ -1,104 +1,86 @@
 import { Reveal } from "./Reveal";
-import { entityNoun } from "../entityDiff";
 import type { GintiData } from "../types";
 
 /**
- * Why anyone would build this, in about fifteen seconds.
+ * The next question after the hero, not the same one.
  *
- * Sits between the hero and the first numbered section, unnumbered: it is
- * orientation, not part of the argument, and numbering it would imply a reader
- * has to have read it to follow what comes after.
+ * The hero establishes the setting -- a phone call, a bank, an account number
+ * read back. A reader arriving here already has that, so this section does not
+ * restate what a voice agent is or what it reads. It answers why the failure is
+ * hard to see: the line does more damage than it sounds like, the standard
+ * metric averages it away, and nobody publishes the number that would show it.
  *
- * The entity types listed are the ones actually scored in this run, not a
- * wishlist, so the section cannot claim coverage the corpus does not have.
+ * Unnumbered, and between the hero and section 01: orientation, not part of the
+ * argument. Numbering it would imply a reader has to have read it to follow
+ * what comes after.
  */
-
-const DOMAIN_BLURB: Record<string, string> = {
-  account_number: "read back on collections and servicing calls",
-  currency: "the amount in a payment confirmation",
-  otp: "the one-time code on a login or a transaction",
-  pin_code: "the delivery PIN a courier reads out",
-  date: "the due date on a reminder call",
-};
-
 export function WhyItMatters({ data }: { data: GintiData }) {
   const h = data.headline;
-  const types = data.entityTypes;
+  const pair = data.lossPairs[0];
 
   return (
     <section className="why" id="why">
       <div className="why__inner">
         <Reveal className="why__head">
-          <h2>Why this exists</h2>
+          <h2>Why this is hard to see</h2>
           <p>
-            Voice agents in India read account numbers, OTPs and payment
-            amounts down phone lines that drop audio. A voice agent that
-            mishears a word can be forgiven. One that mishears a digit cannot,
-            and the two failures look identical to every metric in common use.
+            A voice agent that mishears a word can be forgiven. One that
+            mishears a digit cannot &mdash; and nothing in the standard toolkit
+            tells the two apart.
           </p>
         </Reveal>
 
-        <div className="why__grid">
+        <div className="why__grid why__grid--3">
           <Reveal as="section" className="why__item">
-            <h3>Where a number is the payload</h3>
+            <h3>The line takes more than it sounds like</h3>
             <p>
-              Collections calls, banking IVR, OTP confirmation, delivery PIN
-              verification, insurance servicing. In each of these the
-              conversation is small talk wrapped around one value that has to be
-              exactly right.
-            </p>
-            <ul className="why__list">
-              {types.map((t) => (
-                <li key={t}>
-                  <span className="why__type">{entityNoun(t)}</span>
-                  {DOMAIN_BLURB[t] && <span>{DOMAIN_BLURB[t]}</span>}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-
-          <Reveal as="section" className="why__item" delay={60}>
-            <h3>The call is not studio audio</h3>
-            <p>
-              An Indian mobile call arrives at 8&nbsp;kHz through a lossy codec,
-              and on a weak connection some of it does not arrive at all. Models
-              are benchmarked on clean recordings and then deployed onto this.
+              Audio travels in packets of about twenty milliseconds, and on a
+              weak connection some never arrive. Twenty milliseconds is roughly
+              one Hindi syllable &mdash; which, in a number read aloud, is
+              usually a whole digit. The hole does not blur the digit. It
+              removes it.
             </p>
             <p className="why__aside">
               This run puts synthesised speech through{" "}
-              {h.conditions} such conditions &mdash; downsampling, G.711, G.726,
-              additive noise, and packet loss both scattered and in bursts
-              &mdash; using ffmpeg, not a simulation of one.
+              {h.conditions} such conditions using ffmpeg &mdash; real
+              downsampling, real G.711 and G.726, real dropped frames &mdash;
+              not a simulation of one.
             </p>
+          </Reveal>
+
+          <Reveal as="section" className="why__item" delay={60}>
+            <h3>The usual metric averages it away</h3>
+            <p>
+              Word error rate is a mean over every word in the sentence. The
+              account number is one word among thirty, so losing it moves the
+              average about as much as dropping a postposition does &mdash; and
+              a mean cannot tell you which of the two it was.
+            </p>
+            {pair && (
+              <p className="why__aside">
+                Section 05 has the case: entity accuracy falls{" "}
+                {(((pair.scattered.hits / pair.scattered.total)
+                  - (pair.bursty.hits / pair.bursty.total)) * 100).toFixed(0)}{" "}
+                points while word error rate moves{" "}
+                {pair.scattered.wer?.toFixed(3) ?? "—"} to{" "}
+                {pair.bursty.wer?.toFixed(3) ?? "—"}.
+              </p>
+            )}
           </Reveal>
 
           <Reveal as="section" className="why__item" delay={120}>
-            <h3>What actually breaks</h3>
+            <h3>So nobody has the number</h3>
             <p>
-              Not a garbled transcript anyone would notice. A single wrong
-              digit, in a value of exactly the right length and shape, that
-              passes every downstream validation and lands in a ledger.
+              Indic ASR is benchmarked on clean read speech and scored on that
+              average. Neither half of that describes a collections call. The
+              result is that anyone deploying or buying an Indian-language voice
+              agent is choosing on a figure that cannot answer the only question
+              that matters to them.
             </p>
             <p className="why__aside">
-              In the worst condition here,{" "}
-              {data.lossPairs[0]
-                ? `${data.lossPairs[0].bursty.total - data.lossPairs[0].bursty.hits} of ${data.lossPairs[0].bursty.total}`
-                : "some"}{" "}
-              entities came back wrong while word error rate barely moved.
-            </p>
-          </Reveal>
-
-          <Reveal as="section" className="why__item" delay={180}>
-            <h3>Who it is for</h3>
-            <p>
-              Anyone deploying or procuring an Indian-language voice agent who
-              currently has a single word error rate to go on. Ginti gives you
-              the number that matters instead: how often the entity survived,
-              broken out by what the network did to the audio.
-            </p>
-            <p className="why__aside">
-              It is an open harness, not a leaderboard. The conditions, the
-              corpus and the scoring are all in the repository.
+              Ginti is the harness that produces the missing number, and it is
+              open: the conditions, the corpus and the scoring are all in the
+              repository. It is not a leaderboard.
             </p>
           </Reveal>
         </div>

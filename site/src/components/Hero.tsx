@@ -89,7 +89,7 @@ export function Hero({ data }: { data: GintiData }) {
         {example && <HeroFailure ex={example} />}
 
         <a className="hero__cue" href="#why">
-          <span>Why this matters</span>
+          <span>Why it goes unnoticed</span>
           <svg viewBox="0 0 16 22" width="11" height="15" aria-hidden="true">
             <path d="M8 0 v18 M2 12 l6 6 l6 -6" fill="none"
                   stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"

@@ -1,3 +1,4 @@
+import { entityNoun } from "../entityDiff";
 import type { ConditionDef } from "../types";
 
 /* -------------------------------------------------------------------------
@@ -79,6 +80,45 @@ export function PipelineDiagram() {
         </defs>
       </svg>
     </figure>
+  );
+}
+
+/* -------------------------------------------------------------------------
+ * What gets scored
+ * ---------------------------------------------------------------------- */
+
+/**
+ * The entity types this run actually scored, with the call each one shows up
+ * on. Read from the results rather than listed by hand, so the page cannot
+ * claim coverage the corpus does not have -- and so a type added to the
+ * generator appears here without anyone remembering to add it.
+ *
+ * Why names of people and places are absent belongs in Known issues, which
+ * already says it; repeating it here was the third time the page explained the
+ * same omission.
+ */
+const WHERE: Record<string, string> = {
+  account_number: "read back on a collections or servicing call",
+  currency: "the amount in a payment confirmation",
+  otp: "the code on a login or a transaction",
+  pin_code: "the PIN a courier reads out at the door",
+  date: "the due date on a reminder call",
+};
+
+export function ScoredTypes({ types }: { types: string[] }) {
+  if (types.length === 0) return null;
+  return (
+    <div className="scored">
+      <h4 className="scored__head">What counts as an entity here</h4>
+      <dl className="scored__list">
+        {types.map((t) => (
+          <div key={t}>
+            <dt>{entityNoun(t)}</dt>
+            <dd>{WHERE[t] ?? "scored on exact normalised match"}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
   );
 }
 

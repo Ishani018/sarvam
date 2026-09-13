@@ -29,6 +29,6 @@ narrower than they look, and anyone reading the results should read these first.
   wired in. Reporting zero accuracy for an extractor that does not exist would
   read as a finding, so those types are excluded rather than reported as failing.
 
-- **Most declared conditions have not been run.** The conditions section
-  describes all nine because the method is the point, but anything without data
-  is marked as unmeasured and should not be read as coverage.
+- **Not every declared condition has been run.** The conditions section
+  describes all of them because the method is the point; the ones without data
+  are marked as unmeasured in every table and should not be read as coverage.

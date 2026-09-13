@@ -4,7 +4,7 @@ import { Hero } from "./components/Hero";
 import { ResultsMatrix } from "./components/ResultsMatrix";
 import { RenderingTable } from "./components/RenderingTable";
 import { Playground } from "./components/Playground";
-import { Conditions, PipelineDiagram } from "./components/Explainers";
+import { Conditions, PipelineDiagram, ScoredTypes } from "./components/Explainers";
 import { ConditionLadder, ContrastBars, DisagreementChart } from "./components/Charts";
 import { Detail, Section, Subhead } from "./components/Shell";
 import { Reveal } from "./components/Reveal";
@@ -74,7 +74,7 @@ const CONDITION_NOTES: Record<string, string> = {
 const SECTIONS: SectionDef[] = [
   { id: "why", no: "", title: "Why this exists", nav: "Why" },
   { id: "problem", no: "01", title: "The problem", nav: "Problem" },
-  { id: "what", no: "02", title: "What Ginti does", nav: "Method" },
+  { id: "what", no: "02", title: "What Ginti does", nav: "Approach" },
   { id: "listen", no: "03", title: "Hear it break", nav: "Listen" },
   { id: "degradation", no: "04", title: "How the degradation works", nav: "Degradation" },
   { id: "results", no: "05", title: "Results", nav: "Results" },
@@ -174,6 +174,7 @@ export function App() {
       <Section id="what" no="02" title="What Ginti does" tone="cool" wide
                summary={md("what-ginti-does").summary}>
         <PipelineDiagram />
+        <ScoredTypes types={data.entityTypes} />
         <Detail>
           <Markdown source={md("what-ginti-does").body} />
         </Detail>

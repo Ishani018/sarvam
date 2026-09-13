@@ -1,4 +1,4 @@
-SUMMARY: Nine telephony conditions are declared as chains of ffmpeg transforms; the page shows the commands that actually ran, not a restatement of the config.
+SUMMARY: Every telephony condition is a declared chain of ffmpeg transforms, and the page shows the commands that actually ran rather than a restatement of the config.
 
 Each condition is a named chain of transforms declared in YAML, applied with
 ffmpeg and sox. Nothing is reimplemented in Python except packet-loss frame

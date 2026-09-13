@@ -1,4 +1,4 @@
-SUMMARY: Packet loss is modelled as independent per-frame loss, which is gentler than real networks; read these figures as a floor on the damage.
+SUMMARY: Loss is modelled both scattered and in bursts at matching rates, so the two can be compared directly; concealment, real handsets and human speech are still absent.
 
 Packet loss is modelled two ways, and both are declared at matching rates so
 they can be compared directly.
