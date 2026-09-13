@@ -1,10 +1,13 @@
 import { Gate } from "./Gate";
+import { Header, type SectionDef } from "./components/Header";
+import { Hero } from "./components/Hero";
 import { ResultsMatrix } from "./components/ResultsMatrix";
 import { RenderingTable } from "./components/RenderingTable";
 import { ListenSection } from "./components/ListenSection";
 import { Conditions, PipelineDiagram } from "./components/Explainers";
-import { ConditionLadder, DisagreementChart } from "./components/Charts";
-import { Detail, Nav, ResultBlock, Section } from "./components/Shell";
+import { ConditionLadder, ContrastBars, DisagreementChart } from "./components/Charts";
+import { Detail, Section, Subhead } from "./components/Shell";
+import { Reveal } from "./components/Reveal";
 import { Markdown } from "./components/Markdown";
 import { MethodTable } from "./components/MethodTable";
 import raw from "./generated/data.json";
@@ -48,8 +51,9 @@ const CONDITION_NOTES: Record<string, string> = {
     "20 ms is about the length of one short Hindi syllable, which makes this the " +
     "condition most likely to remove a digit outright rather than blur it.",
   packet_loss_10:
-    "At this rate the holes start to overlap the same word. Note that loss here " +
-    "is independent per frame, not bursty; see the limitations below.",
+    "At this rate the holes start to overlap the same word. Loss here is " +
+    "independent per frame; the bursty conditions below drop the same fraction " +
+    "in runs instead, and that is where the entities are actually lost.",
   noisy_line:
     "Additive background noise at a set signal-to-noise ratio, applied before " +
     "the codec. That order is the physical one: a noisy room first, then the " +
@@ -57,77 +61,98 @@ const CONDITION_NOTES: Record<string, string> = {
 };
 
 /**
- * Sections are numbered like a paper and the nav is the table of contents.
+ * Sections are numbered like a paper. Listening comes before the codec chain
+ * deliberately: hearing the damage makes the technical explanation land,
+ * whereas reading the chain first is work with no payoff yet.
  *
- * Listening comes before the codec chain deliberately: hearing the damage makes
- * the technical explanation land, whereas reading the chain first is work with
- * no payoff yet.
+ * `nav` is the short label for the header bar; `title` is the full one, which
+ * the section heading itself carries.
  */
-const SECTIONS = [
-  { id: "problem", no: "01", title: "The problem" },
-  { id: "what", no: "02", title: "What Ginti does" },
-  { id: "listen", no: "03", title: "Listen for yourself" },
-  { id: "degradation", no: "04", title: "How the degradation works" },
-  { id: "results", no: "05", title: "Results" },
-  { id: "method", no: "06", title: "Method" },
-  { id: "issues", no: "07", title: "Known issues" },
+const SECTIONS: SectionDef[] = [
+  { id: "problem", no: "01", title: "The problem", nav: "Problem" },
+  { id: "what", no: "02", title: "What Ginti does", nav: "Method" },
+  { id: "listen", no: "03", title: "Listen for yourself", nav: "Listen" },
+  { id: "degradation", no: "04", title: "How the degradation works", nav: "Degradation" },
+  { id: "results", no: "05", title: "Results", nav: "Results" },
+  { id: "method", no: "06", title: "Exact parameters", nav: "Parameters" },
+  { id: "issues", no: "07", title: "Known issues", nav: "Issues" },
 ];
 
 const md = (key: string) => data.content[key] ?? { summary: null, body: "" };
-
-function Masthead() {
-  return (
-    <header className="masthead">
-      <div className="wrap">
-        <h1 className="masthead__title">
-          Ginti<span className="deva">गिनती</span>
-        </h1>
-        <p className="masthead__lede">
-          Whether the number survives the phone line. An entity-level evaluation
-          of Indic speech recognition under telephony-grade audio degradation.
-        </p>
-      </div>
-    </header>
-  );
-}
 
 /** Provenance banner. Load-bearing: the page goes to the vendor being
  *  evaluated, so mock output must never read as a measurement. */
 function Provenance() {
   if (!data.provenance.isMock) return null;
   return (
-    <div className="banner-wrap">
-      <div className="wrap">
-        <div className="banner">
-          <strong>These are not measurements.</strong> Every row in this build
-          comes from the offline mock recogniser, which returns canned output
-          without contacting any API. Nothing here describes the behaviour of a
-          real system.
-        </div>
+    <div className="banner">
+      <div className="banner__inner">
+        <strong>These are not measurements.</strong> Every row in this build
+        comes from the offline mock recogniser, which returns canned output
+        without contacting any API. Nothing here describes the behaviour of a
+        real system.
       </div>
     </div>
+  );
+}
+
+function Footer() {
+  const repo = data.project.repo;
+  const built = new Date(data.generatedAt)
+    .toISOString().slice(0, 16).replace("T", " ");
+  const runs = data.runs.map((r) => r.runId).join(", ");
+
+  return (
+    <footer className="foot">
+      <div className="foot__inner">
+        <div className="foot__brand">
+          <span className="foot__mark">Ginti<span className="deva">गिनती</span></span>
+          <p>{data.project.tagline}</p>
+          {repo && (
+            <a className="foot__link" href={repo} target="_blank" rel="noreferrer noopener">
+              {repo.replace("https://", "")}
+            </a>
+          )}
+        </div>
+
+        <dl className="foot__meta">
+          <div><dt>built</dt><dd>{built}Z</dd></div>
+          <div><dt>runs</dt><dd>{runs}</dd></div>
+          <div><dt>result rows</dt><dd>{data.summary.rows}</dd></div>
+          <div><dt>entities scored</dt><dd>{data.summary.entities}</dd></div>
+          {data.audioBundle.files > 0 && (
+            <div><dt>audio bundled</dt><dd>
+              {data.audioBundle.files} files,{" "}
+              {(data.audioBundle.bytes / 1e6).toFixed(1)} MB
+            </dd></div>
+          )}
+          <div><dt>sources</dt><dd>{data.provenance.sourceFiles.results.join(", ")}</dd></div>
+        </dl>
+      </div>
+    </footer>
   );
 }
 
 export function App() {
   const stats = data.renderingStats;
   const h = data.headline;
+  const pair = data.lossPairs[0];
 
   return (
     <Gate>
-      <Nav sections={SECTIONS} />
-      <Masthead />
+      <Header sections={SECTIONS} heroId="top" repo={data.project.repo} />
       <Provenance />
-      <ResultBlock data={data} />
+      <Hero data={data} />
 
       <Section id="problem" no="01" title="The problem"
                summary={md("problem").summary}>
+        <ContrastBars werByModel={h.werByModel} hitRate={h.hitRate} />
         <Detail>
           <Markdown source={md("problem").body} />
         </Detail>
       </Section>
 
-      <Section id="what" no="02" title="What Ginti does"
+      <Section id="what" no="02" title="What Ginti does" tone="tint" wide
                summary={md("what-ginti-does").summary}>
         <PipelineDiagram />
         <Detail>
@@ -135,35 +160,82 @@ export function App() {
         </Detail>
       </Section>
 
-      <Section id="listen" no="03" title="Listen for yourself"
-               summary="The same sentence, clean and then over the phone line, with what each model returned underneath.">
+      <Section id="listen" no="03" title="Listen for yourself" wide
+               summary="The same sentence, clean and then over the phone line. Pick a condition to hear it against the control, and read what each model returned.">
         <ListenSection listen={data.listen} conditions={data.conditions} />
       </Section>
 
-      <Section id="degradation" no="04" title="How the degradation works"
+      <Section id="degradation" no="04" title="How the degradation works" tone="tint" wide
                summary={md("degradation").summary}>
-        <ConditionLadder conditions={data.conditions} />
+        <ConditionLadder conditions={data.conditions} matrix={data.matrix} />
         <Detail>
           <Markdown source={md("degradation").body} />
           <Conditions conditions={data.conditions} notes={CONDITION_NOTES} />
-          <h3 className="subhead">What this model of the phone line leaves out</h3>
+          <h4 className="minihead">What this model of the phone line leaves out</h4>
           <Markdown source={md("degradation-limits").body} />
         </Detail>
       </Section>
 
-      <Section id="results" no="05" title="Results"
+      <Section id="results" no="05" title="Results" wide
                summary={
                  `Entity accuracy is unaffected by bandwidth, codecs and ` +
                  `scattered packet loss, and falls sharply once the same loss ` +
                  `arrives in bursts. Word error rate moves ` +
-                 `${h.werConditionMin?.toFixed(3)}\u2013${h.werConditionMax?.toFixed(3)} ` +
+                 `${h.werConditionMin?.toFixed(3)}–${h.werConditionMax?.toFixed(3)} ` +
                  `across all of it and does not track the failure.`
                }>
-        <DisagreementChart
-          matrix={data.matrix} wer={data.wer} conditions={data.conditions}
-        />
+        {pair && (
+          <Reveal className="pairbox">
+            {data.lossPairs.map((p) => {
+              const s = p.scattered.hits / p.scattered.total;
+              const b = p.bursty.hits / p.bursty.total;
+              return (
+                <div className="pairbox__row" key={p.rate}>
+                  <span className="pairbox__rate">
+                    {(p.rate * 100).toFixed(0)}% loss
+                  </span>
+                  {/* Both bars run the full 0..1 scale. What differs, and what
+                      the eye actually compares, is the rust tail: the share of
+                      entities the condition lost. */}
+                  <div className="pairbox__bars">
+                    {[
+                      { v: s, side: p.scattered, kind: "keep" as const },
+                      { v: b, side: p.bursty, kind: "lose" as const },
+                    ].map((r) => (
+                      <div className={`pairbox__bar pairbox__bar--${r.kind}`}
+                           key={r.side.condition}>
+                        <span className="pairbox__hit" style={{ width: `${r.v * 100}%` }} />
+                        <span className="pairbox__miss" style={{ width: `${(1 - r.v) * 100}%` }} />
+                        <b>{r.v.toFixed(3)}</b>
+                        <i>{r.side.condition}</i>
+                        <u>&mdash; {r.side.total - r.side.hits} lost</u>
+                      </div>
+                    ))}
+                  </div>
+                  <span className="pairbox__gap">
+                    &minus;{((s - b) * 100).toFixed(1)} pts
+                  </span>
+                </div>
+              );
+            })}
+            <p className="figcap">
+              All entity types, both models, on a 0&ndash;1 scale; the rust tail
+              is the share lost. Each pair differs only in whether the dropped
+              frames are independent or clustered into runs averaging{" "}
+              {pair.meanBurstMs ?? 100}&nbsp;ms.
+            </p>
+          </Reveal>
+        )}
 
-        <h3 className="subhead">Entity hit rate</h3>
+        <Reveal as="figure" className="bleedfig">
+          <DisagreementChart
+            matrix={data.matrix} wer={data.wer} conditions={data.conditions}
+          />
+        </Reveal>
+
+        <Subhead note="An entity counts as a hit only on exact normalised match.">
+          Entity hit rate by type and condition
+        </Subhead>
         <ResultsMatrix
           matrix={data.matrix}
           conditions={data.conditions}
@@ -172,9 +244,11 @@ export function App() {
           lowNThreshold={data.lowNThreshold}
         />
 
-        <div className="prose" style={{ margin: "2.5rem 0 1.5rem" }}>
+        <Subhead note="Transcribe mode normalises numbers, but not to a fixed form.">
+          How the models write numbers back
+        </Subhead>
+        <Reveal className="prose">
           <p>
-            Transcribe mode normalises numbers, but not to a fixed form.{" "}
             {stats.rewrote > 0 && (
               <>
                 In {stats.rewrote} of {stats.pairs * stats.models} scored
@@ -198,42 +272,35 @@ export function App() {
             Anything parsing a transcript for an account number has to handle
             both forms.
           </p>
-        </div>
+        </Reveal>
         <RenderingTable
           rendering={data.rendering} wer={data.wer} models={data.models}
         />
 
-        <div className="note note--warn" style={{ marginTop: "2rem" }}>
+        <Reveal className="note note--warn">
           This part is an observation about output formatting, not about
           recognition accuracy: the model-to-model gap above comes from how each
           writes numbers. The entity losses under bursty packet loss are a
           separate effect, and a real one.
-        </div>
+        </Reveal>
       </Section>
 
-      <Section id="method" no="06" title="Method"
+      <Section id="method" no="06" title="Exact parameters" tone="tint"
                summary={md("method").summary}>
-        <Detail>
+        <Detail label="Read how it is scored">
           <Markdown source={md("method").body} />
-          <h3 className="subhead">Exact parameters</h3>
-          <MethodTable data={data} />
         </Detail>
+        <MethodTable data={data} />
       </Section>
 
       <Section id="issues" no="07" title="Known issues"
                summary={md("known-issues").summary}>
-        <Markdown source={md("known-issues").body} />
+        <Reveal className="prose">
+          <Markdown source={md("known-issues").body} />
+        </Reveal>
       </Section>
 
-      <footer className="footer">
-        <div className="wrap footer__grid">
-          <span>
-            Built {new Date(data.generatedAt).toISOString().slice(0, 16).replace("T", " ")}Z
-          </span>
-          <span>from {data.provenance.sourceFiles.results.join(", ")}</span>
-          <span>{data.summary.rows} result rows</span>
-        </div>
-      </footer>
+      <Footer />
     </Gate>
   );
 }

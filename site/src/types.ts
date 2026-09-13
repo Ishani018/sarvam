@@ -60,7 +60,7 @@ export interface RunMeta {
 
 export interface GintiData {
   generatedAt: string;
-  project: { name: string; script: string; tagline: string };
+  project: { name: string; script: string; tagline: string; repo: string | null };
   provenance: {
     isMock: boolean;
     asrImpls: string[];

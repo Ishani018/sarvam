@@ -1,9 +1,10 @@
 {
-  "generatedAt": "2026-09-13T06:33:49.771Z",
+  "generatedAt": "2026-09-13T10:13:22.567Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
-    "tagline": "Does the number survive the phone line?"
+    "tagline": "Does the number survive the phone line?",
+    "repo": "https://github.com/Ishani018/sarvam"
   },
   "provenance": {
     "isMock": false,

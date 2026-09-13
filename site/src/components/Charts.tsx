@@ -1,4 +1,40 @@
+import { useInView } from "./Reveal";
 import type { ConditionDef, MatrixCell, WerRow } from "../types";
+
+/* -------------------------------------------------------------------------
+ * Shared condition ordering
+ * ---------------------------------------------------------------------- */
+
+const lossOp = (c: ConditionDef) => c.chain.find((o) => o.op === "packet_loss");
+const isBursty = (c: ConditionDef) => lossOp(c)?.model === "gilbert";
+const lossRate = (c: ConditionDef) => Number(lossOp(c)?.rate ?? 0);
+
+/**
+ * Split conditions at the one axis that matters -- whether the loss is
+ * clustered -- and order by loss rate within each half.
+ *
+ * Read left to right, a series holds through the first block and moves at the
+ * boundary, which is the finding. In config order the two kinds of loss are
+ * interleaved and the boundary does not exist. Sorting by rate inside each half
+ * keeps the whole loss ramp contiguous across it, rather than interrupted by
+ * the noisy line.
+ */
+export function conditionGroups(conditions: ConditionDef[]) {
+  const exercised = conditions.filter((c) => c.exercised);
+  const byRate = (a: ConditionDef, b: ConditionDef) => lossRate(a) - lossRate(b);
+  return [
+    {
+      label: "no loss, or loss scattered",
+      short: "scattered",
+      items: exercised.filter((c) => !isBursty(c)).sort(byRate),
+    },
+    {
+      label: "same loss, clustered into bursts",
+      short: "bursty",
+      items: exercised.filter(isBursty).sort(byRate),
+    },
+  ].filter((g) => g.items.length);
+}
 
 /* -------------------------------------------------------------------------
  * The disagreement chart
@@ -7,45 +43,27 @@ import type { ConditionDef, MatrixCell, WerRow } from "../types";
 /**
  * Entity hit rate and word error rate over the same audio, on one pair of axes.
  *
- * This is the argument in one image: a flat line at the top and a flat line
- * across the middle, computed from identical recordings. Two series need two
- * colours, which is the only reason the second accent exists.
+ * This is the argument in one image: one series that holds and then falls where
+ * clustering begins, and another that does not move at all and separates by
+ * model instead. Two series need two colours, which is why the second accent
+ * exists.
  *
- * Both series are plotted on 0..1 because both are rates. They are not
- * comparable in magnitude and the caption says so; what is legible is that one
- * does not move and the other sits nowhere near it.
+ * Both are plotted on 0..1 because both are rates. They are not comparable in
+ * magnitude and the caption says so; what is legible is that one tracks the
+ * damage and the other does not.
  */
 export function DisagreementChart({
-  matrix, wer, conditions, compact = false,
+  matrix, wer, conditions, compact = false, caption = true,
 }: {
   matrix: MatrixCell[];
   wer: WerRow[];
   conditions: ConditionDef[];
   compact?: boolean;
+  caption?: boolean;
 }) {
-  // Split into two blocks at the one axis that matters: whether the loss is
-  // clustered. Read left to right, the teal line holds through the first block
-  // and drops at the boundary -- which is the finding, and is invisible in
-  // config order where the two kinds of loss are interleaved.
-  //
-  // Within each block, conditions that drop no packets come first and the lossy
-  // ones follow in rate order, so the whole loss ramp runs contiguously across
-  // the boundary rather than being interrupted by the noisy line.
-  const exercised = conditions.filter((c) => c.exercised);
-  const lossOp = (c: ConditionDef) => c.chain.find((o) => o.op === "packet_loss");
-  const isBursty = (c: ConditionDef) => lossOp(c)?.model === "gilbert";
-  const byRate = (a: ConditionDef, b: ConditionDef) =>
-    Number(lossOp(a)?.rate ?? 0) - Number(lossOp(b)?.rate ?? 0);
-  const groups = [
-    {
-      label: "no loss, or loss scattered",
-      items: exercised.filter((c) => !isBursty(c)).sort(byRate),
-    },
-    {
-      label: "same loss, clustered into bursts",
-      items: exercised.filter(isBursty).sort(byRate),
-    },
-  ].filter((g) => g.items.length);
+  const { ref, inView } = useInView<HTMLElement>();
+
+  const groups = conditionGroups(conditions);
   const ordered = groups.flatMap((g) => g.items);
   const names = ordered.map((c) => c.name);
   if (names.length === 0) return null;
@@ -79,11 +97,11 @@ export function DisagreementChart({
   const groupY = labelDrop + 20;   // below the axis
   const W = 640;
   const padL = 34;
-  const padR = 26;
-  const padT = 14;
+  const padR = 30;
+  const padT = 16;
   const padB = groupY + 18;
   const plotW = W - padL - padR;
-  const plotH = compact ? 150 : 190;
+  const plotH = compact ? 158 : 196;
   const H = padT + plotH + padB;
 
   const x = (i: number) =>
@@ -96,8 +114,15 @@ export function DisagreementChart({
       .filter(Boolean)
       .join(" ");
 
+  // The boundary between the two blocks, drawn as a full-height divider: it is
+  // where the teal line drops, and a reader should see the two regions before
+  // reading a single label.
+  const boundary = groups.length > 1
+    ? (x(groups[0].items.length - 1) + x(groups[0].items.length)) / 2
+    : null;
+
   return (
-    <figure className="chart">
+    <figure className={`chart ${inView ? "is-drawn" : ""}`} ref={ref as never}>
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
            aria-label={
              `Entity hit rate across ${names.length} telephony conditions, ` +
@@ -111,19 +136,32 @@ export function DisagreementChart({
                `${m.model} near ${(m.points[0].value ?? 0).toFixed(2)}`).join(", ") +
              `, on the same audio.`
            }>
+        {/* The bursty half sits on a faint wash, so the two regimes read as
+            regions rather than as ten interchangeable ticks. */}
+        {boundary !== null && (
+          <rect className="ch-region" x={boundary} y={padT}
+                width={W - padR - boundary + 6} height={plotH} />
+        )}
+
         {[0, 0.25, 0.5, 0.75, 1].map((g) => (
           <g key={g}>
             <line className="ch-grid" x1={padL} x2={W - padR} y1={y(g)} y2={y(g)} />
-            <text className="ch-label" x={padL - 7} y={y(g) + 3} textAnchor="end">
+            <text className="ch-label" x={padL - 8} y={y(g) + 3} textAnchor="end">
               {g.toFixed(2)}
             </text>
           </g>
         ))}
         <line className="ch-axis" x1={padL} x2={W - padR} y1={y(0)} y2={y(0)} />
 
-        <path className="ch-series-a" d={path(hitAt)} />
+        {boundary !== null && (
+          <line className="ch-boundary" x1={boundary} x2={boundary}
+                y1={padT} y2={y(0)} />
+        )}
+
+        <path className="ch-series-a" d={path(hitAt)} pathLength={1} />
         {werByModel.map((m, mi) => (
           <path key={m.model} className="ch-series-b" d={path(m.points)}
+                pathLength={1}
                 strokeDasharray={mi === 0 ? undefined : "5 3"} />
         ))}
 
@@ -139,7 +177,7 @@ export function DisagreementChart({
           const last = m.points[m.points.length - 1];
           return last.value === null ? null : (
             <text key={`l${m.model}`} className="ch-value"
-                  x={x(names.length - 1) + 7} y={y(last.value) + 3}
+                  x={x(names.length - 1) + 8} y={y(last.value) + 3}
                   fill="var(--accent)">{m.model.replace("saaras:", "")}</text>
           );
         })}
@@ -152,8 +190,7 @@ export function DisagreementChart({
           </text>
         ))}
 
-        {/* Group rules, clear of the labels: the boundary between them is where
-            clustering turns on, which is where the teal line drops. */}
+        {/* Group rules, clear of the labels. */}
         {groups.length > 1 && (() => {
           let at = 0;
           return groups.map((g) => {
@@ -184,15 +221,83 @@ export function DisagreementChart({
           word error rate, one line per model
         </span>
       </div>
-      <figcaption className="result__scope">
-        Conditions are split by whether packet loss is scattered or clustered,
-        and ordered by loss rate within each half, so the loss ramp runs
-        unbroken across the boundary. Entity accuracy holds through bandwidth
-        loss, codecs and scattered packet loss, then falls where clustering
-        begins. Word error rate does not track it, and separates by model rather
-        than by condition.
-      </figcaption>
+
+      {caption && (
+        <figcaption className="figcap">
+          Conditions are split by whether packet loss is scattered or clustered,
+          and ordered by loss rate within each half, so the loss ramp runs
+          unbroken across the boundary. Entity accuracy holds through bandwidth
+          loss, codecs and scattered packet loss, then falls where clustering
+          begins. Word error rate does not track it, and separates by model
+          rather than by condition.
+        </figcaption>
+      )}
     </figure>
+  );
+}
+
+/* -------------------------------------------------------------------------
+ * The contrast, as a statement
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Two bars on the same 0..1 scale: how wrong the transcript is, against how
+ * often the number in it is right.
+ *
+ * The point of the framing is that these are the same recordings. A reader who
+ * only ever sees the first number concludes the system is unusable; a reader
+ * who only ever sees the second concludes it is solved. Both are drawn from
+ * data.headline, so neither can drift.
+ */
+export function ContrastBars({
+  werByModel, hitRate,
+}: {
+  werByModel: Array<{ model: string; wer: number; n: number }>;
+  hitRate: number | null;
+}) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  if (hitRate === null || werByModel.length === 0) return null;
+
+  const rows = [
+    ...werByModel.map((m) => ({
+      key: m.model,
+      label: "word error rate",
+      note: m.model,
+      value: Math.min(m.wer, 1),
+      raw: m.wer,
+      kind: "bad" as const,
+    })),
+    {
+      key: "entity",
+      label: "entity hit rate",
+      note: "pooled over both models",
+      value: hitRate,
+      raw: hitRate,
+      kind: "good" as const,
+    },
+  ];
+
+  return (
+    <div className={`contrast ${inView ? "is-in" : ""}`} ref={ref}>
+      {rows.map((r) => (
+        <div className={`contrast__row contrast__row--${r.kind}`} key={r.key}>
+          <div className="contrast__meta">
+            <span className="contrast__label">{r.label}</span>
+            <span className="contrast__note">{r.note}</span>
+          </div>
+          <div className="contrast__track">
+            <span className="contrast__fill"
+                  style={{ transform: `scaleX(${r.value})` }} />
+          </div>
+          <span className="contrast__val">{r.raw.toFixed(3)}</span>
+        </div>
+      ))}
+      <p className="figcap">
+        The same recordings, scored two ways. Nearly every word is wrong and
+        nearly every number is right, which is why word error rate is the wrong
+        instrument for anything that has to read a number back to a customer.
+      </p>
+    </div>
   );
 }
 
@@ -201,63 +306,133 @@ export function DisagreementChart({
  * ---------------------------------------------------------------------- */
 
 /**
- * What each condition progressively takes away. Schematic, not a waveform: a
- * band of frequency, a quantisation grid, and gaps where frames were dropped.
+ * What each condition takes away, and what it costs.
  *
- * Derived from each condition's declared chain, so a new condition in the YAML
- * draws itself.
+ * One row per condition: what the chain does, a schematic of the surviving
+ * signal, and the measured entity hit rate for that condition. Everything is
+ * derived from the declared chain and the result matrix, so a new condition in
+ * the YAML draws its own row.
  */
-export function ConditionLadder({ conditions }: { conditions: ConditionDef[] }) {
-  const W = 420;
-  const H = 22;
+export function ConditionLadder({
+  conditions, matrix,
+}: { conditions: ConditionDef[]; matrix: MatrixCell[] }) {
+  const W = 360;
+  const H = 26;
 
   const describe = (c: ConditionDef) => {
     const ops = c.chain.map((o) => String(o.op));
     const rate = c.chain.find((o) => o.op === "resample")?.rate as number | undefined;
-    const loss = c.chain.find((o) => o.op === "packet_loss");
+    const loss = lossOp(c);
     return {
       band: rate === 8000 ? 0.5 : 1,      // 8 kHz keeps half the band
       quantised: ops.includes("codec"),
       lossRate: loss ? Number(loss.rate) : 0,
+      bursty: isBursty(c),
+      burstMs: loss ? Number(loss.mean_burst_ms ?? 0) : 0,
       noisy: ops.includes("noise"),
     };
   };
 
+  const hitFor = (name: string) => {
+    const cells = matrix.filter((m) => m.condition === name);
+    const hits = cells.reduce((a, c) => a + c.hits, 0);
+    const total = cells.reduce((a, c) => a + c.total, 0);
+    return total ? { rate: hits / total, hits, total } : null;
+  };
+
+  const groups = conditionGroups(conditions);
+  const unrun = conditions.filter((c) => !c.exercised);
+
+  const row = (c: ConditionDef) => {
+    const d = describe(c);
+    const hit = hitFor(c.name);
+    // Deterministic gap placement from the condition name, so the picture is
+    // stable between builds and is obviously schematic.
+    let seed = [...c.name].reduce((a, ch) => a + ch.charCodeAt(0), 0);
+    const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+    const bars = 72;
+    // A bursty condition drops the same fraction of bars as its scattered twin,
+    // but in runs. The count is placed rather than sampled: at 72 bars a
+    // Bernoulli draw lands anywhere from half to double the nominal rate, and
+    // two rows that should differ only in clustering would differ in how much
+    // was dropped -- which is exactly the comparison the picture exists to make.
+    const runLen = d.bursty ? Math.max(2, Math.round(d.burstMs / 20)) : 1;
+    // Exaggerated over the true rate so a 5% condition is legible at all; the
+    // caption says the drawing is schematic.
+    const wanted = Math.round(bars * Math.min(d.lossRate * 2.4, 0.6));
+    const drops = new Array<boolean>(bars).fill(false);
+    let placed = 0;
+    for (let guard = 0; placed < wanted && guard < bars * 8; guard++) {
+      const at = Math.floor(rnd() * (bars - runLen + 1));
+      for (let k = 0; k < runLen && placed < wanted; k++) {
+        if (!drops[at + k]) { drops[at + k] = true; placed++; }
+      }
+    }
+
+    return (
+      <li className="lad__row" key={c.name}>
+        <div className="lad__id">
+          <span className="lad__name">{c.name}</span>
+          <span className="lad__desc">{c.description}</span>
+        </div>
+
+        <svg className="lad__viz" viewBox={`0 0 ${W} ${H}`} role="img"
+             aria-label={`${c.name}: ${c.description}`}>
+          {Array.from({ length: bars }, (_, i) => {
+            const dropped = drops[i];
+            const h = dropped ? 2 : H * d.band * (d.quantised ? 0.7 : 1);
+            return (
+              <rect key={i} x={i * (W / bars)} width={W / bars - 1.4}
+                    y={(H - h) / 2} height={Math.max(h, 2)}
+                    className={dropped ? "lad__drop" : "lad__keep"}
+                    opacity={d.noisy && !dropped ? 0.72 : 1} />
+            );
+          })}
+        </svg>
+
+        <div className="lad__score">
+          {hit ? (
+            <>
+              <span className={`lad__rate ${hit.rate < 1 ? "is-down" : ""}`}>
+                {hit.rate.toFixed(3)}
+              </span>
+              <span className="lad__n">{hit.hits}/{hit.total}</span>
+            </>
+          ) : (
+            <span className="lad__unrun">not run</span>
+          )}
+        </div>
+      </li>
+    );
+  };
+
   return (
-    <div className="ladder">
-      {conditions.map((c) => {
-        const d = describe(c);
-        // Deterministic gap placement from the condition name, so the picture
-        // is stable between builds and is obviously schematic.
-        let seed = [...c.name].reduce((a, ch) => a + ch.charCodeAt(0), 0);
-        const rnd = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
-        const bars = 60;
-        return (
-          <div className="ladder__row" key={c.name}>
-            <span className={`ladder__name ${c.exercised ? "" : "ladder__name--off"}`}>
-              {c.name}
-            </span>
-            <svg viewBox={`0 0 ${W} ${H}`} height={H} role="img"
-                 aria-label={`${c.name}: ${c.description}`}>
-              {Array.from({ length: bars }, (_, i) => {
-                const dropped = d.lossRate > 0 && rnd() < d.lossRate * 3;
-                const h = dropped ? 2 : H * d.band * (d.quantised ? 0.72 : 1);
-                const fill = dropped
-                  ? "var(--accent)"
-                  : c.exercised ? "var(--ink-3)" : "var(--ink-4)";
-                return (
-                  <rect key={i} x={i * (W / bars)} width={W / bars - 1.5}
-                        y={(H - h) / 2} height={Math.max(h, 2)}
-                        fill={fill} opacity={d.noisy ? 0.75 : 1} />
-                );
-              })}
-            </svg>
-          </div>
-        );
-      })}
-      <p className="result__scope" style={{ marginTop: "0.9rem" }}>
-        Schematic. Bar height stands for retained bandwidth, shortened bars for
-        codec quantisation, and rust marks frames the network dropped.
+    <div className="lad">
+      {groups.map((g) => (
+        <section className="lad__group" key={g.label}>
+          <h3 className="lad__grouphead">
+            <span>{g.label}</span>
+            <span className="lad__groupn">{g.items.length}</span>
+          </h3>
+          <ul className="lad__list">{g.items.map(row)}</ul>
+        </section>
+      ))}
+
+      {unrun.length > 0 && (
+        <section className="lad__group lad__group--off">
+          <h3 className="lad__grouphead">
+            <span>declared, not yet measured</span>
+            <span className="lad__groupn">{unrun.length}</span>
+          </h3>
+          <ul className="lad__list">{unrun.map(row)}</ul>
+        </section>
+      )}
+
+      <p className="figcap">
+        Schematic, not a waveform. Bar height stands for retained bandwidth,
+        shortened bars for codec quantisation, and rust for frames the network
+        dropped &mdash; scattered singly in the first group, in runs in the
+        second. The rate on the right is measured.
       </p>
     </div>
   );

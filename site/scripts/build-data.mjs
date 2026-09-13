@@ -11,6 +11,7 @@
  * repo at build time; only site/dist/ is deployed.
  */
 
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
   copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync,
@@ -518,6 +519,23 @@ function assertNoStaleSurvivalClaim(data) {
   }
 }
 
+/**
+ * The repository this was built from, read from the git remote rather than
+ * typed in, so a fork's page links to the fork. Null on a checkout with no
+ * remote, and the link is then simply not rendered.
+ */
+function repoUrl() {
+  try {
+    const raw = execFileSync("git", ["remote", "get-url", "origin"], {
+      cwd: REPO, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    const m = raw.match(/github\.com[/:]([^/]+)\/(.+?)(?:\.git)?$/);
+    return m ? `https://github.com/${m[1]}/${m[2]}` : null;
+  } catch {
+    return null;
+  }
+}
+
 function build() {
   console.log("ginti: building site data");
   const rows = loadRows();
@@ -736,6 +754,7 @@ function build() {
       name: "Ginti",
       script: "गिनती",
       tagline: "Does the number survive the phone line?",
+      repo: repoUrl(),
     },
     provenance: {
       isMock,

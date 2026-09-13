@@ -1,3 +1,4 @@
+import { conditionGroups } from "./Charts";
 import type { ConditionDef, MatrixCell } from "../types";
 
 /**
@@ -48,9 +49,15 @@ function Cell({ cell }: { cell: MatrixCell | undefined }) {
 export function ResultsMatrix({
   matrix, conditions, entityTypes, models, lowNThreshold,
 }: Props) {
-  // Every declared condition gets a column, run or not. Hiding the unrun ones
-  // would quietly overstate coverage.
-  const cols = conditions.map((c) => c.name);
+  // Every declared condition gets a column, run or not: hiding the unrun ones
+  // would quietly overstate coverage. Columns follow the same scattered-then-
+  // clustered order as the chart and the ladder, so the misses gather on the
+  // right instead of being scattered across the row by config order, and a
+  // reader moving between the three does not have to re-learn the axis.
+  const cols = [
+    ...conditionGroups(conditions).flatMap((g) => g.items.map((c) => c.name)),
+    ...conditions.filter((c) => !c.exercised).map((c) => c.name),
+  ];
   const lookup = new Map(
     matrix.map((m) => [`${m.model}|${m.condition}|${m.entityType}`, m]));
 

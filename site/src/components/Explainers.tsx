@@ -27,7 +27,9 @@ export function PipelineDiagram() {
   return (
     <figure className="diagram">
       <svg
-        viewBox={`0 0 ${total} 150`}
+        /* One unit of slack each side so the outer boxes' strokes are not
+           clipped when the svg is scaled to the container width. */
+        viewBox={`-1 0 ${total + 2} 150`}
         width="100%"
         role="img"
         aria-label="Pipeline: a value is sampled first, a sentence is built around it, synthesised, degraded, transcribed, then the extracted entity is compared back to the original value."
@@ -36,8 +38,7 @@ export function PipelineDiagram() {
           const x = i * (W + GAP);
           return (
             <g key={s.label}>
-              <rect x={x} y={40} width={W} height={H}
-                    fill="none" stroke="var(--rule-strong)" strokeWidth="1" />
+              <rect className="dg-box" x={x} y={40} width={W} height={H} />
               <text x={x + 12} y={64} className="dg-label">{s.label}</text>
               <text x={x + 12} y={82} className="dg-sub">{s.sub}</text>
               {i < steps.length - 1 && (

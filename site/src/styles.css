@@ -1,13 +1,17 @@
 /* Ginti -- design system.
  *
- * Reference points: a well-set research paper and an engineering postmortem.
- * White ground, near-black text, hairline rules instead of card borders, and
- * exactly one accent.
+ * Reference points: a well-set research paper and an engineering postmortem,
+ * laid out as a product page. Warm off-white ground, near-black text, hairline
+ * rules instead of card borders, and two accents that both mean something.
  *
- * The accent marks MISSES, not hits. That inversion is deliberate: a table of
- * successes should be visually quiet, so a wall of green can never form and
- * imply a result the sample size does not support. Colour is reserved for the
- * thing a reader needs to find.
+ * Rust marks damage: a miss, a low-n cell, a dropped frame, a condition that
+ * was never run. Teal marks the measurement that survives it: the entity
+ * series, section numbers, the active nav item. Colour is never decoration --
+ * a page whose argument is "look at what the numbers actually say" cannot
+ * afford a wall of green implying a result the sample size will not support.
+ *
+ * Structure: full-bleed sections alternating between paper and a tinted panel,
+ * each with its own inner measure. Nothing floats in an empty column.
  */
 
 /* ---------------------------------------------------------------- fonts -- */
@@ -42,8 +46,9 @@
   --t-17: 1.0625rem;
   --t-21: 1.3125rem;
   --t-26: 1.625rem;
-  --t-33: 2.0625rem;
+  --t-33: clamp(1.6rem, 1.1rem + 2vw, 2.0625rem);
   --t-42: clamp(2rem, 1.3rem + 3.2vw, 2.625rem);
+  --t-hero: clamp(2.75rem, 1.6rem + 5.4vw, 5rem);
 
   --lh-tight: 1.22;
   --lh-snug: 1.4;
@@ -59,31 +64,36 @@
 
   --paper: #fcfaf7;
   --paper-2: #f6f2ec;
+  --paper-3: #efe9e0;
   --rule: #e7e0d6;
   --rule-strong: #cdc3b5;
 
-  /* Accent 1, rust. Means: something failed, or something is uncertain --
-   * a miss, a low-n cell, a condition that was never run. Never decoration. */
+  /* Accent 1, rust. Means: damaged, missed, uncertain, never run. */
   --accent: #b4502e;
   --accent-ink: #8f3c20;
-  --accent-wash: #b4502e14;   /* ~8% -- the one tinted panel treatment */
+  --accent-wash: #b4502e14;   /* ~8% */
+  --accent-wash-2: #b4502e0a;
 
-  /* Accent 2, teal. Introduced for exactly one reason: the disagreement chart
-   * needs two distinguishable series. Having earned its place there it also
-   * marks section numbers and the active nav item, and nothing else. */
+  /* Accent 2, teal. The entity series, and the structural signals that point
+   * at it: section numbers, the active nav item, the progress bar. */
   --accent-2: #1f5c63;
   --accent-2-ink: #17474d;
+  --accent-2-wash: #1f5c6314;
 
   --measure: 36rem;
-  --wide: 74rem;
+  --wide: 76rem;
   --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --bar: 3.5rem;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 /* ----------------------------------------------------------------- base -- */
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
 body {
   margin: 0;
@@ -95,6 +105,7 @@ body {
   font-feature-settings: "kern" 1;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4 { font-weight: 600; line-height: var(--lh-tight); margin: 0; }
@@ -104,184 +115,724 @@ p:last-child { margin-bottom: 0; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
 a:hover { text-decoration-color: var(--accent); }
 
-code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+code, .mono, .t-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.t-dim { color: var(--ink-3); }
+.nowrap { white-space: nowrap; }
 
 /* Devanagari needs a touch more leading than Latin at the same size. */
 .deva { font-family: var(--font-deva); line-height: 1.7; }
 
-/* ------------------------------------------------------------- layout --- */
+.prose { max-width: var(--measure); }
 
-.wrap {
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+
+/* A caption voice, used under every figure on the page. */
+.figcap {
+  font-size: var(--t-12);
+  line-height: 1.55;
+  color: var(--ink-3);
+  max-width: 46rem;
+  margin: 1rem 0 0;
+}
+
+/* ----------------------------------------------------------- reveal ----- */
+
+/* Short, single-property, no stagger. It should read as the page settling,
+ * not as an entrance. */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 520ms var(--ease), transform 520ms var(--ease);
+}
+.reveal.is-in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+}
+
+/* ==================================================== header ============= */
+
+.hdr {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  height: var(--bar);
+  transition: background-color 220ms var(--ease), border-color 220ms var(--ease);
+  border-bottom: 1px solid transparent;
+}
+
+/* Over the hero the bar is transparent, so the hero reads full-bleed. Past it
+ * the bar earns a ground, or the nav sits unreadably over body copy. */
+.hdr--stuck {
+  background: color-mix(in srgb, var(--paper) 95%, transparent);
+  backdrop-filter: saturate(150%) blur(10px);
+  border-bottom-color: var(--rule);
+}
+
+.hdr__inner {
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hdr__mark {
+  font-size: var(--t-17);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-decoration: none;
+  white-space: nowrap;
+  flex: none;
+}
+.hdr__mark .deva { font-weight: 400; color: var(--ink-3); margin-left: 0.4rem; }
+
+.hdr__nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-left: auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.hdr__nav::-webkit-scrollbar { display: none; }
+
+.hdr__nav a {
+  position: relative;
+  font-size: var(--t-13);
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+  padding-block: 0.35rem;
+  transition: color 140ms var(--ease);
+}
+.hdr__nav a:hover { color: var(--ink); }
+
+/* Active: near-black label with a teal underscore. The underscore is drawn
+ * from the centre so switching sections reads as movement, not a redraw. */
+.hdr__nav a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: var(--accent-2);
+  transform: scaleX(0);
+  transition: transform 200ms var(--ease);
+}
+.hdr__nav a.is-active { color: var(--ink); }
+.hdr__nav a.is-active::after { transform: scaleX(1); }
+
+.hdr__repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: none;
+  font-size: var(--t-13);
+  color: var(--ink-3);
+  text-decoration: none;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--rule-strong);
+  transition: color 140ms var(--ease), border-color 140ms var(--ease);
+}
+.hdr__repo:hover { color: var(--ink); border-color: var(--ink); }
+
+.hdr__progress {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  pointer-events: none;
+}
+.hdr__progress span {
+  display: block;
+  height: 100%;
+  background: var(--accent-2);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hdr, .hdr__nav a, .hdr__nav a::after, .hdr__repo { transition: none; }
+}
+
+/* ==================================================== hero =============== */
+
+.hero {
+  min-height: min(100svh, 54rem);
+  padding-block: calc(var(--bar) + clamp(2rem, 6vh, 4.5rem)) clamp(1.5rem, 4vh, 2.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vh, 3rem);
   max-width: var(--wide);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
 
-.prose { max-width: var(--measure); }
-
-/* ---------------------------------------------------------------- nav --- */
-
-.nav {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: color-mix(in srgb, var(--paper) 92%, transparent);
-  backdrop-filter: saturate(140%) blur(8px);
-  border-bottom: 1px solid var(--rule);
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: clamp(2rem, 4vw, 4rem);
+  align-items: center;
 }
 
-.nav__inner {
-  display: flex;
-  align-items: baseline;
-  gap: 2rem;
-  height: 3.25rem;
+.hero__title {
+  font-size: var(--t-hero);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  margin-bottom: 1.1rem;
 }
-
-.nav__mark {
-  font-size: var(--t-15);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-.nav__mark .deva { font-weight: 500; color: var(--ink-3); margin-left: 0.45rem; }
-
-.nav__links {
-  display: flex;
-  gap: 1.35rem;
-  margin-left: auto;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.nav__links::-webkit-scrollbar { display: none; }
-
-.nav__links a {
-  font-size: var(--t-12);
-  color: var(--ink-3);
-  text-decoration: none;
-  white-space: nowrap;
-  letter-spacing: 0.01em;
-}
-.nav__links a:hover { color: var(--ink); }
-
-/* -------------------------------------------------------------- header -- */
-
-.masthead { padding-block: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 3vw, 2.25rem); }
-
-.masthead__title {
-  font-size: var(--t-42);
-  letter-spacing: -0.022em;
-  margin-bottom: 0.6rem;
-}
-.masthead__title .deva {
+.hero__title .deva {
+  display: block;
+  font-size: 0.44em;
   font-weight: 400;
   color: var(--ink-3);
   letter-spacing: 0;
-  margin-left: 0.6rem;
+  margin-top: 0.35rem;
 }
 
-.masthead__lede {
-  font-size: var(--t-21);
+.hero__thesis {
+  font-size: clamp(1.0625rem, 0.95rem + 0.6vw, 1.375rem);
   line-height: 1.45;
   color: var(--ink-2);
   max-width: 30rem;
-  text-wrap: balance;
+  margin: 0 0 2rem;
+  text-wrap: pretty;
+}
+/* The two words the finding turns on, each in the colour of its outcome. An
+ * underline rather than a highlight: at this size a filled band reads as a
+ * rendering artefact. */
+.hero__thesis em {
+  font-style: normal;
+  color: var(--ink);
+  padding-bottom: 0.06em;
+  border-bottom: 2px solid var(--rule-strong);
+}
+.hero__thesis em.keeps { border-bottom-color: var(--accent-2); }
+.hero__thesis em.loses { border-bottom-color: var(--accent); }
+
+/* The verdict: the two numbers, side by side, as the hero's visual weight. */
+.verdict {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 2.25rem);
+  padding-block: 1.5rem;
+  border-block: 1px solid var(--rule);
 }
 
-/* Run facts, set as a definition list rather than stat cards. */
-.facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 1.5rem 2rem;
-  margin-top: 2.75rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--rule);
-}
-.facts__k {
+.verdict__side { display: flex; flex-direction: column; min-width: 0; }
+
+.verdict__k {
   font-size: var(--t-11);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.11em;
   color: var(--ink-3);
-  margin-bottom: 0.3rem;
-}
-.facts__v {
-  font-family: var(--font-mono);
-  font-size: var(--t-15);
-  font-variant-numeric: tabular-nums;
-  line-height: 1.35;
-}
-
-/* ------------------------------------------------------------ sections -- */
-
-.section {
-  padding-block: clamp(3rem, 7vw, 5rem);
-  border-top: 1px solid var(--rule);
-  /* Clears the sticky nav when an anchor link jumps here. */
-  scroll-margin-top: 3.25rem;
-}
-
-.section__head { margin-bottom: 2rem; }
-
-.section__no {
-  font-family: var(--font-mono);
-  font-size: var(--t-12);
-  color: var(--accent-2);
-  display: block;
   margin-bottom: 0.5rem;
 }
 
-/* A short rule under the heading, not a full-width divider: it marks the start
- * of a section without drawing a box around it. */
-.section__title::after {
-  content: "";
-  display: block;
-  width: 40px;
-  height: 2px;
-  background: var(--accent-2);
-  margin-top: 0.7rem;
+.verdict__n {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2.5rem, 1.4rem + 4.2vw, 3.75rem);
+  font-weight: 500;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  white-space: nowrap;
+}
+.verdict__n i { font-style: normal; color: var(--ink-4); margin-inline: 0.06em; }
+
+.verdict__side--keep .verdict__n { color: var(--accent-2); }
+.verdict__side--lose .verdict__n { color: var(--accent); }
+
+.verdict__cond {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  margin-top: 0.65rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verdict__vs {
+  flex: none;
+  font-size: var(--t-13);
+  color: var(--ink-4);
+  align-self: center;
+  padding-top: 1.1rem;
+}
+
+.hero__sub {
+  font-size: var(--t-15);
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 32rem;
+  margin: 1.5rem 0 0;
+}
+
+.hero__figure { min-width: 0; }
+.hero__figure .chart { margin: 0; }
+
+.hero__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+}
+
+.hero__scope {
+  font-size: var(--t-12);
+  color: var(--ink-3);
+  max-width: 52rem;
+  margin: 0;
+}
+
+.hero__cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: var(--t-12);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.hero__cue:hover { color: var(--ink); }
+.hero__cue svg { animation: cue 2.4s var(--ease) infinite; }
+
+@keyframes cue {
+  0%, 62%, 100% { transform: translateY(0); opacity: 0.65; }
+  80% { transform: translateY(4px); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero__cue svg { animation: none; }
+}
+
+/* ==================================================== banner ============= */
+
+.banner {
+  position: relative;
+  z-index: 40;
+  margin-top: var(--bar);
+  background: var(--accent-wash);
+  border-bottom: 1px solid var(--accent);
+}
+.banner__inner {
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding: 0.85rem var(--gutter);
+  font-size: var(--t-13);
+  color: var(--accent-ink);
+}
+.banner strong { font-weight: 600; }
+/* With a banner above it the hero no longer needs to clear the fixed bar. */
+.banner + .hero { padding-top: clamp(2rem, 6vh, 4.5rem); }
+
+/* ==================================================== sections =========== */
+
+.sec {
+  padding-block: clamp(3.5rem, 9vh, 7rem);
+  scroll-margin-top: var(--bar);
+}
+.sec--paper { background: var(--paper); }
+.sec--tint {
+  background: var(--paper-2);
+  border-block: 1px solid var(--rule);
+}
+
+.sec__inner {
+  max-width: 52rem;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.sec__inner--wide { max-width: var(--wide); }
+
+.sec__head { margin-bottom: clamp(2rem, 4vh, 3rem); max-width: 44rem; }
+
+.sec__rule {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1.1rem;
+}
+.sec__no {
+  font-family: var(--font-mono);
+  font-size: var(--t-13);
+  font-weight: 500;
+  color: var(--accent-2);
+  letter-spacing: 0.04em;
+}
+.sec__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, var(--rule-strong), transparent);
+}
+
+.sec__title {
+  font-size: var(--t-33);
+  letter-spacing: -0.022em;
+  margin-bottom: 0.85rem;
 }
 
 /* The one sentence carrying the section's argument. A reader who reads only
  * these should come away with the case intact. */
-.section__summary {
+.sec__summary {
   font-size: var(--t-21);
   line-height: 1.45;
-  color: var(--ink);
-  max-width: 34rem;
-  margin: 0 0 1.1rem;
+  color: var(--ink-2);
+  max-width: 40rem;
+  margin: 0;
   text-wrap: pretty;
 }
 
-.section__title {
-  font-size: var(--t-26);
-  letter-spacing: -0.014em;
-  margin-bottom: 0.75rem;
-}
-
-.section__intro { color: var(--ink-2); }
-
-.subhead {
+.subhead { margin-block: clamp(2.5rem, 5vh, 4rem) 1.25rem; }
+.subhead h3 {
   font-size: var(--t-12);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.11em;
   color: var(--ink-3);
   font-weight: 600;
-  margin-block: 2.5rem 0.9rem;
 }
-.subhead:first-child { margin-top: 0; }
+.subhead p {
+  font-size: var(--t-15);
+  color: var(--ink-2);
+  margin: 0.5rem 0 0;
+  max-width: 42rem;
+}
+
+.minihead {
+  font-size: var(--t-17);
+  margin: 2.25rem 0 0.6rem;
+}
+
+/* A figure allowed to use the full inner width. */
+.bleedfig { margin: 2.5rem 0 0; }
 
 /* --------------------------------------------------------------- notes -- */
 
 .note {
   border-left: 2px solid var(--rule-strong);
-  padding: 0.1rem 0 0.1rem 1rem;
+  padding: 0.35rem 0 0.35rem 1.1rem;
   color: var(--ink-2);
   font-size: var(--t-15);
-  max-width: var(--measure);
+  max-width: 44rem;
+  margin-top: 2.5rem;
 }
 .note--warn { border-left-color: var(--accent); }
 .note strong { color: var(--ink); font-weight: 600; }
 
-/* ------------------------------------------------------------- tables --- */
+/* ==================================================== contrast bars ====== */
+
+.contrast { max-width: 46rem; }
+
+.contrast__row {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr) 4rem;
+  align-items: center;
+  gap: 1.25rem;
+  padding-block: 0.95rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.contrast__meta { display: flex; flex-direction: column; min-width: 0; }
+.contrast__label { font-size: var(--t-13); color: var(--ink); }
+.contrast__note {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-3);
+}
+
+.contrast__track {
+  height: 10px;
+  background: var(--paper-3);
+  overflow: hidden;
+}
+.contrast__fill {
+  display: block;
+  height: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  transition: transform 900ms var(--ease);
+}
+.contrast__row--bad .contrast__fill { background: var(--accent); }
+.contrast__row--good .contrast__fill { background: var(--accent-2); }
+
+.contrast__val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-15);
+  text-align: right;
+}
+.contrast__row--bad .contrast__val { color: var(--accent); }
+.contrast__row--good .contrast__val { color: var(--accent-2); }
+
+/* The target scale is inline, computed from the data; until the block is in
+ * view it is overridden back to zero so the bars grow rather than appear. */
+.contrast:not(.is-in) .contrast__fill { transform: scaleX(0) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .contrast__fill { transition: none; }
+}
+
+/* ==================================================== pair comparison ==== */
+
+/* The controlled comparison, one row per loss rate. Two bars on a shared
+ * scale, and the gap between them named in points, because the gap is the
+ * result and a reader should not have to subtract. */
+.pairbox { margin-bottom: 1rem; }
+
+.pairbox__row {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr) 7.5rem;
+  align-items: center;
+  gap: 1.5rem;
+  padding-block: 1.35rem;
+  border-bottom: 1px solid var(--rule);
+}
+.pairbox__row:first-child { border-top: 1px solid var(--rule); }
+
+.pairbox__rate {
+  font-size: var(--t-15);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pairbox__bars { display: grid; gap: 0.5rem; min-width: 0; }
+
+.pairbox__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  height: 1.9rem;
+  padding-inline: 0.6rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* The recovered share and the lost share, laid end to end across the full
+ * 0..1 width. Every rate here is above 0.75, so two bars drawn only to their
+ * value look identical; the rust tails do not. */
+.pairbox__hit, .pairbox__miss {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.pairbox__hit { left: 0; }
+.pairbox__miss { right: 0; background: var(--accent); }
+.pairbox__bar--keep .pairbox__hit { background: var(--accent-2-wash); }
+.pairbox__bar--lose .pairbox__hit { background: var(--accent-wash); }
+
+.pairbox__bar b, .pairbox__bar i, .pairbox__bar u {
+  position: relative;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.pairbox__bar b { font-size: var(--t-13); font-weight: 500; }
+.pairbox__bar i {
+  font-style: normal;
+  font-size: var(--t-11);
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Kept beside the condition name rather than at the far end: at the right the
+ * label lands on the rust tail in one row and on the light track in the next,
+ * and no single colour is legible against both. */
+.pairbox__bar u {
+  padding-left: 0.2rem;
+  font-size: var(--t-11);
+  text-decoration: none;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.pairbox__bar i { flex: 0 1 auto; }
+.pairbox__bar--keep b { color: var(--accent-2-ink); }
+.pairbox__bar--lose b { color: var(--accent-ink); }
+
+.pairbox__gap {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-15);
+  color: var(--accent);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ==================================================== charts ============= */
+
+.chart { margin: 2rem 0 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+.ch-axis { stroke: var(--rule-strong); stroke-width: 1; }
+.ch-grid { stroke: var(--rule); stroke-width: 1; }
+.ch-region { fill: var(--accent-wash-2); }
+.ch-boundary {
+  stroke: var(--rule-strong);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.ch-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--ink-3);
+}
+.ch-value {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Brackets under the x axis, marking where clustering turns on. */
+.ch-group { stroke: var(--rule-strong); stroke-width: 1; }
+.ch-group-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  fill: var(--ink-3);
+}
+
+.ch-series-a { stroke: var(--accent-2); fill: none; stroke-width: 2; }
+.ch-series-b { stroke: var(--accent); fill: none; stroke-width: 2; }
+.ch-dot-a { fill: var(--accent-2); }
+.ch-dot-b { fill: var(--accent); }
+
+/* Draw-in. pathLength=1 normalises every path so one dash length works for
+ * all of them regardless of their real geometry. */
+.chart .ch-series-a, .chart .ch-series-b {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+.chart .ch-series-b[stroke-dasharray] { stroke-dasharray: 1; }
+.chart .ch-dot-a, .chart .ch-dot-b { opacity: 0; }
+
+.chart.is-drawn .ch-series-a,
+.chart.is-drawn .ch-series-b {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1100ms var(--ease);
+}
+.chart.is-drawn .ch-dot-a,
+.chart.is-drawn .ch-dot-b {
+  opacity: 1;
+  transition: opacity 400ms var(--ease) 700ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chart .ch-series-a, .chart .ch-series-b { stroke-dasharray: none; stroke-dashoffset: 0; }
+  .chart .ch-dot-a, .chart .ch-dot-b { opacity: 1; transition: none; }
+}
+
+.chart__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
+  margin-top: 1rem;
+  font-size: var(--t-12);
+  color: var(--ink-2);
+}
+.chart__swatch {
+  display: inline-block;
+  width: 1.1rem;
+  height: 2px;
+  vertical-align: middle;
+  margin-right: 0.45rem;
+}
+.chart__swatch--a { background: var(--accent-2); }
+.chart__swatch--b { background: var(--accent); }
+
+/* ==================================================== condition ladder === */
+
+.lad__group { margin-bottom: 2.5rem; }
+
+.lad__grouphead {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  font-size: var(--t-12);
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+  color: var(--ink-2);
+  padding-bottom: 0.7rem;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.lad__groupn {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+  color: var(--ink-4);
+}
+.lad__group--off .lad__grouphead { color: var(--ink-4); }
+
+.lad__list { list-style: none; margin: 0; padding: 0; }
+
+.lad__row {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) 5.5rem;
+  align-items: center;
+  gap: 1.5rem;
+  padding-block: 0.85rem;
+  border-bottom: 1px solid var(--rule);
+  transition: background-color 140ms var(--ease);
+}
+.lad__row:hover { background: var(--accent-2-wash); }
+.lad__row:last-child { border-bottom: 0; }
+
+.lad__id { display: flex; flex-direction: column; min-width: 0; }
+.lad__name {
+  font-family: var(--font-mono);
+  font-size: var(--t-13);
+  color: var(--ink);
+}
+.lad__desc {
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  line-height: 1.45;
+  margin-top: 0.15rem;
+}
+
+.lad__viz { width: 100%; height: 26px; display: block; min-width: 0; }
+.lad__keep { fill: var(--ink-3); }
+.lad__drop { fill: var(--accent); }
+.lad__group--off .lad__keep { fill: var(--ink-4); }
+.lad__group--off .lad__drop { fill: var(--ink-4); }
+
+.lad__score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+.lad__rate {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-15);
+  color: var(--accent-2);
+}
+.lad__rate.is-down { color: var(--accent); }
+.lad__n {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-4);
+}
+.lad__unrun {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-4);
+  font-style: italic;
+}
+
+/* ==================================================== tables ============= */
 
 /* Wide tables scroll rather than shrinking the type. The paired gradients are
  * the standard local/scroll background trick: the shadow appears at an edge
@@ -289,8 +840,6 @@ code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
  * tell there are columns they have not seen. */
 .tablewrap {
   overflow-x: auto;
-  margin-inline: calc(-1 * var(--gutter));
-  padding-inline: var(--gutter);
   background:
     linear-gradient(to right, var(--paper) 40%, rgba(255, 255, 255, 0))
       left center / 2.5rem 100% no-repeat local,
@@ -301,6 +850,13 @@ code, .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums;
     radial-gradient(farthest-side at 100% 50%, rgba(22, 24, 29, 0.13), rgba(22, 24, 29, 0))
       right center / 0.7rem 100% no-repeat scroll;
 }
+.sec--tint .tablewrap {
+  background-image:
+    linear-gradient(to right, var(--paper-2) 40%, rgba(255, 255, 255, 0)),
+    linear-gradient(to left, var(--paper-2) 40%, rgba(255, 255, 255, 0)),
+    radial-gradient(farthest-side at 0 50%, rgba(22, 24, 29, 0.13), rgba(22, 24, 29, 0)),
+    radial-gradient(farthest-side at 100% 50%, rgba(22, 24, 29, 0.13), rgba(22, 24, 29, 0));
+}
 
 table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
 
@@ -308,10 +864,10 @@ caption {
   text-align: left;
   font-size: var(--t-12);
   color: var(--ink-3);
-  padding-bottom: 0.7rem;
+  padding-bottom: 0.8rem;
 }
 
-th, td { text-align: left; padding: 0.5rem 0.9rem 0.5rem 0; vertical-align: baseline; }
+th, td { text-align: left; padding: 0.55rem 0.9rem 0.55rem 0; vertical-align: baseline; }
 th:last-child, td:last-child { padding-right: 0; }
 
 thead th {
@@ -327,11 +883,10 @@ thead th {
 
 tbody td { border-bottom: 1px solid var(--rule); font-size: var(--t-13); }
 tbody tr:last-child td { border-bottom: 0; }
+tbody tr { transition: background-color 120ms var(--ease); }
+tbody tr:hover { background: var(--accent-2-wash); }
 
 .num { text-align: right; font-family: var(--font-mono); }
-.t-mono { font-family: var(--font-mono); }
-.t-dim { color: var(--ink-3); }
-.nowrap { white-space: nowrap; }
 
 /* Row-header column: the entity type / utterance id down the left edge. */
 .rowhead {
@@ -359,12 +914,12 @@ tbody tr:last-child td { border-bottom: 0; }
   font-variant-numeric: tabular-nums;
 }
 
-/* Sufficient n: the rate is the number, shown plainly. */
+/* Sufficient n and nothing missed: quiet. */
 .cell--ok .cell__rate { color: var(--ink); }
 
-/* Sufficient n and something missed: the accent, which is the only colour on
- * the page, and it points at failure. */
-.cell--miss .cell__rate { color: var(--accent); }
+/* Sufficient n and something missed: rust, which is the point of the table. */
+.cell--miss .cell__rate { color: var(--accent); font-weight: 500; }
+.cell--miss { position: relative; }
 
 /* Below threshold: no rate at all. The count stands alone and the em-dash
  * holds the column so the absence is legible rather than looking like a gap. */
@@ -390,7 +945,7 @@ td.cell-td { padding-left: 0.9rem; }
   font-family: var(--font-mono);
   font-size: var(--t-11);
   letter-spacing: 0.02em;
-  padding: 0.08rem 0.34rem;
+  padding: 0.08rem 0.38rem;
   border: 1px solid var(--rule-strong);
   color: var(--ink-2);
   white-space: nowrap;
@@ -398,6 +953,7 @@ td.cell-td { padding-left: 0.9rem; }
 .tag--miss { border-color: var(--accent); color: var(--accent-ink); background: var(--accent-wash); }
 .tag--hit { border-color: var(--rule-strong); color: var(--ink-3); }
 .tag--warn { border-color: var(--accent); color: var(--accent-ink); }
+.tag--pending { border-style: dashed; color: var(--ink-4); }
 
 /* --------------------------------------------------------- key/legend --- */
 
@@ -414,20 +970,420 @@ td.cell-td { padding-left: 0.9rem; }
 .key__item { display: flex; align-items: baseline; gap: 0.6rem; }
 .key__sample { min-width: 3.4rem; text-align: right; }
 
-/* ------------------------------------------------------------- banner --- */
+/* ==================================================== listen ============= */
 
-.banner {
-  border: 1px solid var(--accent);
-  background: var(--accent-wash);
-  padding: 1rem 1.15rem;
-  margin-bottom: 2rem;
-  font-size: var(--t-15);
-  color: var(--accent-ink);
-  max-width: var(--measure);
+.utt {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  margin-bottom: 1.5rem;
 }
-.banner strong { font-weight: 600; }
+.sec--tint .utt { background: var(--paper); }
+.utt:last-child { margin-bottom: 0; }
 
-/* --------------------------------------------------------------- gate --- */
+.utt__head { max-width: 48rem; }
+
+.utt__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+.utt__id {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  margin-right: 0.3rem;
+}
+.utt__chip {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 0.02rem 0.36rem;
+  background: var(--paper);
+}
+.sec--tint .utt__chip { background: var(--paper-2); }
+
+.utt__text {
+  font-size: var(--t-21);
+  line-height: 1.6;
+  margin: 0 0 0.5rem;
+}
+
+.utt__gloss {
+  font-size: var(--t-15);
+  color: var(--ink-2);
+  margin: 0 0 1.1rem;
+}
+
+/* The entity, marked in place. Underline rather than highlight: a filled
+ * background at this density would fight the tables for attention. */
+.ent {
+  background: none;
+  color: inherit;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.05em;
+}
+
+.utt__gold {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 2rem;
+  margin: 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+.utt__gold div { display: flex; align-items: baseline; gap: 0.55rem; }
+.utt__gold dt {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ink-3);
+}
+.utt__gold dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-13);
+  color: var(--accent-2-ink);
+}
+
+/* Which damage to hear against the control. */
+.utt__picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-block: 1.25rem;
+}
+
+.pick {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  padding: 0.22rem 0.55rem;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  border-radius: 0;
+  transition: color 120ms var(--ease), border-color 120ms var(--ease),
+              background-color 120ms var(--ease);
+}
+.pick:hover { border-color: var(--ink-3); color: var(--ink); }
+/* A condition that loses an entity is worth finding before you click it. */
+.pick--lost { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.pick.is-on {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.pick--lost.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.utt__takes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: 1.5rem;
+}
+
+.take {
+  min-width: 0;
+  padding: 1rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+}
+.sec--tint .take { background: var(--paper-2); }
+.take--lost { border-color: color-mix(in srgb, var(--accent) 35%, var(--rule)); }
+
+.take__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+}
+.take__role {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+.take__cond {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  color: var(--ink);
+  margin-right: auto;
+}
+
+.take__hyps { margin-top: 0.25rem; }
+
+/* ------------------------------------------------------------ hypothesis -- */
+
+.hyp { margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid var(--rule); }
+
+.hyp__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.6rem; }
+.hyp__model {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-3);
+}
+.hyp__wer {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  color: var(--ink-4);
+  margin-left: auto;
+}
+
+.hyp__text { font-size: var(--t-15); line-height: 1.6; margin: 0.5rem 0 0; }
+
+.hyp__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.8rem;
+  margin-top: 0.6rem;
+  font-size: var(--t-11);
+  color: var(--ink-3);
+}
+.hyp__want { font-family: var(--font-mono); font-size: var(--t-11); }
+.hyp__want b { color: var(--ink); font-weight: 500; }
+.hyp__err { color: var(--accent-ink); }
+
+/* What the model returned for each entity, and whether it matched. */
+.pill {
+  display: inline-flex;
+  align-items: stretch;
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  border: 1px solid var(--rule-strong);
+}
+.pill__t { padding: 0.05rem 0.35rem; color: var(--ink-3); border-right: 1px solid var(--rule-strong); }
+.pill__v { padding: 0.05rem 0.4rem; color: var(--ink); }
+.pill--hit { border-color: color-mix(in srgb, var(--accent-2) 40%, var(--rule)); }
+.pill--hit .pill__t { border-right-color: color-mix(in srgb, var(--accent-2) 40%, var(--rule)); }
+.pill--hit .pill__v { color: var(--accent-2-ink); }
+.pill--miss { border-color: var(--accent); background: var(--accent-wash); }
+.pill--miss .pill__t { border-right-color: var(--accent); }
+.pill--miss .pill__v { color: var(--accent-ink); }
+
+/* Digits vs number words: the finding, marked on every transcript. */
+.rend {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  padding: 0.02rem 0.3rem;
+  border: 1px dashed var(--rule-strong);
+  color: var(--ink-2);
+}
+.rend--digits { border-style: solid; }
+
+/* ---------------------------------------------------------------- player -- */
+
+.player { border-top: 1px solid var(--rule-strong); padding-top: 0.6rem; }
+.player--empty { opacity: 0.55; }
+
+.player__row { display: flex; align-items: center; gap: 0.6rem; }
+
+.player__btn {
+  flex: none;
+  width: 1.85rem;
+  height: 1.85rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  border-radius: 0;
+  transition: background-color 120ms var(--ease), color 120ms var(--ease);
+}
+.player__btn:hover { background: var(--ink); color: var(--paper); }
+.player--on .player__btn { background: var(--ink); color: var(--paper); }
+
+.player__label {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  letter-spacing: 0.01em;
+}
+.player__time {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+}
+
+.player__track {
+  height: 2px;
+  background: var(--rule-strong);
+  margin-top: 0.55rem;
+  cursor: pointer;
+  position: relative;
+}
+/* Widen the hit area without thickening the line. */
+.player__track::after {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+.player__fill { height: 100%; background: var(--accent-2); width: 0; }
+
+.player__hint {
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  margin: 0.5rem 0 0;
+  line-height: 1.45;
+}
+.player__missing {
+  font-size: var(--t-11);
+  color: var(--ink-4);
+  font-style: italic;
+  margin: 0.5rem 0 0;
+}
+
+/* Peak envelope beside each player. */
+.wave { display: block; width: 100%; height: 34px; margin-top: 0.5rem; }
+.wave rect { fill: var(--ink-4); }
+.wave rect.gap { fill: var(--accent); }
+
+/* ==================================================== explainers ========= */
+
+.diagram {
+  margin: 0;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.diagram svg { min-width: 44rem; display: block; }
+
+.dg-label {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--ink);
+}
+.dg-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--ink-3);
+}
+.dg-gold {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  fill: var(--accent-ink);
+}
+.dg-note {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--ink-3);
+}
+.dg-box { fill: var(--paper); stroke: var(--rule-strong); stroke-width: 1; }
+.sec--tint .dg-box { fill: var(--paper-2); }
+
+.conds { margin-top: 2.25rem; }
+
+.condblock { padding-block: 1.75rem; border-top: 1px solid var(--rule); }
+
+.condblock__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+.condblock__name { font-size: var(--t-15); font-weight: 600; font-family: var(--font-mono); }
+
+.condblock__desc,
+.condblock__note {
+  max-width: var(--measure);
+  font-size: var(--t-15);
+  color: var(--ink-2);
+  margin: 0 0 0.75rem;
+}
+.condblock__desc { color: var(--ink); }
+.condblock__nocmd {
+  font-size: var(--t-12);
+  color: var(--ink-4);
+  font-style: italic;
+  margin: 0;
+}
+
+.condblock__chain { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.9rem; }
+
+.chip {
+  font-family: var(--font-mono);
+  font-size: var(--t-11);
+  padding: 0.1rem 0.4rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.sec--tint .chip { background: var(--paper-2); }
+
+.cmd {
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  line-height: 1.65;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+}
+.sec--tint .cmd { background: var(--paper-2); }
+.cmd code { font-size: inherit; display: block; }
+.cmd__note { color: var(--ink-3); }
+.cmd--py { color: var(--ink-2); }
+
+/* ==================================================== disclosure ========= */
+
+.detail { margin-top: 2.25rem; }
+
+.detail__toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font: inherit;
+  font-size: var(--t-13);
+  font-family: var(--font-mono);
+  color: var(--ink-2);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  padding: 0.2rem 0;
+  cursor: pointer;
+  transition: color 120ms var(--ease), border-color 120ms var(--ease);
+}
+.detail__toggle:hover { color: var(--ink); border-bottom-color: var(--ink); }
+.detail__sign { color: var(--accent-2); font-size: var(--t-15); }
+
+.detail__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms var(--ease);
+}
+.detail__body > div { overflow: hidden; }
+.detail--open .detail__body { grid-template-rows: 1fr; }
+.detail--open .detail__body > div { padding-top: 1.75rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .detail__body { transition: none; }
+}
+
+/* ==================================================== markdown =========== */
+
+.md-list { max-width: var(--measure); padding-left: 1.1rem; margin: 0 0 1em; }
+.md-list li { margin-bottom: 0.5em; }
+.md-h4 { font-size: var(--t-17); margin: 1.75rem 0 0.5rem; }
+.prose code, .md-list code {
+  font-size: 0.92em;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  padding: 0.03em 0.28em;
+}
+.sec--tint .prose code, .sec--tint .md-list code { background: var(--paper); }
+
+/* ==================================================== gate =============== */
 
 .gate {
   position: fixed;
@@ -479,577 +1435,123 @@ td.cell-td { padding-left: 0.9rem; }
 .gate button:hover { background: #000; }
 .gate__error { font-size: var(--t-13); color: var(--accent-ink); margin-top: 0.75rem; }
 
-/* -------------------------------------------------------------- footer -- */
+/* ==================================================== footer ============= */
 
-.footer {
-  border-top: 1px solid var(--rule);
-  padding-block: 2.5rem 4rem;
-  font-size: var(--t-12);
-  color: var(--ink-3);
-}
-.footer__grid { display: flex; flex-wrap: wrap; gap: 0.5rem 2.5rem; }
-
-/* -------------------------------------------------------------- narrow -- */
-
-@media (max-width: 46rem) {
-  .facts { gap: 1.15rem 1.25rem; }
-  .nav__inner { gap: 1rem; }
-  .rowhead { padding-right: 0.9rem; }
-  th, td { padding-right: 0.65rem; }
+.foot {
+  background: var(--ink);
+  color: var(--paper);
+  padding-block: clamp(3rem, 7vh, 4.5rem);
 }
 
-/* ======================================================== listen section == */
-
-.utt {
-  padding-block: 2.25rem;
-  border-top: 1px solid var(--rule);
+.foot__inner {
+  max-width: var(--wide);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 2.5rem 4rem;
+  align-items: start;
 }
-.utt:first-child { border-top: 0; padding-top: 0; }
 
-.utt__head { max-width: 46rem; margin-bottom: 1.5rem; }
-
-.utt__id {
+.foot__mark {
   display: block;
-  font-family: var(--font-mono);
-  font-size: var(--t-11);
-  color: var(--ink-4);
-  margin-bottom: 0.7rem;
-}
-
-.utt__text {
-  font-size: var(--t-21);
-  line-height: 1.55;
-  margin: 0 0 0.5rem;
-}
-
-.utt__gloss {
-  font-size: var(--t-15);
-  color: var(--ink-2);
-  margin: 0 0 1rem;
-}
-
-/* The entity, marked in place. Underline rather than highlight: a filled
- * background at this density would fight the tables for attention. */
-.ent {
-  background: none;
-  color: inherit;
-  border-bottom: 2px solid var(--accent);
-  padding-bottom: 0.05em;
-}
-
-.utt__gold { display: flex; flex-wrap: wrap; gap: 0.4rem 2rem; margin: 0; }
-.utt__gold div { display: flex; align-items: baseline; gap: 0.55rem; }
-.utt__gold dt {
-  font-size: var(--t-11);
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--ink-3);
-}
-.utt__gold dd { margin: 0; font-size: var(--t-13); }
-
-/* Conditions side by side so the same sentence can be heard clean then
- * degraded without scrolling between them. */
-.utt__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
-  gap: 1.75rem;
-}
-
-.cond { min-width: 0; }
-
-/* ---------------------------------------------------------------- player -- */
-
-.player { border-top: 1px solid var(--rule-strong); padding-top: 0.6rem; }
-.player--empty { opacity: 0.55; }
-
-.player__row { display: flex; align-items: center; gap: 0.6rem; }
-
-.player__btn {
-  flex: none;
-  width: 1.7rem;
-  height: 1.7rem;
-  display: grid;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
-  cursor: pointer;
-  border-radius: 0;
-}
-.player__btn:hover { background: var(--ink); color: var(--paper); }
-.player--on .player__btn { background: var(--ink); color: var(--paper); }
-
-.player__label {
-  font-family: var(--font-mono);
-  font-size: var(--t-12);
-  letter-spacing: 0.01em;
-}
-.player__time {
-  margin-left: auto;
-  font-family: var(--font-mono);
-  font-size: var(--t-11);
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-3);
-}
-
-.player__track {
-  height: 2px;
-  background: var(--rule);
-  margin-top: 0.55rem;
-  cursor: pointer;
-  position: relative;
-}
-/* Widen the hit area without thickening the line. */
-.player__track::after {
-  content: "";
-  position: absolute;
-  inset: -7px 0;
-}
-.player__fill { height: 100%; background: var(--ink); width: 0; }
-
-.player__hint {
-  font-size: var(--t-11);
-  color: var(--ink-3);
-  margin: 0.5rem 0 0;
-  line-height: 1.45;
-}
-.player__missing {
-  font-size: var(--t-11);
-  color: var(--ink-4);
-  font-style: italic;
-  margin: 0.5rem 0 0;
-}
-
-/* ------------------------------------------------------------ hypothesis -- */
-
-.hyp { margin-top: 1.1rem; padding-top: 0.85rem; border-top: 1px solid var(--rule); }
-
-.hyp__head { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem; }
-.hyp__model { font-size: var(--t-11); color: var(--ink-3); margin-right: 0.2rem; }
-
-.hyp__text { font-size: var(--t-15); line-height: 1.6; margin: 0.5rem 0 0; }
-
-.hyp__foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1rem;
-  margin-top: 0.5rem;
-  font-size: var(--t-11);
-  color: var(--ink-3);
-}
-.hyp__got { font-size: var(--t-11); }
-.hyp__err { color: var(--accent-ink); }
-
-/* Digits vs number words: the finding, marked on every transcript. */
-.rend {
-  font-family: var(--font-mono);
-  font-size: var(--t-11);
-  padding: 0.02rem 0.3rem;
-  border: 1px dashed var(--rule-strong);
-  color: var(--ink-2);
-}
-.rend--digits { border-style: solid; }
-
-.tag--pending { border-style: dashed; color: var(--ink-4); }
-
-/* ======================================================== explainers ===== */
-
-.diagram {
-  margin: 0 0 2rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-}
-.diagram svg { min-width: 44rem; display: block; }
-
-.dg-label {
-  font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: var(--t-26);
   font-weight: 600;
-  fill: var(--ink);
-}
-.dg-sub {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  fill: var(--ink-3);
-}
-.dg-gold {
-  font-family: var(--font-sans);
-  font-size: 11px;
-  fill: var(--accent-ink);
-}
-.dg-note {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  fill: var(--ink-3);
-}
-
-.conds { margin-top: 2.25rem; }
-
-.condblock { padding-block: 1.75rem; border-top: 1px solid var(--rule); }
-
-.condblock__head {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  letter-spacing: -0.02em;
   margin-bottom: 0.6rem;
 }
-.condblock__name { font-size: var(--t-15); font-weight: 600; }
-
-.condblock__desc,
-.condblock__note {
-  max-width: var(--measure);
+.foot__mark .deva {
+  font-weight: 400;
+  color: color-mix(in srgb, var(--paper) 55%, transparent);
+  margin-left: 0.5rem;
+}
+.foot__brand p {
   font-size: var(--t-15);
-  color: var(--ink-2);
-  margin: 0 0 0.75rem;
+  color: color-mix(in srgb, var(--paper) 62%, transparent);
+  margin: 0 0 1rem;
+  max-width: 20rem;
 }
-.condblock__desc { color: var(--ink); }
-.condblock__nocmd {
-  font-size: var(--t-12);
-  color: var(--ink-4);
-  font-style: italic;
-  margin: 0;
-}
-
-.condblock__chain { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.9rem; }
-
-.chip {
-  font-size: var(--t-11);
-  padding: 0.1rem 0.4rem;
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
-  color: var(--ink-2);
-  white-space: nowrap;
-}
-
-.cmd {
+.foot__link {
   font-family: var(--font-mono);
   font-size: var(--t-12);
-  line-height: 1.65;
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
-  padding: 0.85rem 1rem;
-  overflow-x: auto;
-  margin: 0;
-  white-space: pre;
+  color: var(--paper);
+  text-decoration-color: color-mix(in srgb, var(--paper) 40%, transparent);
 }
-.cmd code { font-size: inherit; display: block; }
-.cmd__note { color: var(--ink-3); }
-.cmd--py { color: var(--ink-2); }
+.foot__link:hover { text-decoration-color: var(--accent); }
 
-/* ======================================================== markdown ======= */
+.foot__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1.25rem 2rem;
+  margin: 0;
+}
+.foot__meta dt {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: color-mix(in srgb, var(--paper) 45%, transparent);
+  margin-bottom: 0.3rem;
+}
+.foot__meta dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--t-12);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--paper) 80%, transparent);
+  overflow-wrap: anywhere;
+}
 
-.md-list { max-width: var(--measure); padding-left: 1.1rem; margin: 0 0 1em; }
-.md-list li { margin-bottom: 0.5em; }
-.md-h4 { font-size: var(--t-17); margin: 1.75rem 0 0.5rem; }
-.prose code {
-  font-size: 0.92em;
-  background: var(--paper-2);
-  border: 1px solid var(--rule);
-  padding: 0.03em 0.28em;
+/* ==================================================== responsive ========= */
+
+/* 1024: the hero stacks, and the chart goes under the numbers rather than
+ * beside them. Below that width a two-column hero squeezes both halves. */
+@media (max-width: 64rem) {
+  .hero { min-height: 0; }
+  .hero__grid { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+  .hero__thesis, .hero__sub { max-width: 42rem; }
+  .foot__inner { grid-template-columns: minmax(0, 1fr); }
+  .lad__row { grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) 4.75rem; gap: 1rem; }
+}
+
+@media (max-width: 52rem) {
+  /* The nav stays: hiding it strands a reader on a 25,000px page with no way
+     back. It scrolls horizontally instead, and the repo link drops to its
+     icon so the wordmark and the first sections are visible without moving. */
+  .hdr__inner { gap: 1rem; }
+  .hdr__nav {
+    gap: 1.1rem;
+    -webkit-mask-image: linear-gradient(to right, #000 85%, transparent);
+    mask-image: linear-gradient(to right, #000 85%, transparent);
+    padding-right: 1.5rem;
+  }
+  .hdr__repo { padding-inline: 0.45rem; }
+  .hdr__repo span { display: none; }
+  .contrast__row { grid-template-columns: minmax(0, 1fr) 4rem; gap: 0.5rem 1rem; }
+  .contrast__track { grid-column: 1; }
+  .pairbox__row { grid-template-columns: minmax(0, 1fr) 5rem; gap: 0.5rem 1rem; }
+  .pairbox__rate { grid-column: 1 / -1; }
+  .pairbox__bars { grid-column: 1; }
 }
 
 @media (max-width: 46rem) {
-  .utt__grid { gap: 2rem; }
+  :root { --bar: 3.25rem; }
+  .hero__title .deva { font-size: 0.4em; }
+  .verdict { flex-direction: column; align-items: stretch; gap: 1.25rem; }
+  .verdict__vs { display: none; }
+  .verdict__side { padding-bottom: 1.25rem; border-bottom: 1px solid var(--rule); }
+  .verdict__side:last-child { padding-bottom: 0; border-bottom: 0; }
+  .hero__foot { flex-direction: column; align-items: flex-start; }
+
+  .lad__row {
+    grid-template-columns: minmax(0, 1fr) 4.5rem;
+    gap: 0.6rem 1rem;
+  }
+  .lad__viz { grid-column: 1 / -1; }
+
+  .utt { padding: 1.1rem; }
   .utt__text { font-size: var(--t-17); }
+  .utt__takes { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .rowhead { padding-right: 0.9rem; }
+  th, td { padding-right: 0.65rem; }
+  .foot__meta { grid-template-columns: minmax(0, 1fr); }
 }
-
-
-/* ==================================================== result block ======== */
-
-/* The sentence that frames the two numbers. */
-.result__lede {
-  font-size: var(--t-21);
-  line-height: 1.45;
-  color: var(--ink);
-  max-width: 38rem;
-  margin: 0 0 1.75rem;
-  text-wrap: pretty;
-}
-.result__says--quiet {
-  font-size: var(--t-15);
-  color: var(--ink-2);
-  border-top: 0;
-  padding-top: 0;
-  margin-top: 1rem;
-}
-
-/* The two numbers that make the argument, above the fold. No celebration
- * styling: large type and whitespace are the emphasis, and a wall of green
- * would claim more than 40 utterances can support. */
-.result {
-  background: var(--accent-wash);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
-  padding-block: clamp(2rem, 5vw, 3.25rem);
-}
-
-.result__pair {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: 2rem 3.5rem;
-  align-items: end;
-}
-
-.result__k {
-  font-size: var(--t-11);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--ink-3);
-  margin-bottom: 0.5rem;
-}
-
-.result__v {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  font-size: clamp(2.25rem, 1.2rem + 4.4vw, 3.25rem);
-  line-height: 1;
-  letter-spacing: -0.03em;
-  color: var(--ink);
-}
-.result__v--teal { color: var(--accent-2); }
-
-/* Two figures in one cell. Kept on one line where there is room and broken
- * cleanly where there is not, so "vs" never strands at the end of a line. */
-.result__v--pair {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.2em 0.45em;
-}
-.result__vs {
-  font-family: var(--font-sans);
-  font-size: var(--t-17);
-  color: var(--ink-3);
-}
-.result__v--rust { color: var(--accent); }
-
-.result__sub {
-  font-family: var(--font-mono);
-  font-size: var(--t-12);
-  color: var(--ink-3);
-  margin-top: 0.5rem;
-}
-
-.result__says {
-  font-size: var(--t-17);
-  line-height: 1.55;
-  color: var(--ink);
-  max-width: 38rem;
-  margin: 2rem 0 0;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--rule);
-}
-
-.result__scope {
-  font-size: var(--t-13);
-  color: var(--ink-3);
-  max-width: 38rem;
-  margin: 0.75rem 0 0;
-}
-
-/* ==================================================== charts ============= */
-
-.chart { margin: 1.75rem 0 0; }
-.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-
-.ch-axis { stroke: var(--rule-strong); stroke-width: 1; }
-.ch-grid { stroke: var(--rule); stroke-width: 1; }
-.ch-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  fill: var(--ink-3);
-}
-.ch-value {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-}
-/* Brackets under the x axis, marking where clustering turns on. */
-.ch-group { stroke: var(--rule-strong); stroke-width: 1; }
-.ch-group-label {
-  font-family: var(--font-sans);
-  font-size: 10px;
-  fill: var(--ink-3);
-}
-
-.ch-series-a { stroke: var(--accent-2); fill: none; stroke-width: 2; }
-.ch-series-b { stroke: var(--accent); fill: none; stroke-width: 2; }
-.ch-dot-a { fill: var(--accent-2); }
-.ch-dot-b { fill: var(--accent); }
-
-.chart__legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem 1.5rem;
-  margin-top: 0.9rem;
-  font-size: var(--t-12);
-  color: var(--ink-2);
-}
-.chart__swatch {
-  display: inline-block;
-  width: 1.1rem;
-  height: 2px;
-  vertical-align: middle;
-  margin-right: 0.45rem;
-}
-.chart__swatch--a { background: var(--accent-2); }
-.chart__swatch--b { background: var(--accent); }
-
-/* Condition ladder: what each condition progressively removes. */
-.ladder { margin-top: 1.5rem; }
-.ladder__row {
-  display: grid;
-  grid-template-columns: minmax(7rem, auto) 1fr;
-  gap: 0.9rem;
-  align-items: center;
-  padding-block: 0.45rem;
-  border-bottom: 1px solid var(--rule);
-}
-.ladder__row:last-child { border-bottom: 0; }
-.ladder__name {
-  font-family: var(--font-mono);
-  font-size: var(--t-12);
-  color: var(--ink-2);
-}
-.ladder__name--off { color: var(--ink-4); }
-
-/* Waveform pair beside each player. */
-.wave { display: block; width: 100%; height: 34px; margin-top: 0.5rem; }
-.wave rect { fill: var(--ink-3); }
-.wave rect.gap { fill: var(--accent); }
-
-/* ==================================================== disclosure ========= */
-
-.detail { margin-top: 0.5rem; }
-
-.detail__toggle {
-  font: inherit;
-  font-size: var(--t-13);
-  font-family: var(--font-mono);
-  color: var(--ink-2);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--rule-strong);
-  padding: 0.15rem 0;
-  cursor: pointer;
-}
-.detail__toggle:hover { color: var(--ink); border-bottom-color: var(--ink); }
-
-.detail__body {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 180ms ease;
-}
-.detail__body > div { overflow: hidden; }
-.detail--open .detail__body { grid-template-rows: 1fr; }
-
-@media (prefers-reduced-motion: reduce) {
-  .detail__body { transition: none; }
-}
-
-/* ==================================================== left rail nav ====== */
-
-/* Reading position. A hairline at the top edge of the viewport, above
- * everything, so it reads as ambient state rather than as a border. */
-.progress {
-  position: fixed;
-  inset: 0 0 auto 0;
-  height: 2px;
-  z-index: 40;
-  pointer-events: none;
-}
-.progress__bar {
-  height: 100%;
-  background: var(--accent-2);
-  transition: width 90ms linear;
-}
-
-.nav__pos {
-  font-family: var(--font-mono);
-  font-size: var(--t-11);
-  color: var(--accent-2);
-  margin-left: 0.5rem;
-}
-
-.nav__links a.is-active { color: var(--ink); }
-
-/* The rail needs a ground of its own, or it reads as text floating beside the
- * article rather than as a distinct region. A hairline and a faint tint do that
- * without drawing a box. */
-.rail {
-  position: fixed;
-  top: 6.5rem;
-  left: max(1rem, calc((100vw - var(--wide)) / 2 + 0.5rem));
-  width: 12rem;
-  padding: 0.2rem 1.25rem 0.2rem 0;
-  border-right: 1px solid var(--rule);
-  z-index: 10;
-}
-.rail ol { list-style: none; margin: 0; padding: 0; }
-.rail li { margin-bottom: 0.15rem; }
-
-.rail a {
-  position: relative;
-  display: flex;
-  gap: 0.65rem;
-  padding: 0.3rem 0 0.3rem 0.7rem;
-  font-size: var(--t-12);
-  color: var(--ink-3);
-  text-decoration: none;
-  line-height: 1.35;
-  transition: color 120ms ease, background-color 120ms ease;
-}
-.rail a:hover { color: var(--ink-2); background: var(--paper-2); }
-
-/* The number is the only structural signal in the rail, so it carries the
- * accent at all times rather than only when active. */
-.rail .rail__no {
-  font-family: var(--font-mono);
-  color: var(--accent-2);
-  opacity: 0.55;
-}
-
-/* Active state needs more than weight: a marker at the edge, a full-strength
- * number, and near-black for the label. */
-.rail a.is-active { color: var(--ink); }
-.rail a.is-active .rail__no { opacity: 1; }
-.rail a.is-active::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.3rem;
-  bottom: 0.3rem;
-  width: 2px;
-  background: var(--accent-2);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .progress__bar, .rail a { transition: none; }
-}
-
-/* The rail only exists where there is room for it beside the content. */
-@media (max-width: 80rem) { .rail { display: none; } }
-@media (min-width: 80rem) {
-  .nav__links { display: none; }
-  /* Where the rail shows the position, the masthead counter is duplication. */
-  .nav__pos { display: none; }
-  .section > .wrap, .result > .wrap, .masthead > .wrap, .footer > .wrap,
-  .banner-wrap > .wrap { padding-left: 17rem; }
-}
-
-/* Listen cards get the same faint tint as the result block: they are the other
- * thing on the page that is not prose. */
-.cond--card {
-  background: var(--accent-wash);
-  padding: 0.9rem 1rem 1.1rem;
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px; height: 1px;
-  margin: -1px; padding: 0;
-  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-}
-
-.banner-wrap { padding-top: 1.5rem; }
