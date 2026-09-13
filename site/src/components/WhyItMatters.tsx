@@ -16,7 +16,16 @@ import type { GintiData } from "../types";
  */
 export function WhyItMatters({ data }: { data: GintiData }) {
   const h = data.headline;
-  const pair = data.lossPairs[0];
+
+  // The clean take that scored worst on word error rate while returning every
+  // entity exactly right. It is the cleanest available demonstration that the
+  // metric is not measuring the thing: nothing was lost, and the score is
+  // still terrible, because the model spelled the digits out and the reference
+  // wrote them as digits.
+  const perfectButPenalised = data.listen
+    .flatMap((u) => (u.conditions.find((c) => c.condition === "clean")?.results ?? []))
+    .filter((r) => r.entities.length > 0 && r.entities.every((e) => e.hit))
+    .sort((a, b) => b.wer - a.wer)[0] ?? null;
 
   return (
     <section className="why" id="why">
@@ -49,21 +58,20 @@ export function WhyItMatters({ data }: { data: GintiData }) {
           </Reveal>
 
           <Reveal as="section" className="why__item" delay={60}>
-            <h3>The usual metric averages it away</h3>
+            <h3>The usual metric counts the wrong thing</h3>
             <p>
-              Word error rate is a mean over every word in the sentence. The
-              account number is one word among thirty, so losing it moves the
-              average about as much as dropping a postposition does &mdash; and
-              a mean cannot tell you which of the two it was.
+              Word error rate treats every word alike. A dropped postposition
+              and a wrong digit cost the same. Worse, a model that reads the
+              number back correctly but spells the digits out, where the
+              reference wrote them as digits, is charged an error for every
+              digit &mdash; so the score collapses while the answer is perfect.
             </p>
-            {pair && (
+            {perfectButPenalised && (
               <p className="why__aside">
-                Section 05 has the case: entity accuracy falls{" "}
-                {(((pair.scattered.hits / pair.scattered.total)
-                  - (pair.bursty.hits / pair.bursty.total)) * 100).toFixed(0)}{" "}
-                points while word error rate moves{" "}
-                {pair.scattered.wer?.toFixed(3) ?? "—"} to{" "}
-                {pair.bursty.wer?.toFixed(3) ?? "—"}.
+                The worst case on this page: a transcript that returned every
+                value exactly right and still scored{" "}
+                {perfectButPenalised.wer.toFixed(2)} on word error rate. Nothing
+                about that number tells you the account number survived.
               </p>
             )}
           </Reveal>

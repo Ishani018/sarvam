@@ -168,6 +168,49 @@ function loadContent() {
   return out;
 }
 
+/**
+ * The share of frames a manifest records as dropped, or null if this condition
+ * drops none.
+ *
+ * The count is parsed out of the note on the frame-gating step -- the same
+ * string the page prints -- so what is measured here is exactly what a reader
+ * sees.
+ */
+function droppedFraction(manifest) {
+  for (const c of manifest.commands ?? []) {
+    const m = /dropped (\d+)\/(\d+) frames/.exec(c.note ?? "");
+    if (m && Number(m[2]) > 0) return Number(m[1]) / Number(m[2]);
+  }
+  return null;
+}
+
+/**
+ * The file to show for a condition: the one whose loss is nearest the median
+ * across every file that ran it.
+ *
+ * A reader who stops on "0 of 183 frames" on a 5% condition does not go on to
+ * read the paragraph explaining per-file variance, and is right not to trust
+ * the page in the meantime. The median case shows the condition doing what its
+ * name says. Ties break on utterance id so the choice is stable between builds,
+ * and conditions that drop nothing keep the first file in id order -- there is
+ * no tail to avoid.
+ *
+ * With an even number of candidates the median is the lower of the two middles,
+ * so it is always a file that exists rather than an average of two that do not.
+ */
+function pickExemplar(cands) {
+  const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+  const lossy = cands.filter((c) => c.frac !== null);
+  if (lossy.length === 0) return cands.slice().sort(byId)[0];
+
+  const sorted = lossy.map((c) => c.frac).sort((a, b) => a - b);
+  const median = sorted[Math.floor((sorted.length - 1) / 2)];
+  return lossy.slice().sort((a, b) => {
+    const d = Math.abs(a.frac - median) - Math.abs(b.frac - median);
+    return d !== 0 ? d : byId(a, b);
+  })[0];
+}
+
 /** The recorded argv for each condition, lifted from one manifest that used it.
  *  This is what actually ran -- not a restatement of the config. */
 function loadCommandsByCondition(rows) {
@@ -193,28 +236,43 @@ function loadCommandsByCondition(rows) {
     } catch { /* a malformed previous build is simply not reused */ }
   }
 
-  const out = {};
+  // Every file carrying a manifest for this condition is a candidate, and which
+  // one is shown matters: packet loss is a random process, so the first file in
+  // id order is as likely to be a tail case as a typical one. In this corpus a
+  // 5% condition had files reporting 0 of 183 frames dropped and 15 of 196 --
+  // 0% and 7.6%. Both are honest and both invite the wrong question.
+  const candidates = {};
   for (const r of rows) {
-    if (!r.audio_path || out[r.condition]) continue;
-    const manifest = join(REPO, `${r.audio_path}.manifest.json`);
-    if (!existsSync(manifest)) continue;
+    if (!r.audio_path) continue;
+    const path = join(REPO, `${r.audio_path}.manifest.json`);
+    if (!existsSync(path)) continue;
     try {
-      const m = JSON.parse(readFileSync(manifest, "utf8"));
-      out[r.condition] = {
-        commands: (m.commands ?? []).map((c) => ({
-          argv: (c.argv ?? []).map(shortenTempPath),
-          note: c.note,
-          // Frame gating is done in Python, not shelled out; the page should
-          // not present it as an ffmpeg invocation.
-          isShell: c.argv?.[0] !== "<python>",
-        })),
-        tools: m.tools ?? {},
-        seed: m.seed ?? null,
-        durationS: m.output?.duration_s ?? null,
-      };
+      const m = JSON.parse(readFileSync(path, "utf8"));
+      (candidates[r.condition] ??= []).push({
+        id: r.utterance_id ?? "",
+        manifest: m,
+        frac: droppedFraction(m),
+      });
     } catch (e) {
-      warn(`unreadable manifest ${manifest}: ${e.message}`);
+      warn(`unreadable manifest ${path}: ${e.message}`);
     }
+  }
+
+  const out = {};
+  for (const [condition, cands] of Object.entries(candidates)) {
+    const m = pickExemplar(cands).manifest;
+    out[condition] = {
+      commands: (m.commands ?? []).map((c) => ({
+        argv: (c.argv ?? []).map(shortenTempPath),
+        note: c.note,
+        // Frame gating is done in Python, not shelled out; the page should
+        // not present it as an ffmpeg invocation.
+        isShell: c.argv?.[0] !== "<python>",
+      })),
+      tools: m.tools ?? {},
+      seed: m.seed ?? null,
+      durationS: m.output?.duration_s ?? null,
+    };
   }
 
   let carried = 0;
@@ -225,6 +283,35 @@ function loadCommandsByCondition(rows) {
     console.log(`  manifests: ${carried} condition(s) carried from the previous build`);
   }
   return out;
+}
+
+/**
+ * Refuse to ship a condition whose displayed manifest contradicts its own name.
+ *
+ * A carried-forward exemplar was chosen by an older rule on whatever machine
+ * last had the scratch directory, so the near-median pick above cannot reach
+ * it. This is the backstop: if a condition declares packet loss and the
+ * commands on the page report none, say so loudly at build time rather than
+ * letting a reader find it.
+ */
+function checkExemplars(conditions) {
+  const bad = [];
+  for (const c of conditions) {
+    const loss = c.chain?.find((o) => o.op === "packet_loss");
+    if (!loss || !Number(loss.rate) || !c.commands?.length) continue;
+    for (const cmd of c.commands) {
+      const m = /dropped (\d+)\/(\d+) frames/.exec(cmd.note ?? "");
+      if (m && Number(m[1]) === 0) {
+        bad.push(`${c.name}: declares ${(Number(loss.rate) * 100).toFixed(0)}% loss, ` +
+                 `shows "${cmd.note}"`);
+      }
+    }
+  }
+  if (bad.length === 0) return;
+  warn("the manifest shown for these conditions reports no loss:");
+  for (const b of bad) warn(`    ${b}`);
+  warn("    rerun `npm run data` where .tee/work holds this run's manifests, so");
+  warn("    a near-median file can be chosen instead of the carried one.");
 }
 
 /**
@@ -580,6 +667,7 @@ function build() {
   if (notExercised.length) {
     warn(`declared but absent from results: ${notExercised.join(", ")}`);
   }
+  checkExemplars(conditions);
 
   // --- listen set + audio ---------------------------------------------------
   // The bundle is not cleared up front. .tee/work/ is scratch and lives only on
@@ -940,4 +1028,14 @@ function build() {
   }
 }
 
-build();
+/* -------------------------------------------------------------------------
+ * Entry point
+ * ---------------------------------------------------------------------- */
+
+// Run when invoked directly; stay inert when imported, so the exemplar picker
+// can be tested without a build writing files as a side effect.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  build();
+}
+
+export { droppedFraction, pickExemplar };

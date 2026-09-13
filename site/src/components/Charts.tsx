@@ -293,9 +293,12 @@ export function ContrastBars({
         </div>
       ))}
       <p className="figcap">
-        The same recordings, scored two ways. Nearly every word is wrong and
-        nearly every number is right, which is why word error rate is the wrong
-        instrument for anything that has to read a number back to a customer.
+        The same recordings, scored two ways. Word error rate puts{" "}
+        {(Math.min(...werByModel.map((m) => m.wer)) * 100).toFixed(0)}&ndash;
+        {(Math.max(...werByModel.map((m) => m.wer)) * 100).toFixed(0)}% of the
+        words wrong; the entity score puts{" "}
+        {(hitRate * 100).toFixed(0)}% of the numbers right. Both are correct.
+        Only one of them is about the thing that has to reach the customer.
       </p>
     </div>
   );

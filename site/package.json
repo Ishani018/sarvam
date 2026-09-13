@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node scripts/check-case-collisions.mjs && node scripts/check-mark.mjs",
+    "check": "node scripts/check-case-collisions.mjs && node scripts/check-mark.mjs && node --test scripts/build-data.test.mjs",
     "data": "npm run check && node scripts/build-data.mjs",
     "dev": "npm run data && vite",
     "build": "npm run data && tsc -b && vite build",

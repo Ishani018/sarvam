@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T15:27:25.065Z",
+  "generatedAt": "2026-09-13T15:36:36.554Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
@@ -14,7 +14,11 @@
     "warnings": [
       "excluded 120 mock row(s) from mock-calib.jsonl: real results are present and the two cannot be mixed",
       "dropped 20 duplicate row(s): the same (utterance, condition, model, mode) measured in more than one run. The newest run wins. Counting both would weight the overlapping utterances twice.",
-      "declared but absent from results: opus_low, packet_loss_2, noisy_line"
+      "declared but absent from results: opus_low, packet_loss_2, noisy_line",
+      "the manifest shown for these conditions reports no loss:",
+      "    packet_loss_burst_5_repeat: declares 5% loss, shows \"dropped 0/183 frames in 0 burst(s), mean 0 ms, gilbert model, fill=repeat\"",
+      "    rerun `npm run data` where .tee/work holds this run's manifests, so",
+      "    a near-median file can be chosen instead of the carried one."
     ],
     "sourceFiles": {
       "results": [
