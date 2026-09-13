@@ -382,7 +382,8 @@ export function ConditionLadder({
             const dropped = drops[i];
             const h = dropped ? 2 : H * d.band * (d.quantised ? 0.7 : 1);
             return (
-              <rect key={i} x={i * (W / bars)} width={W / bars - 1.4}
+              <rect key={i} x={i * (W / bars)} width={W / bars - 1.6}
+                    rx={Math.min((W / bars - 1.6) / 2, 1.4)}
                     y={(H - h) / 2} height={Math.max(h, 2)}
                     className={dropped ? "lad__drop" : "lad__keep"}
                     opacity={d.noisy && !dropped ? 0.72 : 1} />
@@ -435,35 +436,5 @@ export function ConditionLadder({
         second. The rate on the right is measured.
       </p>
     </div>
-  );
-}
-
-/* -------------------------------------------------------------------------
- * Waveform
- * ---------------------------------------------------------------------- */
-
-/**
- * Peak envelope, precomputed at build time. Packet-loss gaps show up as bars
- * at zero, so the damage is visible as well as audible.
- */
-export function Waveform({ peaks, label }: { peaks: number[] | null; label: string }) {
-  if (!peaks?.length) return null;
-  const W = 300;
-  const H = 34;
-  const bw = W / peaks.length;
-  return (
-    <svg className="wave" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
-         role="img" aria-label={`Waveform of the ${label} audio`}>
-      {peaks.map((p, i) => {
-        const h = Math.max((p / 100) * H, 0.6);
-        // A bucket at the floor is a hole in the audio, not quiet speech.
-        const silent = p <= 1;
-        return (
-          <rect key={i} className={silent ? "gap" : undefined}
-                x={i * bw} width={Math.max(bw - 0.4, 0.4)}
-                y={(H - h) / 2} height={h} />
-        );
-      })}
-    </svg>
   );
 }

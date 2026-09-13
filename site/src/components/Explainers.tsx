@@ -38,7 +38,7 @@ export function PipelineDiagram() {
           const x = i * (W + GAP);
           return (
             <g key={s.label}>
-              <rect className="dg-box" x={x} y={40} width={W} height={H} />
+              <rect className="dg-box" x={x} y={40} width={W} height={H} rx="10" />
               <text x={x + 12} y={64} className="dg-label">{s.label}</text>
               <text x={x + 12} y={82} className="dg-sub">{s.sub}</text>
               {i < steps.length - 1 && (

@@ -3,11 +3,13 @@ import { Header, type SectionDef } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { ResultsMatrix } from "./components/ResultsMatrix";
 import { RenderingTable } from "./components/RenderingTable";
-import { ListenSection } from "./components/ListenSection";
+import { Playground } from "./components/Playground";
 import { Conditions, PipelineDiagram } from "./components/Explainers";
 import { ConditionLadder, ContrastBars, DisagreementChart } from "./components/Charts";
 import { Detail, Section, Subhead } from "./components/Shell";
 import { Reveal } from "./components/Reveal";
+import { Ambient } from "./components/Ambient";
+import { WhyItMatters } from "./components/WhyItMatters";
 import { Markdown } from "./components/Markdown";
 import { MethodTable } from "./components/MethodTable";
 import raw from "./generated/data.json";
@@ -69,9 +71,10 @@ const CONDITION_NOTES: Record<string, string> = {
  * the section heading itself carries.
  */
 const SECTIONS: SectionDef[] = [
+  { id: "why", no: "", title: "Why this exists", nav: "Why" },
   { id: "problem", no: "01", title: "The problem", nav: "Problem" },
   { id: "what", no: "02", title: "What Ginti does", nav: "Method" },
-  { id: "listen", no: "03", title: "Listen for yourself", nav: "Listen" },
+  { id: "listen", no: "03", title: "Hear it break", nav: "Listen" },
   { id: "degradation", no: "04", title: "How the degradation works", nav: "Degradation" },
   { id: "results", no: "05", title: "Results", nav: "Results" },
   { id: "method", no: "06", title: "Exact parameters", nav: "Parameters" },
@@ -140,9 +143,11 @@ export function App() {
 
   return (
     <Gate>
+      <Ambient />
       <Header sections={SECTIONS} heroId="top" repo={data.project.repo} />
       <Provenance />
       <Hero data={data} />
+      <WhyItMatters data={data} />
 
       <Section id="problem" no="01" title="The problem"
                summary={md("problem").summary}>
@@ -160,9 +165,9 @@ export function App() {
         </Detail>
       </Section>
 
-      <Section id="listen" no="03" title="Listen for yourself" wide
-               summary="The same sentence, clean and then over the phone line. Pick a condition to hear it against the control, and read what each model returned.">
-        <ListenSection listen={data.listen} conditions={data.conditions} />
+      <Section id="listen" no="03" title="Hear it break" wide
+               summary="Pick a sentence and a kind of damage, then swap between the clean take and the damaged one on the same playhead. What each model returned updates underneath.">
+        <Playground listen={data.listen} conditions={data.conditions} />
       </Section>
 
       <Section id="degradation" no="04" title="How the degradation works" tone="tint" wide
