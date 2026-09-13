@@ -1022,6 +1022,56 @@ function build() {
       };
     })(),
     audioBundle: { files: copied, bytes },
+
+    // What this run actually spent on the two Sarvam endpoints. Counts are
+    // exact; seconds and cost are estimates and are labelled as such on the
+    // page, because the result rows carry no per-file duration and the rate
+    // card in config is what we were told, not an invoice.
+    usage: (() => {
+      const utts = new Set(rows.map((r) => r.utterance_id));
+      const files = new Set(rows.map((r) => `${r.utterance_id}\u001f${r.condition}`));
+      const cost = cfg.cost ?? {};
+      const chars = [...utts].reduce((a, id) => {
+        const u = utterances.get(id);
+        return a + (u?.text?.length ?? 0);
+      }, 0);
+      // The same chars-per-second the harness plans with, so the page and the
+      // dry run cannot disagree about the size of the run.
+      const CHARS_PER_SECOND = 14;
+      const secondsPerUtt = [...utts].reduce((a, id) => {
+        const u = utterances.get(id);
+        return a + Math.max(1, (u?.text?.length ?? 0) / CHARS_PER_SECOND);
+      }, 0);
+      const asrSeconds = rows.length && utts.size
+        ? (secondsPerUtt / utts.size) * rows.length
+        : 0;
+      return {
+        tts: {
+          endpoint: cfg.providers?.tts?.sarvam?.endpoint ?? null,
+          model: cfg.providers?.tts?.sarvam?.model ?? null,
+          speaker: cfg.providers?.tts?.sarvam?.speaker ?? null,
+          sampleRate: cfg.providers?.tts?.sarvam?.speech_sample_rate ?? null,
+          calls: utts.size,
+          chars,
+        },
+        asr: {
+          endpoint: cfg.providers?.asr?.sarvam?.endpoint ?? null,
+          models,
+          modes,
+          calls: rows.length,
+          audioFiles: files.size,
+        },
+        estimatedAudioSeconds: asrSeconds,
+        estimatedCostInr:
+          (chars / 1000) * (cost.tts_inr_per_1k_chars ?? 0)
+          + asrSeconds * (cost.asr_inr_per_audio_second ?? 0),
+        rates: {
+          asrInrPerAudioSecond: cost.asr_inr_per_audio_second ?? null,
+          ttsInrPer1kChars: cost.tts_inr_per_1k_chars ?? null,
+        },
+        charsPerSecond: CHARS_PER_SECOND,
+      };
+    })(),
   };
 
   assertNoStaleSurvivalClaim(data);

@@ -47,7 +47,7 @@ for (const [name, width, height] of [["desktop", 1440, 1000], ["narrow", 390, 84
   await page.screenshot({ path: join(OUT, `${pre}${name}-full.png`), fullPage: true });
   await page.screenshot({ path: join(OUT, `${pre}${name}-fold.png`) });
 
-  for (const id of ["listen", "degradation", "what", "results", "issues"]) {
+  for (const id of ["listen", "degradation", "what", "results", "used", "issues"]) {
     const el = page.locator(`#${id}`);
     if (await el.count()) {
       await el.scrollIntoViewIfNeeded();

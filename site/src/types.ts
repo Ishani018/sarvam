@@ -105,6 +105,22 @@ export interface GintiData {
     modes: string[]; languages: string[]; utterances: number;
   };
   audioBundle: { files: number; bytes: number };
+  /** What the run spent on the two Sarvam endpoints. Counts exact; seconds and
+   *  cost estimated, and labelled as such wherever they are shown. */
+  usage: {
+    tts: {
+      endpoint: string | null; model: string | null; speaker: string | null;
+      sampleRate: number | null; calls: number; chars: number;
+    };
+    asr: {
+      endpoint: string | null; models: string[]; modes: string[];
+      calls: number; audioFiles: number;
+    };
+    estimatedAudioSeconds: number;
+    estimatedCostInr: number;
+    rates: { asrInrPerAudioSecond: number | null; ttsInrPer1kChars: number | null };
+    charsPerSecond: number;
+  } | null;
 }
 
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-13T16:20:07.287Z",
+  "generatedAt": "2026-09-13T20:45:59.369Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
@@ -28618,5 +28618,34 @@
   "audioBundle": {
     "files": 0,
     "bytes": 0
+  },
+  "usage": {
+    "tts": {
+      "endpoint": "https://api.sarvam.ai/text-to-speech",
+      "model": "bulbul:v3",
+      "speaker": "shubh",
+      "sampleRate": 24000,
+      "calls": 40,
+      "chars": 2413
+    },
+    "asr": {
+      "endpoint": "https://api.sarvam.ai/speech-to-text",
+      "models": [
+        "saaras:v3",
+        "saaras:v4"
+      ],
+      "modes": [
+        "transcribe"
+      ],
+      "calls": 800,
+      "audioFiles": 400
+    },
+    "estimatedAudioSeconds": 3447.1428571428573,
+    "estimatedCostInr": 35.953700000000005,
+    "rates": {
+      "asrInrPerAudioSecond": 0.00833,
+      "ttsInrPer1kChars": 3
+    },
+    "charsPerSecond": 14
   }
 }

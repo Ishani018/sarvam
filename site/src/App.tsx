@@ -4,7 +4,11 @@ import { Hero } from "./components/Hero";
 import { ResultsMatrix } from "./components/ResultsMatrix";
 import { RenderingTable } from "./components/RenderingTable";
 import { Playground } from "./components/Playground";
-import { Conditions, PipelineDiagram, ScoredTypes } from "./components/Explainers";
+import { Conditions, ScoredTypes } from "./components/Explainers";
+import { LoopDiagram } from "./components/LoopDiagram";
+import { pickHeroExample } from "./conditionKind";
+import { prettyValue } from "./entityDiff";
+import { WhatWasUsed } from "./components/WhatWasUsed";
 import { ConditionLadder, ContrastBars, DisagreementChart } from "./components/Charts";
 import { Detail, Section, Subhead } from "./components/Shell";
 import { Reveal } from "./components/Reveal";
@@ -13,6 +17,7 @@ import { WhyItMatters } from "./components/WhyItMatters";
 import { Markdown } from "./components/Markdown";
 import { Mark } from "./components/Mark";
 import { MethodTable } from "./components/MethodTable";
+import { languageList } from "./lang";
 import raw from "./generated/data.json";
 import type { GintiData } from "./types";
 
@@ -78,8 +83,9 @@ const SECTIONS: SectionDef[] = [
   { id: "listen", no: "03", title: "Hear it break", nav: "Listen" },
   { id: "degradation", no: "04", title: "How the degradation works", nav: "Degradation" },
   { id: "results", no: "05", title: "Results", nav: "Results" },
-  { id: "method", no: "06", title: "Exact parameters", nav: "Parameters" },
-  { id: "issues", no: "07", title: "Known issues", nav: "Issues" },
+  { id: "used", no: "06", title: "What this runs on", nav: "What was used" },
+  { id: "method", no: "07", title: "Exact parameters", nav: "Parameters" },
+  { id: "issues", no: "08", title: "Known issues", nav: "Issues" },
 ];
 
 const md = (key: string) => data.content[key] ?? { summary: null, body: "" };
@@ -124,7 +130,7 @@ function Footer() {
 
         <dl className="foot__meta">
           <div><dt>scope</dt><dd>
-            {data.headline.utterances} synthetic {data.headline.languages.join(", ")}{" "}
+            {data.headline.utterances} synthetic {languageList(data.headline.languages)}{" "}
             utterances, {data.headline.models} models,{" "}
             {data.headline.conditions} of {data.headline.declaredConditions}{" "}
             declared conditions, {data.headline.modes.join(" and ")} mode.
@@ -154,6 +160,10 @@ export function App() {
   const stats = data.renderingStats;
   const h = data.headline;
   const pair = data.lossPairs[0];
+  // The diagram's first step shows a real value from the run rather than one
+  // typed into the component, so it cannot drift from the corpus.
+  const heroEx = pickHeroExample(data.listen, data.conditions);
+  const heroValue = heroEx ? prettyValue(heroEx.expected) : null;
 
   return (
     <Gate>
@@ -173,7 +183,9 @@ export function App() {
 
       <Section id="what" no="02" title="What Ginti does" tone="cool" wide
                summary={md("what-ginti-does").summary}>
-        <PipelineDiagram />
+        <LoopDiagram conditions={data.headline.conditions}
+                     models={data.headline.models}
+                     sample={heroValue} />
         <ScoredTypes types={data.entityTypes} />
         <Detail>
           <Markdown source={md("what-ginti-does").body} />
@@ -319,7 +331,18 @@ export function App() {
         </Reveal>
       </Section>
 
-      <Section id="method" no="06" title="Exact parameters" tone="warm-deep"
+      <Section id="used" no="06" title="What this runs on" wide
+               summary={
+                 `Two Sarvam endpoints: bulbul:v3 makes the test material and ` +
+                 `the saaras models are the thing under test. Everything ` +
+                 `between them — the sentences, the damage, the scoring — is ` +
+                 `the harness. Nothing here is evidence about the rest of the ` +
+                 `platform.`
+               }>
+        <WhatWasUsed data={data} />
+      </Section>
+
+      <Section id="method" no="07" title="Exact parameters" tone="warm-deep"
                summary={md("method").summary}>
         <Detail label="Read how it is scored">
           <Markdown source={md("method").body} />
@@ -327,7 +350,7 @@ export function App() {
         <MethodTable data={data} />
       </Section>
 
-      <Section id="issues" no="07" title="Known issues"
+      <Section id="issues" no="08" title="Known issues"
                summary={md("known-issues").summary}>
         <Reveal className="prose">
           <Markdown source={md("known-issues").body} />
