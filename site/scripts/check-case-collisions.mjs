@@ -20,12 +20,43 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { dirname, extname, basename } from "node:path";
+import { readdirSync } from "node:fs";
+import { dirname, extname, basename, join, relative } from "node:path";
 
 const MODULE_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
 
-const files = execFileSync("git", ["ls-files"], { encoding: "utf8" })
-  .split("\n").map((l) => l.trim()).filter(Boolean);
+const SKIP = new Set(["node_modules", ".git", "dist", ".vercel"]);
+
+/** Every file under `root`, as repo-relative paths. */
+function walk(root, dir = root, out = []) {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (SKIP.has(e.name)) continue;
+    const full = join(dir, e.name);
+    if (e.isDirectory()) walk(root, full, out);
+    else out.push(relative(root, full));
+  }
+  return out;
+}
+
+/**
+ * Prefer git's index -- it is the set that actually ships, and it sees files a
+ * walk would miss on a case-insensitive filesystem, which is the whole point.
+ * Fall back to walking when there is no checkout: a deploy that unpacks the
+ * source without .git would otherwise fail this check with "Command failed:
+ * git ls-files", which says nothing about the collision it is meant to catch.
+ */
+function listFiles() {
+  try {
+    return execFileSync("git", ["ls-files"], {
+      encoding: "utf8", stdio: ["ignore", "pipe", "ignore"],
+    }).split("\n").map((l) => l.trim()).filter(Boolean);
+  } catch {
+    console.log("  (no git checkout: walking the filesystem instead)");
+    return walk(process.cwd());
+  }
+}
+
+const files = listFiles();
 
 const problems = [];
 

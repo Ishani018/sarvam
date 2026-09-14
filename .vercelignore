@@ -1,27 +1,29 @@
-# The deployed artifact is site/dist and nothing else.
+# The deployed artifact is site/dist. This file controls what reaches the BUILD,
+# which is a different question from what is served -- outputDirectory settles
+# that -- so the only things excluded here are things the build must not have.
 #
-# Two reasons this file is not just tidiness. The harness talks to a paid API
-# with a key read from the environment, and none of it -- not the client, not
-# the config, not the cost guard -- belongs on a static host. And the repo root
-# carries pyproject.toml, which is what made Vercel try to deploy src/tee/cli.py
-# as a Python function in the first place; excluding it keeps the detection
-# from having anything to find.
-pyproject.toml
-uv.lock
-src/
-tests/
-configs/
-corpora/
-fixtures/
-results/
-.tee/
-.venv/
-.pytest_cache/
+# The harness is one of them. It talks to a paid API with a key read from the
+# environment, and none of it belongs on a static host. Its pyproject.toml is
+# also what made Vercel try to deploy src/tee/cli.py as a Python function:
+# excluding it leaves the detection nothing to find.
+#
+# Every pattern is anchored with a leading slash. Unanchored, `src/` matches at
+# any depth and would take site/src -- the React app -- with it.
+/pyproject.toml
+/uv.lock
+/src/
+/tests/
+/configs/
+/corpora/
+/fixtures/
+/results/
+/.tee/
+/.venv/
+/.pytest_cache/
 
-# Site sources are built, not served. dist/ is what ships.
-site/scripts/
-site/content/
-site/node_modules/
+# Reinstalled by `npm ci` anyway.
+/site/node_modules/
 
-# site/vercel.json is read only when the project's Root Directory is `site`,
-# in which case this file is not consulted at all. Harmless either way.
+# Nothing else under site/ is excluded. `build:ci` runs site/scripts/ for its
+# checks, so excluding them as "sources, not served" broke the build -- and it
+# bought nothing, since only site/dist is ever served.
