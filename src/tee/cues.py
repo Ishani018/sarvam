@@ -287,3 +287,45 @@ def render(stats: Sequence[ConditionCues], found: Sequence[Orphan]) -> str:
             out.append(f"  extractor   {mark}")
     out.append("")
     return "\n".join(out)
+
+
+def to_json(stats: Sequence[ConditionCues], found: Sequence[Orphan],
+            modes: Sequence[str], rows: int) -> dict:
+    """The same figures, for the site build to read.
+
+    A sidecar rather than a field on the result rows: cue survival is a
+    property of a (reference, hypothesis) pair and is computed after the fact,
+    so writing it back into the rows would make a re-scored run and a
+    re-analysed one two different things on disk.
+
+    `modes` is carried because the whole point of these numbers is that they
+    differ by mode -- transcribe writes ₹ where the line destroyed रुपये, so
+    it reports cue loss the recogniser itself repaired.
+    """
+    return {
+        "modes": list(modes),
+        "rows": rows,
+        "conditions": [
+            {
+                "condition": c.condition,
+                "cueTotal": c.cue_total,
+                "cueKept": c.cue_kept,
+                "cueSurvival": c.cue_survival,
+                "wordTotal": c.word_total,
+                "wordKept": c.word_kept,
+                "wordSurvival": c.word_survival,
+                "valuePresent": c.value_present,
+                "orphans": c.orphans,
+                "orphansUnrecovered": c.orphans_unrecovered,
+                "orphansByType": dict(c.by_type),
+            }
+            for c in stats
+        ],
+        "orphansByType": dict(sum((c.by_type for c in stats), Counter())),
+        "shapedTypes": sorted(SHAPED_TYPES),
+        "totals": {
+            "orphans": sum(c.orphans for c in stats),
+            "orphansUnrecovered": sum(c.orphans_unrecovered for c in stats),
+            "valuePresent": sum(c.value_present for c in stats),
+        },
+    }

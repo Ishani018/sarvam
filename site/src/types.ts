@@ -105,6 +105,12 @@ export interface GintiData {
     modes: string[]; languages: string[]; utterances: number;
   };
   audioBundle: { files: number; bytes: number };
+  /** Cue-survival figures from `tee cues --json`, keyed by ASR mode. Null when
+   *  no sidecar was present at build time; the section then does not render. */
+  cues: {
+    byMode: Record<string, CueFigures>;
+    sources: string[];
+  } | null;
   /** What the run spent on the two Sarvam endpoints. Counts exact; seconds and
    *  cost estimated, and labelled as such wherever they are shown. */
   usage: {
@@ -123,6 +129,25 @@ export interface GintiData {
   } | null;
 }
 
+
+export interface CueCondition {
+  condition: string;
+  cueTotal: number; cueKept: number; cueSurvival: number | null;
+  wordTotal: number; wordKept: number; wordSurvival: number | null;
+  valuePresent: number;
+  orphans: number;
+  orphansUnrecovered: number;
+  orphansByType: Record<string, number>;
+}
+
+export interface CueFigures {
+  modes: string[];
+  rows: number;
+  conditions: CueCondition[];
+  orphansByType: Record<string, number>;
+  shapedTypes: string[];
+  totals: { orphans: number; orphansUnrecovered: number; valuePresent: number };
+}
 
 export interface ListenEntity {
   type: string;

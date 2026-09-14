@@ -623,6 +623,43 @@ function repoUrl() {
   }
 }
 
+
+/** Cue-survival figures written by `tee cues --json`, keyed by mode.
+ *
+ * Every sidecar in results/ is read and grouped by the mode its rows came
+ * from, because the finding is a comparison between modes: transcribe writes
+ * ₹ where the line destroyed रुपये, so it reports cue loss the recogniser
+ * itself repaired. A build with only one mode's sidecar gets that mode alone
+ * and the page says which.
+ */
+function readCues() {
+  const files = existsSync(PATHS.results)
+    ? readdirSync(PATHS.results).filter((f) => f.endsWith(".cues.json")
+        || /^cues-.*\.json$/.test(f))
+    : [];
+  const byMode = {};
+  for (const f of files.sort()) {
+    let doc;
+    try {
+      doc = JSON.parse(readFileSync(join(PATHS.results, f), "utf8"));
+    } catch (e) {
+      warn(`could not read cue figures in ${f}: ${e.message}`);
+      continue;
+    }
+    for (const mode of doc.modes ?? []) {
+      if (mode === "-") continue;
+      if (byMode[mode]) {
+        warn(`two cue sidecars claim mode ${mode}; keeping the first`);
+        continue;
+      }
+      byMode[mode] = doc;
+    }
+  }
+  if (Object.keys(byMode).length === 0) return null;
+  return { byMode, sources: files };
+}
+
+
 function build() {
   console.log("ginti: building site data");
   const rows = loadRows();
@@ -1022,6 +1059,15 @@ function build() {
       };
     })(),
     audioBundle: { files: copied, bytes },
+
+    // Cue survival, from `tee cues --json`. A sidecar rather than a field on
+    // the rows: it is a property of a (reference, hypothesis) pair computed
+    // after the fact, and folding it into the rows would make a re-scored run
+    // and a re-analysed one two different files on disk. Absent sidecar means
+    // the section does not render -- it is never approximated here, because
+    // the cue lexicon lives in Python and a second copy of it in JS would
+    // drift silently.
+    cues: readCues(),
 
     // What this run actually spent on the two Sarvam endpoints. Counts are
     // exact; seconds and cost are estimates and are labelled as such on the

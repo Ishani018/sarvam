@@ -9,6 +9,7 @@ import { LoopDiagram } from "./components/LoopDiagram";
 import { pickHeroExample } from "./conditionKind";
 import { prettyValue } from "./entityDiff";
 import { WhatWasUsed } from "./components/WhatWasUsed";
+import { CueSurvival } from "./components/CueSurvival";
 import { ConditionLadder, ContrastBars, DisagreementChart } from "./components/Charts";
 import { Detail, Section, Subhead } from "./components/Shell";
 import { Reveal } from "./components/Reveal";
@@ -322,6 +323,13 @@ export function App() {
         <RenderingTable
           rendering={data.rendering} wer={data.wer} models={data.models}
         />
+
+        {data.cues && (
+          <Subhead note="An orphan is a value that arrived with nothing left beside it to say what kind of number it is.">
+            What the burst takes besides the digits
+          </Subhead>
+        )}
+        <CueSurvival data={data} />
 
         <Reveal className="note note--warn">
           This part is an observation about output formatting, not about

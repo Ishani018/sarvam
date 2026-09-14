@@ -1,0 +1,171 @@
+{
+  "modes": [
+    "transcribe"
+  ],
+  "rows": 800,
+  "conditions": [
+    {
+      "condition": "clean",
+      "cueTotal": 196,
+      "cueKept": 155,
+      "cueSurvival": 0.7908163265306123,
+      "wordTotal": 830,
+      "wordKept": 588,
+      "wordSurvival": 0.708433734939759,
+      "valuePresent": 114,
+      "orphans": 0,
+      "orphansUnrecovered": 0,
+      "orphansByType": {}
+    },
+    {
+      "condition": "g711_ulaw",
+      "cueTotal": 196,
+      "cueKept": 154,
+      "cueSurvival": 0.7857142857142857,
+      "wordTotal": 830,
+      "wordKept": 571,
+      "wordSurvival": 0.6879518072289157,
+      "valuePresent": 114,
+      "orphans": 1,
+      "orphansUnrecovered": 0,
+      "orphansByType": {
+        "otp": 1
+      }
+    },
+    {
+      "condition": "g726_16k",
+      "cueTotal": 196,
+      "cueKept": 152,
+      "cueSurvival": 0.7755102040816326,
+      "wordTotal": 830,
+      "wordKept": 553,
+      "wordSurvival": 0.6662650602409639,
+      "valuePresent": 114,
+      "orphans": 1,
+      "orphansUnrecovered": 0,
+      "orphansByType": {
+        "otp": 1
+      }
+    },
+    {
+      "condition": "narrowband",
+      "cueTotal": 196,
+      "cueKept": 157,
+      "cueSurvival": 0.8010204081632653,
+      "wordTotal": 830,
+      "wordKept": 582,
+      "wordSurvival": 0.7012048192771084,
+      "valuePresent": 114,
+      "orphans": 0,
+      "orphansUnrecovered": 0,
+      "orphansByType": {}
+    },
+    {
+      "condition": "noisy_line_snr5",
+      "cueTotal": 196,
+      "cueKept": 144,
+      "cueSurvival": 0.7346938775510204,
+      "wordTotal": 830,
+      "wordKept": 537,
+      "wordSurvival": 0.6469879518072289,
+      "valuePresent": 112,
+      "orphans": 2,
+      "orphansUnrecovered": 0,
+      "orphansByType": {
+        "account_number": 1,
+        "otp": 1
+      }
+    },
+    {
+      "condition": "packet_loss_10",
+      "cueTotal": 196,
+      "cueKept": 155,
+      "cueSurvival": 0.7908163265306123,
+      "wordTotal": 830,
+      "wordKept": 572,
+      "wordSurvival": 0.689156626506024,
+      "valuePresent": 113,
+      "orphans": 0,
+      "orphansUnrecovered": 0,
+      "orphansByType": {}
+    },
+    {
+      "condition": "packet_loss_5",
+      "cueTotal": 196,
+      "cueKept": 154,
+      "cueSurvival": 0.7857142857142857,
+      "wordTotal": 830,
+      "wordKept": 559,
+      "wordSurvival": 0.6734939759036145,
+      "valuePresent": 114,
+      "orphans": 1,
+      "orphansUnrecovered": 0,
+      "orphansByType": {
+        "otp": 1
+      }
+    },
+    {
+      "condition": "packet_loss_burst_10",
+      "cueTotal": 196,
+      "cueKept": 142,
+      "cueSurvival": 0.7244897959183674,
+      "wordTotal": 830,
+      "wordKept": 529,
+      "wordSurvival": 0.6373493975903615,
+      "valuePresent": 90,
+      "orphans": 3,
+      "orphansUnrecovered": 2,
+      "orphansByType": {
+        "pin_code": 2,
+        "otp": 1
+      }
+    },
+    {
+      "condition": "packet_loss_burst_5",
+      "cueTotal": 196,
+      "cueKept": 144,
+      "cueSurvival": 0.7346938775510204,
+      "wordTotal": 830,
+      "wordKept": 557,
+      "wordSurvival": 0.6710843373493975,
+      "valuePresent": 104,
+      "orphans": 4,
+      "orphansUnrecovered": 1,
+      "orphansByType": {
+        "otp": 3,
+        "pin_code": 1
+      }
+    },
+    {
+      "condition": "packet_loss_burst_5_repeat",
+      "cueTotal": 196,
+      "cueKept": 147,
+      "cueSurvival": 0.75,
+      "wordTotal": 830,
+      "wordKept": 561,
+      "wordSurvival": 0.6759036144578313,
+      "valuePresent": 102,
+      "orphans": 4,
+      "orphansUnrecovered": 1,
+      "orphansByType": {
+        "otp": 3,
+        "pin_code": 1
+      }
+    }
+  ],
+  "orphansByType": {
+    "otp": 11,
+    "account_number": 1,
+    "pin_code": 4
+  },
+  "shapedTypes": [
+    "account_number",
+    "otp",
+    "pin_code"
+  ],
+  "totals": {
+    "orphans": 16,
+    "orphansUnrecovered": 4,
+    "valuePresent": 1091
+  }
+}

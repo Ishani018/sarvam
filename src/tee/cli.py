@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import sys
 from pathlib import Path
@@ -240,6 +241,8 @@ def cues_cmd(
     results: list[Path] = typer.Argument(
         ..., help="One or more results JSONL files."),
     out: Optional[Path] = typer.Option(None, "--out", help="Report path."),
+    json_out: Optional[Path] = typer.Option(
+        None, "--json", help="Also write the figures as JSON for the site build."),
 ) -> None:
     """Measure whether the words identifying a number survived the line.
 
@@ -248,13 +251,21 @@ def cues_cmd(
     words, and lists values that reached the transcript with no surviving word
     saying what they are.
     """
-    from .cues import analyse, orphans, render as render_cues
+    from .cues import analyse, orphans, render as render_cues, to_json
 
     rows = [r for path_ in results for r in read_rows(path_)]
     modes_seen = sorted({r.asr_mode or "-" for r in rows})
     typer.echo(f"{len(rows)} row(s) from {len(results)} file(s); "
                f"modes present: {', '.join(modes_seen)}\n")
-    report = render_cues(analyse(rows), orphans(rows))
+    stats, found = analyse(rows), orphans(rows)
+    report = render_cues(stats, found)
+    if json_out is not None:
+        json_out.parent.mkdir(parents=True, exist_ok=True)
+        json_out.write_text(
+            json.dumps(to_json(stats, found, modes_seen, len(rows)),
+                       ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8")
+        typer.echo(f"figures: {json_out}")
     path = out or results[0].with_suffix(".cues.txt")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(report, encoding="utf-8")

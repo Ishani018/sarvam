@@ -208,6 +208,26 @@ def _run_kind(run_text: Sequence[str], lex: Lexicon) -> str:
     return "digits"
 
 
+def _amount_from_digits(digits: str) -> Decimal | None:
+    """An amount read out one digit at a time, or None if it cannot be one.
+
+    Money is the only scored type with no characteristic length -- an account
+    number is 9 to 18 digits, a PIN is 6, an amount is any of them -- so the
+    shape fallback that rescues the others cannot rescue currency. When an
+    amount is spoken digit by digit ("एक चार शून्य शून्य") the strict value
+    parser refuses it, correctly: two values in a row with no scale between
+    them is not a magnitude. The digits are still there, though, and a
+    neighbouring cue still says they are money.
+
+    The one shape constraint money does have is that it does not start with a
+    zero. That rules out most account numbers and OTPs that happen to sit
+    beside a financial word, at no cost to real amounts.
+    """
+    if not digits or (len(digits) > 1 and digits[0] == "0"):
+        return None
+    return Decimal(digits)
+
+
 def extract(
     text: str,
     language: str,
@@ -267,6 +287,16 @@ def extract(
         kind = _run_kind(run_text, lex)
         cur_cue = _currency_cue(tokens, start, end, lex)
 
+        # What this run is worth as money. Usually the parsed magnitude; for a
+        # digit-by-digit reading, which the strict parser refuses as a value,
+        # the digits themselves. Only ever emitted with a currency cue beside
+        # it -- an amount with no word saying it is money is not identifiable
+        # as money, by this extractor or by anything else reading the
+        # transcript, and pretending otherwise would hide that.
+        amount = value
+        if amount is None and kind == "digits":
+            amount = _amount_from_digits(digits)
+
         # A magnitude expression is an amount, full stop -- never a digit string.
         if kind == "magnitude":
             if value is not None and want("currency"):
@@ -295,12 +325,19 @@ def extract(
         # type win a tie silently drops the amount entirely, and scoring checks
         # candidates per gold type, so over-generating on a tie costs nothing.
         emitted = False
-        if (cur_dist is not None and value is not None and want("currency")
+        if (cur_dist is not None and amount is not None and want("currency")
                 and (best_digit is None or cur_dist <= best_digit)):
             out.append(ExtractedEntity(
-                "currency", surface, normalize_currency(value), span, cue=cur_cue[0],
+                "currency", surface, normalize_currency(amount), span, cue=cur_cue[0],
             ))
-            emitted = True
+            # A magnitude beside a currency cue is money and nothing else, so
+            # it closes the run. An amount read digit by digit is a weaker
+            # claim -- the same digits are also the shape of an OTP -- so it is
+            # emitted alongside the shape candidates rather than instead of
+            # them. "आपका ओटी छः छः नौ चार" cost a real OTP hit when it
+            # suppressed them: लेनदेन five tokens back is a currency cue, and
+            # it belongs to a different number in the same sentence.
+            emitted = value is not None
 
         if digit_cues and (cur_dist is None or best_digit <= cur_dist):
             for etype, cue in digit_cues.items():

@@ -960,6 +960,93 @@ code, .mono, .t-mono { font-family: var(--font-mono); font-variant-numeric: tabu
   white-space: nowrap;
 }
 
+/* ============================================= cue survival ============== */
+
+/* Same visual grammar as the loss-pair rows: a name, a track, a count. The
+ * track is scaled to the worst row rather than to 1.0 -- the absolute rates
+ * are small and a bar at 3% of its container says nothing. The figure under it
+ * carries the absolute counts, so nothing is hidden by the scaling. */
+.cue { margin-top: 1.75rem; }
+.cue__rows { display: grid; gap: 2px; }
+
+.cue__row {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr) 5rem 7rem;
+  align-items: center;
+  gap: 0.5rem 1.25rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+}
+.cue__row:nth-child(odd) { background: color-mix(in srgb, var(--paper) 85%, transparent); }
+
+.cue__name {
+  font-family: var(--font-mono);
+  font-size: var(--t-13);
+  color: var(--ink);
+  min-width: 0;
+}
+.cue__name i {
+  display: block;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: var(--t-11);
+  color: var(--ink-3);
+  margin-top: 0.15rem;
+}
+
+.cue__track {
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--paper-3);
+  overflow: hidden;
+}
+.cue__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--accent-2-mid);
+  transition: width 620ms var(--ease);
+}
+/* Rust only where the argument is: the bursty conditions are the finding. */
+.cue__row--bursty .cue__fill { background: var(--accent); }
+
+.cue__n {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-15);
+  color: var(--ink);
+  text-align: right;
+  white-space: nowrap;
+}
+.cue__n i { font-style: normal; color: var(--ink-3); font-size: var(--t-12); }
+
+.cue__sur {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.35;
+}
+.cue__sur b { font-size: var(--t-13); font-weight: 500; color: var(--ink-2); }
+.cue__sur i { font-style: normal; font-size: var(--t-11); color: var(--ink-4); }
+
+.cue__split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 3rem;
+  margin-top: clamp(1.75rem, 3.5vh, 2.5rem);
+}
+.cue__split p {
+  font-size: var(--t-15);
+  line-height: 1.62;
+  color: var(--ink-2);
+  max-width: 38rem;
+}
+.cue__split .minihead { margin-top: 0; }
+.cue__note { font-size: var(--t-13) !important; color: var(--ink-3) !important; }
+
 /* ==================================================== charts ============= */
 
 .chart { margin: 2rem 0 0; }
@@ -2342,6 +2429,14 @@ td.cell-td { padding-left: 0.9rem; }
   .pairbox__row { grid-template-columns: minmax(0, 1fr) 5rem; gap: 0.5rem 1rem; }
   .pairbox__rate { grid-column: 1 / -1; }
   .pairbox__bars { grid-column: 1; }
+  /* The condition names are long and monospaced; at this width they get their
+     own line rather than competing with the counts for a 1fr column. */
+  .cue__row { grid-template-columns: minmax(0, 1fr) auto; row-gap: 0.55rem; }
+  .cue__name { grid-column: 1 / -1; order: 1; font-size: var(--t-12); overflow-wrap: anywhere; }
+  .cue__n { order: 2; text-align: left; }
+  .cue__sur { order: 2; flex-direction: row; gap: 0.65rem; align-items: baseline; }
+  .cue__track { grid-column: 1 / -1; order: 3; }
+  .cue__split { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 46rem) {

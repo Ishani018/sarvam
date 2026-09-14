@@ -32,11 +32,22 @@ export function lossOp(c: ConditionDef) {
   return c.chain.find((o) => o.op === "packet_loss");
 }
 
+/** The rate below which a resample is the damage rather than a formality.
+ *  Telephony is 8 kHz; anything at or above this is the corpus's own rate or
+ *  better, and resampling to it takes nothing away. */
+const WIDEBAND_HZ = 16000;
+
 export function kindOf(c: ConditionDef): Kind {
   const loss = lossOp(c);
   if (loss) return loss.model === "gilbert" ? "bursty" : "scattered";
   if (c.chain.some((o) => o.op === "noise")) return "noise";
-  if (c.chain.some((o) => o.op === "codec" || o.op === "resample")) return "codec";
+  if (c.chain.some((o) => o.op === "codec")) return "codec";
+  // A resample is only damage if it narrows the band. The baseline condition
+  // is declared as `resample: 16000` -- the corpus's own rate -- and reading
+  // that as a codec put "clean" under "Bandwidth & codecs" everywhere the
+  // page groups conditions.
+  if (c.chain.some((o) => o.op === "resample"
+        && Number(o.rate ?? WIDEBAND_HZ) < WIDEBAND_HZ)) return "codec";
   return "clean";
 }
 

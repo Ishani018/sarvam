@@ -155,3 +155,62 @@ def test_equidistant_cues_emit_both_types():
     text = "आपके खाते में 76,74,000 की शेष राशि है।"
     types = {e.type for e in extract(text, "hi-IN")}
     assert "currency" in types
+
+
+# --------------------------------------------------------------------------
+# Amounts read out one digit at a time
+#
+# Money is the only scored type with no characteristic length, so the shape
+# fallback that rescues account numbers, OTPs and PINs from a destroyed cue
+# cannot rescue an amount. Under `transcribe` this was invisible: the model
+# rewrote "एक चार शून्य शून्य रुपये" to "₹1400", and ₹ is itself a cue.
+# `verbatim` returns the words as spoken and the hole appeared -- 13 of 14
+# extractor errors in the first verbatim run were this.
+# --------------------------------------------------------------------------
+
+
+def test_amount_spoken_digit_by_digit_is_currency():
+    text = "आपके खाते में एक चार शून्य शून्य रुपये जमा हुए हैं"
+    assert "INR:1400.00" in find(text, "hi-IN", "currency")
+
+
+def test_a_digit_read_amount_needs_the_cue_to_be_money():
+    """Not a limitation to be fixed later: deliberate. A run of digits with no
+    word saying it is money is not identifiable as money -- not by this
+    extractor and not by anything else parsing the transcript. Emitting one
+    anyway would hide exactly the failure the cue report measures."""
+    text = "आपके में एक चार शून्य शून्य हुए हैं"
+    assert find(text, "hi-IN", "currency") == set()
+    assert "1400" in find(text, "hi-IN", "otp")
+
+
+def test_a_nearer_digit_cue_still_wins_over_a_currency_one():
+    text = "ओटीपी एक चार शून्य शून्य है"
+    assert find(text, "hi-IN", "otp") == {"1400"}
+    assert find(text, "hi-IN", "currency") == set()
+
+
+def test_a_leading_zero_is_not_an_amount():
+    """The one shape money does have. This keeps account numbers and OTPs that
+    happen to sit beside a financial word from being read as rupees."""
+    text = "खाता संख्या शून्य नौ आठ सात छह पाँच चार तीन दो एक में जमा"
+    assert find(text, "hi-IN", "currency") == set()
+    assert "0987654321" in find(text, "hi-IN", "account_number")
+
+
+def test_a_single_zero_is_still_an_amount():
+    assert "INR:0.00" in find("शेष राशि शून्य रुपये है", "hi-IN", "currency")
+
+
+def test_magnitude_readings_are_unaffected():
+    """The path that already worked has to keep working, cue or no cue: a
+    scale word is its own type marker."""
+    assert "INR:1400.00" in find("खाते में चौदह सौ", "hi-IN", "currency")
+    assert "INR:797.00" in find("सात सौ सत्तानवे रुपये", "hi-IN", "currency")
+
+
+def test_a_damaged_number_expression_still_emits_nothing():
+    """Strict parsing is not weakened by any of this: an expression with a
+    word missing from the middle is still refused rather than guessed."""
+    assert find("सौ सत्तानवे रुपये", "hi-IN", "currency") == set()
+    assert find("पाँच लाख हज़ार रुपये", "hi-IN", "currency") == set()
