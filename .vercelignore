@@ -22,3 +22,6 @@ results/
 site/scripts/
 site/content/
 site/node_modules/
+
+# site/vercel.json is read only when the project's Root Directory is `site`,
+# in which case this file is not consulted at all. Harmless either way.
