@@ -4,6 +4,10 @@ export type Rendering = "digits" | "words" | "absent" | "n/a";
 
 export interface MatrixCell {
   model: string;
+  /** Which ASR mode this cell was measured in. In the key, not a caller-side
+   *  filter: transcribe and verbatim are the same audio read two ways and a
+   *  cell averaging them is a number about neither. */
+  mode: string;
   condition: string;
   entityType: string;
   hits: number;
@@ -12,7 +16,9 @@ export interface MatrixCell {
   lowN: boolean;
 }
 
-export interface WerRow { model: string; condition: string; wer: number; n: number; }
+export interface WerRow {
+  model: string; mode: string; condition: string; wer: number; n: number;
+}
 
 export interface RenderingModel {
   model: string;
@@ -25,6 +31,10 @@ export interface RenderingModel {
 
 export interface RenderingRow {
   utteranceId: string;
+  /** In the key rather than another entry in `models`: the row's subject is
+   *  whether the recogniser rewrote the number, and `verbatim` by definition
+   *  never does. */
+  mode: string;
   condition: string;
   entityType: string;
   expected: string;
@@ -72,10 +82,28 @@ export interface GintiData {
   modes: string[];
   conditions: ConditionDef[];
   entityTypes: string[];
+  /** The ASR mode every single-number figure on the page describes. Tables
+   *  carry every mode and the site switches between them; a headline cannot. */
+  primaryMode: string;
   summary: {
     utterances: number; rows: number; entities: number; hits: number;
     hitRate: number | null; conditions: number; models: number;
+    /** Rows across every mode, where `rows` counts the primary mode alone. */
+    allModeRows: number;
   };
+  /** Modes side by side, measured over the cells every mode covers. Verbatim
+   *  is usually run on a subset, so comparing each mode's own average would
+   *  put a hard subset against an easy one and call it a mode effect. */
+  modeCompare: Array<{
+    mode: string;
+    isPrimary: boolean;
+    rows: number; entities: number; hits: number;
+    hitRate: number | null; wer: number | null;
+    byType: Record<string, { hits: number; total: number }>;
+    coverage: {
+      sharedCells: number; ownCells: number; conditions: string[];
+    };
+  }>;
   matrix: MatrixCell[];
   lowNThreshold: number;
   werSpread: {
@@ -102,7 +130,7 @@ export interface GintiData {
     werByModel: Array<{ model: string; wer: number; n: number }>;
     werConditionMin: number | null; werConditionMax: number | null;
     conditions: number; declaredConditions: number; models: number;
-    modes: string[]; languages: string[]; utterances: number;
+    modes: string[]; mode: string; languages: string[]; utterances: number;
   };
   audioBundle: { files: number; bytes: number };
   /** Cue-survival figures from `tee cues --json`, keyed by ASR mode. Null when

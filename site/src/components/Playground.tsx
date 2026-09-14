@@ -213,11 +213,27 @@ function More({ label, open, onToggle, children }: {
  * disclosure away -- present for a reader who reaches, absent for one who has
  * not yet asked.
  */
-export function Playground({ listen, conditions }: {
+export function Playground({ listen: allListen, conditions, mode }: {
   listen: ListenEntry[]; conditions: ConditionDef[];
+  /** Which ASR mode's transcripts to show. Every result carries its mode, and
+   *  with two modes run the same (utterance, condition, model) has two
+   *  transcripts; picking whichever came first in the array would show one of
+   *  them and label it with neither. */
+  mode: string;
 }) {
   const byName = useMemo(
     () => new Map(conditions.map((c) => [c.name, c])), [conditions]);
+
+  const listen = useMemo(
+    () => allListen.map((u) => ({
+      ...u,
+      conditions: u.conditions.map((c) => ({
+        ...c,
+        results: c.results.filter((r) => (r.mode ?? "-") === mode),
+      })),
+    })),
+    [allListen, mode],
+  );
 
   const models = useMemo(
     () => [...new Set(listen.flatMap((u) =>

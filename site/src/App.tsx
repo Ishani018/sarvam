@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Gate } from "./Gate";
 import { Header, type SectionDef } from "./components/Header";
 import { Hero } from "./components/Hero";
@@ -10,6 +11,8 @@ import { pickHeroExample } from "./conditionKind";
 import { prettyValue } from "./entityDiff";
 import { WhatWasUsed } from "./components/WhatWasUsed";
 import { CueSurvival } from "./components/CueSurvival";
+import { ModeCompare } from "./components/ModeCompare";
+import { ModeSwitch } from "./components/ModeSwitch";
 import { ConditionLadder, ContrastBars, DisagreementChart } from "./components/Charts";
 import { Detail, Section, Subhead } from "./components/Shell";
 import { Reveal } from "./components/Reveal";
@@ -161,9 +164,25 @@ export function App() {
   const stats = data.renderingStats;
   const h = data.headline;
   const pair = data.lossPairs[0];
+
+  // Which mode the results tables show. The data carries every mode with mode
+  // in each aggregation key; this picks the slice to render, defaulting to the
+  // API's own default. Verbatim is a comparison a reader can ask for, not a
+  // second set of rows averaged into the first -- and not something dropped at
+  // load, since the verbatim/transcribe gap is one of the results.
+  const modesRun = data.modeCompare.map((m) => m.mode);
+  const [mode, setMode] = useState(data.primaryMode);
+  const matrix = data.matrix.filter((m) => m.mode === mode);
+  const wer = data.wer.filter((w) => w.mode === mode);
+  const rendering = data.rendering.filter((r) => r.mode === mode);
+  // Sections outside Results are not mode-switchable: they are about the
+  // phone line and the corpus, and the page's single numbers are all the
+  // primary mode's.
+  const primaryMatrix = data.matrix.filter((m) => m.mode === data.primaryMode);
   // The diagram's first step shows a real value from the run rather than one
   // typed into the component, so it cannot drift from the corpus.
-  const heroEx = pickHeroExample(data.listen, data.conditions);
+  const heroEx = pickHeroExample(data.listen, data.conditions,
+                                 data.primaryMode);
   const heroValue = heroEx ? prettyValue(heroEx.expected) : null;
 
   return (
@@ -195,12 +214,13 @@ export function App() {
 
       <Section id="listen" no="03" title="Hear it break" wide
                summary="One sentence, read aloud. Put it through a phone line and switch between the two takes on the same playhead.">
-        <Playground listen={data.listen} conditions={data.conditions} />
+        <Playground listen={data.listen} conditions={data.conditions}
+                    mode={data.primaryMode} />
       </Section>
 
       <Section id="degradation" no="04" title="How the degradation works" tone="warm" wide
                summary={md("degradation").summary}>
-        <ConditionLadder conditions={data.conditions} matrix={data.matrix} />
+        <ConditionLadder conditions={data.conditions} matrix={primaryMatrix} />
         <Detail>
           <Markdown source={md("degradation").body} />
           <Conditions conditions={data.conditions} notes={CONDITION_NOTES} />
@@ -274,9 +294,21 @@ export function App() {
           </Reveal>
         )}
 
+        {modesRun.length > 1 && (
+          <>
+            <Subhead note="Byte-identical audio, transcribed twice. The gap between them is what the recogniser's number normalisation is doing.">
+              The same audio read two ways
+            </Subhead>
+            <ModeCompare data={data} />
+          </>
+        )}
+
+        <ModeSwitch modes={modesRun} value={mode} onChange={setMode}
+                    primary={data.primaryMode} />
+
         <Reveal as="figure" className="bleedfig">
           <DisagreementChart
-            matrix={data.matrix} wer={data.wer} conditions={data.conditions}
+            matrix={matrix} wer={wer} conditions={data.conditions}
           />
         </Reveal>
 
@@ -284,7 +316,7 @@ export function App() {
           Entity hit rate by type and condition
         </Subhead>
         <ResultsMatrix
-          matrix={data.matrix}
+          matrix={matrix}
           conditions={data.conditions}
           entityTypes={data.entityTypes}
           models={data.models}
@@ -321,7 +353,7 @@ export function App() {
           </p>
         </Reveal>
         <RenderingTable
-          rendering={data.rendering} wer={data.wer} models={data.models}
+          rendering={rendering} wer={wer} models={data.models}
         />
 
         {data.cues && (

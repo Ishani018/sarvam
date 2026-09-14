@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T04:58:18.344Z",
+  "generatedAt": "2026-09-14T10:40:19.525Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
@@ -1540,6 +1540,7 @@
     "otp",
     "pin_code"
   ],
+  "primaryMode": "transcribe",
   "summary": {
     "utterances": 40,
     "rows": 800,
@@ -1547,11 +1548,13 @@
     "hits": 1087,
     "hitRate": 0.9535087719298245,
     "conditions": 10,
-    "models": 2
+    "models": 2,
+    "allModeRows": 800
   },
   "matrix": [
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "hits": 12,
@@ -1561,6 +1564,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "hits": 12,
@@ -1570,6 +1574,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "hits": 12,
@@ -1579,6 +1584,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "hits": 12,
@@ -1588,6 +1594,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "hits": 14,
@@ -1597,6 +1604,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "hits": 14,
@@ -1606,6 +1614,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "hits": 14,
@@ -1615,6 +1624,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "hits": 14,
@@ -1624,6 +1634,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "hits": 6,
@@ -1633,6 +1644,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "hits": 6,
@@ -1642,6 +1654,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "hits": 6,
@@ -1651,6 +1664,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "hits": 6,
@@ -1660,6 +1674,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "hits": 22,
@@ -1669,6 +1684,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "hits": 22,
@@ -1678,6 +1694,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "hits": 22,
@@ -1687,6 +1704,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "hits": 22,
@@ -1696,6 +1714,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "hits": 12,
@@ -1705,6 +1724,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "hits": 12,
@@ -1714,6 +1734,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "hits": 12,
@@ -1723,6 +1744,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "hits": 12,
@@ -1732,6 +1754,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "hits": 14,
@@ -1741,6 +1764,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "hits": 14,
@@ -1750,6 +1774,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "hits": 14,
@@ -1759,6 +1784,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "hits": 14,
@@ -1768,6 +1794,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "hits": 6,
@@ -1777,6 +1804,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "hits": 6,
@@ -1786,6 +1814,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "hits": 6,
@@ -1795,6 +1824,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "hits": 6,
@@ -1804,6 +1834,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "hits": 22,
@@ -1813,6 +1844,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "hits": 22,
@@ -1822,6 +1854,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "hits": 22,
@@ -1831,6 +1864,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "hits": 22,
@@ -1840,6 +1874,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "date",
       "hits": 3,
@@ -1849,6 +1884,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "date",
       "hits": 3,
@@ -1858,6 +1894,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "date",
       "hits": 3,
@@ -1867,6 +1904,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "date",
       "hits": 3,
@@ -1876,6 +1914,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "date",
       "hits": 3,
@@ -1885,6 +1924,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "date",
       "hits": 3,
@@ -1894,6 +1934,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "date",
       "hits": 3,
@@ -1903,6 +1944,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "date",
       "hits": 3,
@@ -1912,6 +1954,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "hits": 11,
@@ -1921,6 +1964,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "hits": 11,
@@ -1930,6 +1974,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "hits": 12,
@@ -1939,6 +1984,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "hits": 12,
@@ -1948,6 +1994,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "hits": 8,
@@ -1957,6 +2004,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "hits": 8,
@@ -1966,6 +2014,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "hits": 11,
@@ -1975,6 +2024,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "hits": 11,
@@ -1984,6 +2034,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "hits": 11,
@@ -1993,6 +2044,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "hits": 11,
@@ -2002,6 +2054,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "hits": 12,
@@ -2011,6 +2064,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "hits": 12,
@@ -2020,6 +2074,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "hits": 11,
@@ -2029,6 +2084,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "hits": 11,
@@ -2038,6 +2094,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "hits": 14,
@@ -2047,6 +2104,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "hits": 14,
@@ -2056,6 +2114,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "hits": 8,
@@ -2065,6 +2124,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "hits": 9,
@@ -2074,6 +2134,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "hits": 12,
@@ -2083,6 +2144,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "hits": 12,
@@ -2092,6 +2154,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "hits": 14,
@@ -2101,6 +2164,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "hits": 14,
@@ -2110,6 +2174,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "hits": 14,
@@ -2119,6 +2184,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "hits": 14,
@@ -2128,6 +2194,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "hits": 5,
@@ -2137,6 +2204,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "hits": 6,
@@ -2146,6 +2214,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "hits": 6,
@@ -2155,6 +2224,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "hits": 6,
@@ -2164,6 +2234,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "hits": 4,
@@ -2173,6 +2244,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "hits": 4,
@@ -2182,6 +2254,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "hits": 3,
@@ -2191,6 +2264,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "hits": 4,
@@ -2200,6 +2274,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "hits": 6,
@@ -2209,6 +2284,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "hits": 6,
@@ -2218,6 +2294,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "hits": 6,
@@ -2227,6 +2304,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "hits": 6,
@@ -2236,6 +2314,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "hits": 21,
@@ -2245,6 +2324,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "hits": 21,
@@ -2254,6 +2334,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "hits": 21,
@@ -2263,6 +2344,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "hits": 22,
@@ -2272,6 +2354,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "hits": 20,
@@ -2281,6 +2364,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "hits": 21,
@@ -2290,6 +2374,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "hits": 21,
@@ -2299,6 +2384,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "hits": 22,
@@ -2308,6 +2394,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "hits": 22,
@@ -2317,6 +2404,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "hits": 22,
@@ -2326,6 +2414,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "hits": 22,
@@ -2335,6 +2424,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "hits": 22,
@@ -2344,6 +2434,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "date",
       "hits": 3,
@@ -2353,6 +2444,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "date",
       "hits": 3,
@@ -2362,6 +2454,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "date",
       "hits": 3,
@@ -2371,6 +2464,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "date",
       "hits": 3,
@@ -2380,6 +2474,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "date",
       "hits": 3,
@@ -2389,6 +2484,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "date",
       "hits": 3,
@@ -2398,6 +2494,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "date",
       "hits": 2,
@@ -2407,6 +2504,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "date",
       "hits": 3,
@@ -2416,6 +2514,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "date",
       "hits": 3,
@@ -2425,6 +2524,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "date",
       "hits": 3,
@@ -2434,6 +2534,7 @@
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "date",
       "hits": 3,
@@ -2443,6 +2544,7 @@
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "date",
       "hits": 3,
@@ -2455,120 +2557,140 @@
   "wer": [
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "clean",
       "wer": 0.6763336820184647,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "clean",
       "wer": 0.45415484636136805,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "wer": 0.7111212902435728,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "wer": 0.4448264733454951,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "narrowband",
       "wer": 0.6964755193478019,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "narrowband",
       "wer": 0.44836814001216174,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "wer": 0.7166452801425629,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "wer": 0.4424455209645427,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "wer": 0.7398228664451493,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "wer": 0.45913383265285435,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "wer": 0.6257226610949438,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "wer": 0.4440080209645426,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "wer": 0.7030800814523642,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "wer": 0.46489483553885724,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "wer": 0.7280324624047452,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "wer": 0.45716774318676484,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "wer": 0.7486776574874403,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "wer": 0.4637178181118397,
       "n": 40
     },
     {
       "model": "saaras:v3",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "wer": 0.663600408347691,
       "n": 40
     },
     {
       "model": "saaras:v4",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "wer": 0.43435434131086303,
       "n": 40
@@ -2577,6 +2699,7 @@
   "rendering": [
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "2184",
@@ -2603,6 +2726,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "2184",
@@ -2629,6 +2753,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "2184",
@@ -2655,6 +2780,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "2184",
@@ -2681,6 +2807,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "2184",
@@ -2707,6 +2834,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "2184",
@@ -2733,6 +2861,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "2184",
@@ -2759,6 +2888,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "2184",
@@ -2785,6 +2915,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "2184",
@@ -2811,6 +2942,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00000",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "2184",
@@ -2837,6 +2969,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "5584",
@@ -2863,6 +2996,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "5584",
@@ -2889,6 +3023,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "5584",
@@ -2915,6 +3050,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "5584",
@@ -2941,6 +3077,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "5584",
@@ -2967,6 +3104,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "5584",
@@ -2993,6 +3131,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "5584",
@@ -3019,6 +3158,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "5584",
@@ -3045,6 +3185,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "5584",
@@ -3071,6 +3212,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00001",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "5584",
@@ -3097,6 +3239,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3123,6 +3266,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3149,6 +3293,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3175,6 +3320,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3201,6 +3347,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3227,6 +3374,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3253,6 +3401,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3279,6 +3428,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3305,6 +3455,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3331,6 +3482,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00002",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "762600781019989",
@@ -3357,6 +3509,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3383,6 +3536,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3409,6 +3563,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3435,6 +3590,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3461,6 +3617,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3487,6 +3644,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3513,6 +3671,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3539,6 +3698,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3565,6 +3725,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3591,6 +3752,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00003",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "expected": "375022",
@@ -3617,6 +3779,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3643,6 +3806,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3669,6 +3833,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3695,6 +3860,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3721,6 +3887,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3747,6 +3914,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3773,6 +3941,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3799,6 +3968,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3825,6 +3995,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3851,6 +4022,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00004",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:7674000.00",
@@ -3877,6 +4049,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -3903,6 +4076,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -3929,6 +4103,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -3955,6 +4130,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -3981,6 +4157,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -4007,6 +4184,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -4033,6 +4211,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -4059,6 +4238,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -4085,6 +4265,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -4111,6 +4292,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00005",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:2800000.00",
@@ -4137,6 +4319,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4163,6 +4346,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4189,6 +4373,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4215,6 +4400,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4241,6 +4427,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4267,6 +4454,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4293,6 +4481,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4319,6 +4508,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4345,6 +4535,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4371,6 +4562,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4397,6 +4589,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4423,6 +4616,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4449,6 +4643,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4475,6 +4670,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4501,6 +4697,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4527,6 +4724,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4553,6 +4751,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4579,6 +4778,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4605,6 +4805,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "65335720185281",
@@ -4631,6 +4832,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00006",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:500000.00",
@@ -4657,6 +4859,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -4683,6 +4886,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -4709,6 +4913,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -4735,6 +4940,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -4761,6 +4967,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -4787,6 +4994,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -4813,6 +5021,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -4839,6 +5048,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -4865,6 +5075,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -4891,6 +5102,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -4917,6 +5129,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -4943,6 +5156,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -4969,6 +5183,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -4995,6 +5210,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -5021,6 +5237,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -5047,6 +5264,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -5073,6 +5291,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -5099,6 +5318,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -5125,6 +5345,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "1610828266457853",
@@ -5151,6 +5372,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00007",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:797.00",
@@ -5177,6 +5399,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5203,6 +5426,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5229,6 +5453,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5255,6 +5480,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5281,6 +5507,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5307,6 +5534,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5333,6 +5561,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5359,6 +5588,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5385,6 +5615,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5411,6 +5642,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5437,6 +5669,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5463,6 +5696,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5489,6 +5723,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5515,6 +5750,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5541,6 +5777,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5567,6 +5804,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5593,6 +5831,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5619,6 +5858,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5645,6 +5885,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "date",
       "expected": "2026-11-17",
@@ -5671,6 +5912,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00008",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:80000000.00",
@@ -5697,6 +5939,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "expected": "797065",
@@ -5723,6 +5966,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -5749,6 +5993,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "expected": "797065",
@@ -5775,6 +6020,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -5801,6 +6047,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "expected": "797065",
@@ -5827,6 +6074,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -5853,6 +6101,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "expected": "797065",
@@ -5879,6 +6128,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -5905,6 +6155,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "expected": "797065",
@@ -5931,6 +6182,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -5957,6 +6209,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "expected": "797065",
@@ -5983,6 +6236,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -6009,6 +6263,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "expected": "797065",
@@ -6035,6 +6290,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -6061,6 +6317,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "expected": "797065",
@@ -6087,6 +6344,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -6113,6 +6371,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "expected": "797065",
@@ -6139,6 +6398,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -6165,6 +6425,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "expected": "797065",
@@ -6191,6 +6452,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00009",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "231305017820793",
@@ -6217,6 +6479,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6243,6 +6506,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "6694",
@@ -6269,6 +6533,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6295,6 +6560,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "6694",
@@ -6321,6 +6587,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6347,6 +6614,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "6694",
@@ -6373,6 +6641,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6399,6 +6668,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "6694",
@@ -6425,6 +6695,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6451,6 +6722,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "6694",
@@ -6477,6 +6749,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6503,6 +6776,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "6694",
@@ -6529,6 +6803,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6555,6 +6830,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "6694",
@@ -6581,6 +6857,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6607,6 +6884,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "6694",
@@ -6633,6 +6911,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6659,6 +6938,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "6694",
@@ -6685,6 +6965,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:175000.00",
@@ -6711,6 +6992,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00010",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "6694",
@@ -6737,6 +7019,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "549463",
@@ -6763,6 +7046,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "549463",
@@ -6789,6 +7073,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "549463",
@@ -6815,6 +7100,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "549463",
@@ -6841,6 +7127,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "549463",
@@ -6867,6 +7154,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "549463",
@@ -6893,6 +7181,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "549463",
@@ -6919,6 +7208,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "549463",
@@ -6945,6 +7235,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "549463",
@@ -6971,6 +7262,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00011",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "549463",
@@ -6997,6 +7289,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7023,6 +7316,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7049,6 +7343,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7075,6 +7370,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7101,6 +7397,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7127,6 +7424,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7153,6 +7451,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7179,6 +7478,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7205,6 +7505,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7231,6 +7532,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7257,6 +7559,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7283,6 +7586,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7309,6 +7613,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7335,6 +7640,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7361,6 +7667,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7387,6 +7694,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7413,6 +7721,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7439,6 +7748,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7465,6 +7775,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "787360285383",
@@ -7491,6 +7802,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00012",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:469000.00",
@@ -7517,6 +7829,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7543,6 +7856,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7569,6 +7883,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7595,6 +7910,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7621,6 +7937,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7647,6 +7964,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7673,6 +7991,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7699,6 +8018,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7725,6 +8045,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7751,6 +8072,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00013",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:16600000.00",
@@ -7777,6 +8099,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "406828",
@@ -7803,6 +8126,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "406828",
@@ -7829,6 +8153,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "406828",
@@ -7855,6 +8180,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "406828",
@@ -7881,6 +8207,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "406828",
@@ -7907,6 +8234,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "406828",
@@ -7933,6 +8261,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "406828",
@@ -7959,6 +8288,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "406828",
@@ -7985,6 +8315,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "406828",
@@ -8011,6 +8342,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00014",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "406828",
@@ -8037,6 +8369,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "730606",
@@ -8063,6 +8396,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "730606",
@@ -8089,6 +8423,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "730606",
@@ -8115,6 +8450,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "730606",
@@ -8141,6 +8477,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "730606",
@@ -8167,6 +8504,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "730606",
@@ -8193,6 +8531,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "730606",
@@ -8219,6 +8558,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "730606",
@@ -8245,6 +8585,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "730606",
@@ -8271,6 +8612,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00015",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "730606",
@@ -8297,6 +8639,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8323,6 +8666,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8349,6 +8693,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8375,6 +8720,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8401,6 +8747,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8427,6 +8774,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8453,6 +8801,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8479,6 +8828,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8505,6 +8855,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8531,6 +8882,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00016",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "80735078267",
@@ -8557,6 +8909,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8583,6 +8936,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8609,6 +8963,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8635,6 +8990,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8661,6 +9017,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8687,6 +9044,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8713,6 +9071,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8739,6 +9098,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8765,6 +9125,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8791,6 +9152,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00017",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "expected": "816005",
@@ -8817,6 +9179,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -8843,6 +9206,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -8869,6 +9233,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -8895,6 +9260,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -8921,6 +9287,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -8947,6 +9314,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -8973,6 +9341,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -8999,6 +9368,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9025,6 +9395,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9051,6 +9422,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00018",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9077,6 +9449,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9103,6 +9476,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9129,6 +9503,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9155,6 +9530,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9181,6 +9557,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9207,6 +9584,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9233,6 +9611,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9259,6 +9638,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9285,6 +9665,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9311,6 +9692,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00019",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:70000000.00",
@@ -9337,6 +9719,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9363,6 +9746,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9389,6 +9773,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9415,6 +9800,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9441,6 +9827,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9467,6 +9854,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9493,6 +9881,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9519,6 +9908,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9545,6 +9935,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9571,6 +9962,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9597,6 +9989,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9623,6 +10016,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9649,6 +10043,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9675,6 +10070,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9701,6 +10097,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9727,6 +10124,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9753,6 +10151,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9779,6 +10178,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9805,6 +10205,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "6278500115396",
@@ -9831,6 +10232,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00020",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:156200000.00",
@@ -9857,6 +10259,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -9883,6 +10286,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -9909,6 +10313,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -9935,6 +10340,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -9961,6 +10367,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -9987,6 +10394,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10013,6 +10421,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -10039,6 +10448,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10065,6 +10475,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -10091,6 +10502,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10117,6 +10529,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -10143,6 +10556,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10169,6 +10583,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -10195,6 +10610,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10221,6 +10637,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -10247,6 +10664,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10273,6 +10691,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -10299,6 +10718,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10325,6 +10745,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "49246354964",
@@ -10351,6 +10772,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00021",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:9500.00",
@@ -10377,6 +10799,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10403,6 +10826,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10429,6 +10853,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10455,6 +10880,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10481,6 +10907,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10507,6 +10934,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10533,6 +10961,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10559,6 +10988,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10585,6 +11015,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10611,6 +11042,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10637,6 +11069,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10663,6 +11096,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10689,6 +11123,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10715,6 +11150,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10741,6 +11177,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10767,6 +11204,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10793,6 +11231,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10819,6 +11258,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10845,6 +11285,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "date",
       "expected": "2026-12-10",
@@ -10871,6 +11312,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00022",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:7508000.00",
@@ -10897,6 +11339,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "expected": "838681",
@@ -10923,6 +11366,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -10949,6 +11393,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "expected": "838681",
@@ -10975,6 +11420,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11001,6 +11447,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11027,6 +11474,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11053,6 +11501,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11079,6 +11528,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11105,6 +11555,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11131,6 +11582,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11157,6 +11609,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11183,6 +11636,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11209,6 +11663,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11235,6 +11690,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11261,6 +11717,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11287,6 +11744,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11313,6 +11771,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11339,6 +11798,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11365,6 +11825,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "expected": "838681",
@@ -11391,6 +11852,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00023",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "445867855711568",
@@ -11417,6 +11879,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11443,6 +11906,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "7927",
@@ -11469,6 +11933,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11495,6 +11960,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "7927",
@@ -11521,6 +11987,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11547,6 +12014,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "7927",
@@ -11573,6 +12041,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11599,6 +12068,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "7927",
@@ -11625,6 +12095,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11651,6 +12122,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "7927",
@@ -11677,6 +12149,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11703,6 +12176,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "7927",
@@ -11729,6 +12203,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11755,6 +12230,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "7927",
@@ -11781,6 +12257,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11807,6 +12284,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "7927",
@@ -11833,6 +12311,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11859,6 +12338,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "7927",
@@ -11885,6 +12365,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:6300000.00",
@@ -11911,6 +12392,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00024",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "7927",
@@ -11937,6 +12419,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "5611",
@@ -11963,6 +12446,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "5611",
@@ -11989,6 +12473,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "5611",
@@ -12015,6 +12500,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "5611",
@@ -12041,6 +12527,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "5611",
@@ -12067,6 +12554,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "5611",
@@ -12093,6 +12581,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "5611",
@@ -12119,6 +12608,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "5611",
@@ -12145,6 +12635,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "5611",
@@ -12171,6 +12662,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00025",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "5611",
@@ -12197,6 +12689,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12223,6 +12716,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12249,6 +12743,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12275,6 +12770,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12301,6 +12797,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12327,6 +12824,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12353,6 +12851,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12379,6 +12878,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12405,6 +12905,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12431,6 +12932,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12457,6 +12959,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12483,6 +12986,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12509,6 +13013,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12535,6 +13040,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12561,6 +13067,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12587,6 +13094,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12613,6 +13121,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12639,6 +13148,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12665,6 +13175,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "18340170315790",
@@ -12691,6 +13202,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00026",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:566000.00",
@@ -12717,6 +13229,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12743,6 +13256,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12769,6 +13283,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12795,6 +13310,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12821,6 +13337,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12847,6 +13364,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12873,6 +13391,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12899,6 +13418,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12925,6 +13445,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12951,6 +13472,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00027",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:99000.00",
@@ -12977,6 +13499,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "5693",
@@ -13003,6 +13526,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "5693",
@@ -13029,6 +13553,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "5693",
@@ -13055,6 +13580,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "5693",
@@ -13081,6 +13607,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "5693",
@@ -13107,6 +13634,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "5693",
@@ -13133,6 +13661,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "5693",
@@ -13159,6 +13688,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "5693",
@@ -13185,6 +13715,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "5693",
@@ -13211,6 +13742,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00028",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "5693",
@@ -13237,6 +13769,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "2078",
@@ -13263,6 +13796,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "2078",
@@ -13289,6 +13823,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "2078",
@@ -13315,6 +13850,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "2078",
@@ -13341,6 +13877,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "2078",
@@ -13367,6 +13904,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "2078",
@@ -13393,6 +13931,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "2078",
@@ -13419,6 +13958,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "2078",
@@ -13445,6 +13985,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "2078",
@@ -13471,6 +14012,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00029",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "2078",
@@ -13497,6 +14039,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13523,6 +14066,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13549,6 +14093,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13575,6 +14120,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13601,6 +14147,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13627,6 +14174,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13653,6 +14201,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13679,6 +14228,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13705,6 +14255,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13731,6 +14282,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00030",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "8673293032597314",
@@ -13757,6 +14309,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13783,6 +14336,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13809,6 +14363,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13835,6 +14390,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13861,6 +14417,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13887,6 +14444,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13913,6 +14471,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13939,6 +14498,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13965,6 +14525,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "expected": "504814",
@@ -13991,6 +14552,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00031",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "expected": "504814",
@@ -14017,6 +14579,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14043,6 +14606,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14069,6 +14633,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14095,6 +14660,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14121,6 +14687,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14147,6 +14714,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14173,6 +14741,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14199,6 +14768,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14225,6 +14795,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14251,6 +14822,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00032",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:130000000.00",
@@ -14277,6 +14849,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14303,6 +14876,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14329,6 +14903,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14355,6 +14930,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14381,6 +14957,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14407,6 +14984,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14433,6 +15011,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14459,6 +15038,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14485,6 +15065,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14511,6 +15092,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00033",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:446.00",
@@ -14537,6 +15119,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14563,6 +15146,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14589,6 +15173,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14615,6 +15200,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14641,6 +15227,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14667,6 +15254,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14693,6 +15281,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14719,6 +15308,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14745,6 +15335,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14771,6 +15362,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14797,6 +15389,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14823,6 +15416,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14849,6 +15443,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14875,6 +15470,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14901,6 +15497,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14927,6 +15524,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -14953,6 +15551,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -14979,6 +15578,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -15005,6 +15605,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "3116318357677",
@@ -15031,6 +15632,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00034",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:157500000.00",
@@ -15057,6 +15659,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15083,6 +15686,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15109,6 +15713,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15135,6 +15740,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15161,6 +15767,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15187,6 +15794,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15213,6 +15821,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15239,6 +15848,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15265,6 +15875,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15291,6 +15902,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15317,6 +15929,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15343,6 +15956,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15369,6 +15983,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15395,6 +16010,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15421,6 +16037,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15447,6 +16064,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15473,6 +16091,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15499,6 +16118,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15525,6 +16145,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "154425187016739",
@@ -15551,6 +16172,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00035",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:100000.00",
@@ -15577,6 +16199,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15603,6 +16226,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15629,6 +16253,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15655,6 +16280,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15681,6 +16307,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15707,6 +16334,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15733,6 +16361,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15759,6 +16388,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15785,6 +16415,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15811,6 +16442,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15837,6 +16469,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15863,6 +16496,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15889,6 +16523,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15915,6 +16550,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15941,6 +16577,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -15967,6 +16604,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -15993,6 +16631,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -16019,6 +16658,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -16045,6 +16685,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "date",
       "expected": "2026-05-04",
@@ -16071,6 +16712,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00036",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:7492000.00",
@@ -16097,6 +16739,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16123,6 +16766,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16149,6 +16793,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16175,6 +16820,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16201,6 +16847,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16227,6 +16874,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16253,6 +16901,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16279,6 +16928,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16305,6 +16955,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16331,6 +16982,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16357,6 +17009,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16383,6 +17036,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16409,6 +17063,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16435,6 +17090,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16461,6 +17117,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16487,6 +17144,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16513,6 +17171,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16539,6 +17198,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16565,6 +17225,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "pin_code",
       "expected": "394603",
@@ -16591,6 +17252,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00037",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "account_number",
       "expected": "908787510183665",
@@ -16617,6 +17279,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -16643,6 +17306,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "466956",
@@ -16669,6 +17333,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -16695,6 +17360,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "466956",
@@ -16721,6 +17387,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -16747,6 +17414,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "466956",
@@ -16773,6 +17441,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -16799,6 +17468,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "466956",
@@ -16825,6 +17495,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -16851,6 +17522,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "466956",
@@ -16877,6 +17549,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -16903,6 +17576,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "466956",
@@ -16929,6 +17603,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -16955,6 +17630,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "466956",
@@ -16981,6 +17657,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -17007,6 +17684,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "466956",
@@ -17033,6 +17711,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -17059,6 +17738,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "466956",
@@ -17085,6 +17765,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "currency",
       "expected": "INR:7836000.00",
@@ -17111,6 +17792,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00038",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "466956",
@@ -17137,6 +17819,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "clean",
       "entityType": "otp",
       "expected": "2695",
@@ -17163,6 +17846,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "g711_ulaw",
       "entityType": "otp",
       "expected": "2695",
@@ -17189,6 +17873,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "g726_16k",
       "entityType": "otp",
       "expected": "2695",
@@ -17215,6 +17900,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "narrowband",
       "entityType": "otp",
       "expected": "2695",
@@ -17241,6 +17927,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "noisy_line_snr5",
       "entityType": "otp",
       "expected": "2695",
@@ -17267,6 +17954,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "packet_loss_10",
       "entityType": "otp",
       "expected": "2695",
@@ -17293,6 +17981,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "packet_loss_5",
       "entityType": "otp",
       "expected": "2695",
@@ -17319,6 +18008,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_10",
       "entityType": "otp",
       "expected": "2695",
@@ -17345,6 +18035,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5",
       "entityType": "otp",
       "expected": "2695",
@@ -17371,6 +18062,7 @@
     },
     {
       "utteranceId": "hi-IN-1337-00039",
+      "mode": "transcribe",
       "condition": "packet_loss_burst_5_repeat",
       "entityType": "otp",
       "expected": "2695",
@@ -28610,11 +29302,61 @@
     "modes": [
       "transcribe"
     ],
+    "mode": "transcribe",
     "languages": [
       "hi-IN"
     ],
     "utterances": 40
   },
+  "modeCompare": [
+    {
+      "mode": "transcribe",
+      "isPrimary": true,
+      "rows": 800,
+      "entities": 1140,
+      "hits": 1087,
+      "hitRate": 0.9535087719298245,
+      "wer": 0.5761291740716992,
+      "byType": {
+        "otp": {
+          "hits": 226,
+          "total": 240
+        },
+        "account_number": {
+          "hits": 259,
+          "total": 280
+        },
+        "pin_code": {
+          "hits": 110,
+          "total": 120
+        },
+        "currency": {
+          "hits": 433,
+          "total": 440
+        },
+        "date": {
+          "hits": 59,
+          "total": 60
+        }
+      },
+      "coverage": {
+        "sharedCells": 800,
+        "ownCells": 800,
+        "conditions": [
+          "clean",
+          "g711_ulaw",
+          "g726_16k",
+          "narrowband",
+          "noisy_line_snr5",
+          "packet_loss_10",
+          "packet_loss_5",
+          "packet_loss_burst_10",
+          "packet_loss_burst_5",
+          "packet_loss_burst_5_repeat"
+        ]
+      }
+    }
+  ],
   "audioBundle": {
     "files": 0,
     "bytes": 0

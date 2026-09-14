@@ -346,11 +346,21 @@ function entitySpans(text, entities) {
   });
 }
 
+/** Hit rate per (model, mode, condition, entity type).
+ *
+ * Mode is in the key, not a filter applied by the caller. `transcribe` and
+ * `verbatim` are the same audio read two ways -- one normalises numbers and
+ * one does not -- so a cell that averages them is a number about neither. The
+ * build used to refuse to run when two modes were present for exactly this
+ * reason; carrying mode through is the fix that refusal was holding the door
+ * open for.
+ */
 function hitRateMatrix(rows) {
   const bucket = new Map();
   for (const r of rows) {
     for (const e of r.entities) {
-      const key = JSON.stringify([r.asr_model ?? "-", r.condition, e.type]);
+      const key = JSON.stringify(
+        [r.asr_model ?? "-", r.asr_mode ?? "-", r.condition, e.type]);
       const cur = bucket.get(key) ?? { hits: 0, total: 0 };
       cur.hits += e.hit ? 1 : 0;
       cur.total += 1;
@@ -358,9 +368,9 @@ function hitRateMatrix(rows) {
     }
   }
   return [...bucket.entries()].map(([key, v]) => {
-    const [model, condition, entityType] = JSON.parse(key);
+    const [model, mode, condition, entityType] = JSON.parse(key);
     return {
-      model, condition, entityType,
+      model, mode, condition, entityType,
       hits: v.hits, total: v.total,
       rate: v.total ? v.hits / v.total : null,
       lowN: v.total < LOW_N,
@@ -371,15 +381,77 @@ function hitRateMatrix(rows) {
 function werAggregate(rows) {
   const bucket = new Map();
   for (const r of rows) {
-    const key = JSON.stringify([r.asr_model ?? "-", r.condition]);
+    const key = JSON.stringify([r.asr_model ?? "-", r.asr_mode ?? "-", r.condition]);
     const cur = bucket.get(key) ?? { sum: 0, n: 0 };
     cur.sum += r.wer;
     cur.n += 1;
     bucket.set(key, cur);
   }
   return [...bucket.entries()].map(([key, v]) => {
-    const [model, condition] = JSON.parse(key);
-    return { model, condition, wer: v.sum / v.n, n: v.n };
+    const [model, mode, condition] = JSON.parse(key);
+    return { model, mode, condition, wer: v.sum / v.n, n: v.n };
+  });
+}
+
+
+/**
+ * Each mode's figures, measured over the cells EVERY mode covers.
+ *
+ * Verbatim is normally run on a subset -- the bursty conditions first, because
+ * that is where the misses are -- so pooling each mode over whatever it happens
+ * to cover compares a hard subset against an easy average and calls the
+ * difference a mode effect. The intersection is the only honest comparison, and
+ * `coverage` reports what each mode actually ran so the narrowing is visible
+ * rather than implied.
+ */
+function sharedModeFigures(rows, modesPresent, primaryMode) {
+  const cellKey = (r) =>
+    [r.utterance_id, r.condition, r.asr_model ?? "-"].join("\u001f");
+  const cellsByMode = new Map();
+  for (const m of modesPresent) {
+    cellsByMode.set(m, new Set(
+      rows.filter((r) => (r.asr_mode ?? "-") === m).map(cellKey)));
+  }
+  let shared = null;
+  for (const set of cellsByMode.values()) {
+    shared = shared === null
+      ? new Set(set) : new Set([...shared].filter((k) => set.has(k)));
+  }
+  shared ??= new Set();
+
+  const figuresFor = (rs) => {
+    const entities = rs.reduce((a, r) => a + r.entities.length, 0);
+    const hits = rs.reduce(
+      (a, r) => a + r.entities.filter((e) => e.hit).length, 0);
+    const wers = rs.map((r) => r.wer);
+    const byType = {};
+    for (const r of rs) {
+      for (const e of r.entities) {
+        const t = (byType[e.type] ??= { hits: 0, total: 0 });
+        t.total += 1;
+        t.hits += e.hit ? 1 : 0;
+      }
+    }
+    return {
+      rows: rs.length, entities, hits,
+      hitRate: entities ? hits / entities : null,
+      wer: wers.length ? wers.reduce((a, b) => a + b, 0) / wers.length : null,
+      byType,
+    };
+  };
+
+  return modesPresent.map((mode) => {
+    const all = rows.filter((r) => (r.asr_mode ?? "-") === mode);
+    return {
+      mode,
+      isPrimary: mode === primaryMode,
+      ...figuresFor(all.filter((r) => shared.has(cellKey(r)))),
+      coverage: {
+        sharedCells: shared.size,
+        ownCells: cellsByMode.get(mode).size,
+        conditions: [...new Set(all.map((r) => r.condition))].sort(),
+      },
+    };
   });
 }
 
@@ -509,16 +581,24 @@ function goldDigits(expected) {
   return v.replace(/\D/g, "");
 }
 
-/** One row per (utterance, condition, model): how the number was written on
- *  each side, and the WER that follows from that choice alone. */
+/** One row per (utterance, condition, entity, mode): how the number was
+ *  written on each side, and the WER that follows from that choice alone.
+ *
+ *  Mode is part of the key rather than another entry in `models`. The row is a
+ *  comparison BETWEEN models, and its whole subject -- whether the recogniser
+ *  rewrote the number -- is a property of the mode: `verbatim` by definition
+ *  never rewrites. Mixing them would put a row's own premise on both sides of
+ *  its comparison. */
 function renderingTable(rows) {
   const byKey = new Map();
   for (const r of rows) {
     for (const e of r.entities) {
-      const key = JSON.stringify([r.utterance_id, r.condition, e.type, e.expected]);
+      const key = JSON.stringify(
+        [r.utterance_id, r.asr_mode ?? "-", r.condition, e.type, e.expected]);
       if (!byKey.has(key)) {
         byKey.set(key, {
           utteranceId: r.utterance_id,
+          mode: r.asr_mode ?? "-",
           condition: r.condition,
           entityType: e.type,
           expected: e.expected,
@@ -540,6 +620,7 @@ function renderingTable(rows) {
   const out = [...byKey.values()];
   for (const row of out) row.models.sort((a, b) => a.model.localeCompare(b.model));
   out.sort((a, b) =>
+    a.mode.localeCompare(b.mode) ||
     a.utteranceId.localeCompare(b.utteranceId) ||
     a.condition.localeCompare(b.condition));
   return out;
@@ -700,20 +781,48 @@ function build() {
     ...(commandsByCondition[c.name] ??
       { commands: [], tools: {}, seed: null, durationS: null }),
   }));
-  // The per-cell aggregations below key on (model, condition, type) and do not
-  // carry mode, so rows from two modes would pool into one number. Dedupe does
-  // include mode, so the rows survive as distinct -- it is only the summing
-  // that is wrong. Refuse rather than publish a matrix that silently averages
-  // transcribe and verbatim together; making the site mode-aware is the fix,
-  // and it is not done yet.
+  // Which mode the page's scalar figures describe.
+  //
+  // `transcribe` is the production default -- it is what a caller integrating
+  // the API gets unless they ask for something else -- so it is what the
+  // headline, the loss pairs and the rendering statistics are computed from.
+  // Verbatim is not filtered out: every per-cell aggregation carries mode and
+  // the site can switch between them, because the verbatim comparison is one
+  // of the results. But a single number on the page has to be a number about
+  // one mode, and this says which.
   const modesPresent = [...new Set(rows.map((r) => r.asr_mode ?? "-"))].sort();
+  const primaryMode = modesPresent.includes("transcribe")
+    ? "transcribe" : modesPresent[0] ?? "-";
+  const primaryRows = rows.filter((r) => (r.asr_mode ?? "-") === primaryMode);
   if (modesPresent.length > 1) {
-    throw new Error(
-      `results carry ${modesPresent.length} ASR modes (${modesPresent.join(", ")}) ` +
-      "and this build pools them into one cell.\n" +
-      "  The matrix, WER and rendering aggregations are not mode-aware yet.\n" +
-      "  Until they are, build from one mode at a time.");
+    console.log(`  modes: ${modesPresent.join(", ")}; headline figures from ` +
+                `${primaryMode} (${primaryRows.length} of ${rows.length} rows)`);
   }
+  if (!primaryRows.length) {
+    throw new Error("no rows for the primary mode; nothing to build from");
+  }
+
+  // The build used to refuse outright when two modes were present, because the
+  // aggregations pooled them. They no longer do -- and this is what keeps that
+  // true. A new aggregation that forgets mode, or one whose key drops it in a
+  // refactor, fails here instead of quietly averaging two readings of the same
+  // audio into one cell.
+  const carriesMode = (name, cells) => {
+    const bad = cells.filter((c) => !c.mode);
+    if (bad.length) {
+      throw new Error(
+        `${bad.length} ${name} row(s) carry no ASR mode. Every per-cell ` +
+        `aggregation must key on mode: transcribe and verbatim are the same ` +
+        `audio read two ways and a cell averaging them describes neither.`);
+    }
+    const seen = [...new Set(cells.map((c) => c.mode))].sort();
+    if (cells.length && seen.join() !== modesPresent.join()) {
+      throw new Error(
+        `${name} covers modes [${seen.join(", ")}] but the results carry ` +
+        `[${modesPresent.join(", ")}]; a mode is being dropped before the ` +
+        `page can offer it.`);
+    }
+  };
 
   const notExercised = conditions.filter((c) => !c.exercised).map((c) => c.name);
   if (notExercised.length) {
@@ -729,7 +838,18 @@ function build() {
   mkdirSync(PATHS.outAudio, { recursive: true });
   const existingAudio = readdirSync(PATHS.outAudio).filter((f) => f.endsWith(".wav"));
 
-  const picked = pickListenSet(rows, LISTEN_LIMIT);
+  // Chosen from the primary mode alone, and deliberately so. The set is picked
+  // by which sentences fail somewhere, so scoring it over every mode would let
+  // adding a verbatim run silently change which six sentences the Listen
+  // section uses -- and the audio bundle is committed against those six.
+  // The transcripts attached below still carry every mode; only the choice of
+  // sentence is one mode's.
+  const picked = pickListenSet(primaryRows, LISTEN_LIMIT);
+  const rowsByUtterance = new Map();
+  for (const r of rows) {
+    if (!rowsByUtterance.has(r.utterance_id)) rowsByUtterance.set(r.utterance_id, []);
+    rowsByUtterance.get(r.utterance_id).push(r);
+  }
   const missingAudio = [];
   const keep = new Set();
   let copied = 0;
@@ -745,9 +865,12 @@ function build() {
     const utt = utterances.get(p.id);
     const first = p.rows[0];
     const text = utt?.text ?? first.reference;
+    // Every mode's transcripts for this sentence, not just the mode it was
+    // picked from: the Listen section switches between them.
+    const allRows = rowsByUtterance.get(p.id) ?? p.rows;
 
     const byCondition = new Map();
-    for (const r of p.rows) {
+    for (const r of allRows) {
       if (!byCondition.has(r.condition)) byCondition.set(r.condition, []);
       byCondition.get(r.condition).push(r);
     }
@@ -839,13 +962,6 @@ function build() {
     };
   });
 
-  // Prune anything the page no longer references, so a shrinking listen set
-  // does not leave orphaned audio in the deployed bundle.
-  let pruned = 0;
-  for (const f of existingAudio) {
-    if (!keep.has(f)) { rmSync(join(PATHS.outAudio, f)); pruned++; }
-  }
-
   if (missingAudio.length) {
     const detail =
       `${missingAudio.length} audio file(s) referenced by results are not on disk:\n` +
@@ -858,6 +974,19 @@ function build() {
     if (!ALLOW_MISSING_AUDIO) throw new Error(detail);
     warn(`BUILT WITHOUT AUDIO -- ${detail.split("\n")[0]}`);
   }
+
+  // Prune anything the page no longer references, so a shrinking listen set
+  // does not leave orphaned audio in the deployed bundle.
+  //
+  // After the check above, never before it. Pruning first meant a build that
+  // was about to fail on missing audio deleted the committed bundle on its way
+  // out -- and the bundle is the only copy on any machine that did not run the
+  // harness, so the failure took the fix with it.
+  let pruned = 0;
+  for (const f of existingAudio) {
+    if (!keep.has(f)) { rmSync(join(PATHS.outAudio, f)); pruned++; }
+  }
+
 
   if (listen.some((l) => l.gloss === null)) {
     warn(
@@ -884,9 +1013,19 @@ function build() {
     };
   });
 
-  const totalEntities = rows.reduce((a, r) => a + r.entities.length, 0);
-  const totalHits = rows.reduce(
+  // Every scalar below is a figure about ONE mode. Aggregations that carry
+  // mode in their key take all the rows; anything that collapses to a single
+  // number takes primaryRows, and `primaryMode` on the data says which.
+  const totalEntities = primaryRows.reduce((a, r) => a + r.entities.length, 0);
+  const totalHits = primaryRows.reduce(
     (a, r) => a + r.entities.filter((e) => e.hit).length, 0);
+
+  const checkedMatrix = hitRateMatrix(rows);
+  const checkedWer = werAggregate(rows);
+  const checkedRendering = renderingTable(rows);
+  carriesMode("matrix", checkedMatrix);
+  carriesMode("wer", checkedWer);
+  carriesMode("rendering", checkedRendering);
 
   const data = {
     generatedAt: new Date().toISOString(),
@@ -911,24 +1050,29 @@ function build() {
     modes,
     conditions,
     entityTypes: [...new Set(rows.flatMap((r) => r.entities.map((e) => e.type)))].sort(),
+    // The mode every single-number figure on this page describes. The tables
+    // carry all modes and the site switches between them; the headline does
+    // not, because "the hit rate" has to mean one thing.
+    primaryMode,
     summary: {
-      utterances: new Set(rows.map((r) => r.utterance_id)).size,
-      rows: rows.length,
+      utterances: new Set(primaryRows.map((r) => r.utterance_id)).size,
+      rows: primaryRows.length,
       entities: totalEntities,
       hits: totalHits,
       hitRate: totalEntities ? totalHits / totalEntities : null,
       conditions: conditionsInResults.length,
       models: models.length,
+      allModeRows: rows.length,
     },
-    matrix: hitRateMatrix(rows),
+    matrix: checkedMatrix,
     lowNThreshold: LOW_N,
-    wer: werAggregate(rows),
-    rendering: renderingTable(rows),
+    wer: checkedWer,
+    rendering: checkedRendering,
     // Derived so the prose can state what happened without anyone typing a
     // finding into a component. With one model, or none of these effects, the
     // page says less rather than saying something untrue.
     renderingStats: (() => {
-      const rt = renderingTable(rows);
+      const rt = renderingTable(primaryRows);
       const disagreements = rt.filter(
         (r) => new Set(r.models.map((m) => m.rendering)).size > 1).length;
       const seen = new Map();
@@ -949,7 +1093,8 @@ function build() {
     werSpread: (() => {
       // The headline of the results section: how far WER moves on identical
       // audio, purely from how each side chose to write the number.
-      const vals = rows.map((r) => ({ wer: r.wer, model: r.asr_model, id: r.utterance_id }));
+      const vals = primaryRows.map(
+        (r) => ({ wer: r.wer, model: r.asr_model, id: r.utterance_id }));
       if (!vals.length) return null;
       const min = vals.reduce((a, b) => (b.wer < a.wer ? b : a));
       const max = vals.reduce((a, b) => (b.wer > a.wer ? b : a));
@@ -972,7 +1117,7 @@ function build() {
     // is clustered. Same nominal rate, same source audio, same codec chain.
     lossPairs: (() => {
       const cellsFor = (cond, type) => {
-        const cs = hitRateMatrix(rows).filter(
+        const cs = hitRateMatrix(primaryRows).filter(
           (m) => m.condition === cond && (!type || m.entityType === type));
         return {
           hits: cs.reduce((a, c) => a + c.hits, 0),
@@ -980,7 +1125,7 @@ function build() {
         };
       };
       const werFor = (cond) => {
-        const v = rows.filter((r) => r.condition === cond).map((r) => r.wer);
+        const v = primaryRows.filter((r) => r.condition === cond).map((r) => r.wer);
         return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null;
       };
 
@@ -1024,7 +1169,7 @@ function build() {
       // over model-condition pairs blends the two and implies the phone line
       // is doing something it is not.
       const byModel = new Map();
-      for (const r of rows) {
+      for (const r of primaryRows) {
         const k = r.asr_model ?? "-";
         if (!byModel.has(k)) byModel.set(k, []);
         byModel.get(k).push(r.wer);
@@ -1035,7 +1180,7 @@ function build() {
         .sort((a, b) => a.wer - b.wer);
 
       const byCondition = new Map();
-      for (const r of rows) {
+      for (const r of primaryRows) {
         const k = r.condition;
         if (!byCondition.has(k)) byCondition.set(k, []);
         byCondition.get(k).push(r.wer);
@@ -1054,10 +1199,26 @@ function build() {
         declaredConditions: cfg.conditions.length,
         models: models.length,
         modes,
-        languages: [...new Set(rows.map((r) => r.language))].sort(),
-        utterances: new Set(rows.map((r) => r.utterance_id)).size,
+        // The headline names one mode because every figure beside it is that
+        // mode's. `modes` stays as the list of what was run.
+        mode: primaryMode,
+        languages: [...new Set(primaryRows.map((r) => r.language))].sort(),
+        utterances: new Set(primaryRows.map((r) => r.utterance_id)).size,
       };
     })(),
+
+    // The modes side by side, for the section that compares them rather than
+    // blending them. One entry per mode actually present; with a single mode
+    // the site renders nothing from this and says nothing about modes.
+    //
+    // Figures come from the cells every mode covers, not from each mode's
+    // whole run. Verbatim is usually run on a subset -- the bursty conditions
+    // first, because that is where the misses are -- so pooling each mode over
+    // whatever it happens to cover compares a hard subset against an easy
+    // average and calls the difference a mode effect. `coverage` reports what
+    // each mode actually ran so the narrowing is visible rather than implied.
+    modeCompare: sharedModeFigures(rows, modesPresent, primaryMode),
+
     audioBundle: { files: copied, bytes },
 
     // Cue survival, from `tee cues --json`. A sidecar rather than a field on
@@ -1149,4 +1310,5 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   build();
 }
 
-export { droppedFraction, pickExemplar };
+export { droppedFraction, pickExemplar, hitRateMatrix, werAggregate,
+         renderingTable, sharedModeFigures };

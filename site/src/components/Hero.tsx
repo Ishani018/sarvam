@@ -48,7 +48,8 @@ function inWords(n: number): string {
 
 export function Hero({ data }: { data: GintiData }) {
   const pair = data.lossPairs[0];
-  const example = pickHeroExample(data.listen, data.conditions);
+  const example = pickHeroExample(data.listen, data.conditions,
+                                  data.primaryMode);
   // Whether the right column has anything in it. A build with no bundled audio
   // is one column, not one column and a hole -- and in that build the failure
   // moves back into the left column, since nothing else is carrying it.

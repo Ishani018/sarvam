@@ -960,6 +960,117 @@ code, .mono, .t-mono { font-family: var(--font-mono); font-variant-numeric: tabu
   white-space: nowrap;
 }
 
+/* ============================================= modes ==================== */
+
+/* Two readings of the same audio, side by side. Deliberately not a chart: the
+ * comparison is two numbers, and a chart of two numbers is a decoration with
+ * an axis. */
+.modecmp { display: grid; gap: 2px; margin-top: 1.75rem; }
+.modecmp__row {
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) minmax(0, 1fr) minmax(0, 21rem);
+  align-items: center;
+  gap: 0.75rem 1.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+}
+.modecmp__row.is-primary {
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  box-shadow: inset 3px 0 0 var(--accent-2-mid);
+}
+.modecmp__head h3 {
+  font-family: var(--font-mono);
+  font-size: var(--t-15);
+  font-weight: 500;
+  color: var(--accent-2-deep);
+}
+.modecmp__head span {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: var(--t-12);
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+.modecmp__track {
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: var(--paper-3);
+  overflow: hidden;
+}
+.modecmp__track span {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--accent-2-mid);
+}
+.modecmp__row.is-primary .modecmp__track span { background: var(--accent-2); }
+.modecmp__nums { display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; margin: 0; }
+.modecmp__nums div { display: flex; flex-direction: column-reverse; gap: 0.1rem; }
+.modecmp__nums dt {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+}
+.modecmp__nums dd {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-17);
+  color: var(--ink);
+}
+.modecmp__nums dd i { font-style: normal; color: var(--ink-3); font-size: var(--t-13); }
+
+/* ---- which mode the tables below are showing ---- */
+
+.modesw {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin: clamp(2rem, 4vh, 3rem) 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+}
+.modesw__label {
+  font-size: var(--t-11);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+}
+.modesw__opts {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  background: var(--paper-3);
+  border-radius: var(--r-pill);
+}
+.modesw__opt {
+  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--t-13);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.4rem 1rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink-warm);
+  cursor: pointer;
+  border-radius: var(--r-pill);
+  transition: background-color 220ms var(--ease-soft), color 220ms var(--ease-soft);
+}
+.modesw__opt:hover { color: var(--ink); }
+.modesw__opt.is-on { background: var(--paper); color: var(--ink); box-shadow: var(--lift); }
+.modesw__opt i {
+  font-style: normal;
+  font-family: var(--font-sans);
+  font-size: var(--t-11);
+  color: var(--ink-3);
+}
+.modesw__note { font-size: var(--t-12); color: var(--ink-3); flex: 1 1 16rem; }
+
 /* ============================================= cue survival ============== */
 
 /* Same visual grammar as the loss-pair rows: a name, a track, a count. The
@@ -2437,6 +2548,7 @@ td.cell-td { padding-left: 0.9rem; }
   .cue__sur { order: 2; flex-direction: row; gap: 0.65rem; align-items: baseline; }
   .cue__track { grid-column: 1 / -1; order: 3; }
   .cue__split { grid-template-columns: minmax(0, 1fr); }
+  .modecmp__row { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 46rem) {

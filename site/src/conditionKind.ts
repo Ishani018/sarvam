@@ -73,6 +73,7 @@ export interface HeroExample {
   utteranceId: string;
   condition: string;
   model: string;
+  mode: string;
   entityType: string;
   expected: string;
   found: string;
@@ -94,9 +95,13 @@ export interface HeroExample {
  *
  * Returns null if nothing in the run qualifies, and the hero then simply omits
  * the block rather than inventing one.
+ *
+ * `mode` is required rather than defaulted: the whole point of carrying mode
+ * is that a figure has to say which reading it came from, and a default here
+ * would quietly reintroduce the pooling everything else now refuses.
  */
 export function pickHeroExample(
-  listen: ListenEntry[], conditions: ConditionDef[],
+  listen: ListenEntry[], conditions: ConditionDef[], mode: string,
 ): HeroExample | null {
   const byName = new Map(conditions.map((c) => [c.name, c]));
   const found: HeroExample[] = [];
@@ -105,6 +110,10 @@ export function pickHeroExample(
     for (const c of u.conditions) {
       if (kindOf(byName.get(c.condition) ?? ({ chain: [] } as never)) !== "bursty") continue;
       for (const r of c.results) {
+        // One mode's transcripts. With two modes run, the same audio has two
+        // answers and a failure shown without saying which reading produced it
+        // is not a failure a reader can check.
+        if ((r.mode ?? "-") !== mode) continue;
         for (const e of r.entities) {
           if (e.hit || !e.found || !e.expected) continue;
           const gold = u.entities.find((g) => g.type === e.type);
@@ -112,6 +121,7 @@ export function pickHeroExample(
             utteranceId: u.utteranceId,
             condition: c.condition,
             model: r.model,
+            mode: mode,
             entityType: e.type,
             expected: e.expected,
             found: e.found,

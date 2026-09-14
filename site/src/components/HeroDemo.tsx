@@ -37,9 +37,11 @@ export function HeroDemo({ data, ex }: { data: GintiData; ex: HeroExample }) {
   if (!takes) return null;
   const { utt, clean, dmg } = takes;
 
+  // Model AND mode: the example was chosen from one mode's transcripts, so
+  // the value shown beside it has to come from the same one.
   const valueFrom = (c: ListenCondition) =>
-    c.results.find((r) => r.model === ex.model)?.entities
-      .find((e) => e.type === ex.entityType && e.expected === ex.expected);
+    c.results.find((r) => r.model === ex.model && (r.mode ?? "-") === ex.mode)
+      ?.entities.find((e) => e.type === ex.entityType && e.expected === ex.expected);
 
   const heard = valueFrom(dmg);
   const parts = diffValue(prettyValue(ex.expected), prettyValue(ex.found));

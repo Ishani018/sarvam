@@ -78,6 +78,11 @@ export function DisagreementChart({
   // the two models sit a quarter apart on identical audio, which is the larger
   // effect by an order of magnitude.
   const models = [...new Set(wer.map((w) => w.model))].sort();
+  // Conditions on the axis with nothing measured in the slice being shown --
+  // a mode run on a subset leaves real holes, and the caption says so.
+  const missing = names.filter(
+    (n) => !matrix.some((m) => m.condition === n)
+      && !wer.some((w) => w.condition === n));
   const werByModel = models.map((m) => ({
     model: m,
     points: names.map((n) => ({
@@ -108,11 +113,21 @@ export function DisagreementChart({
     padL + (names.length === 1 ? plotW / 2 : (i / (names.length - 1)) * plotW);
   const y = (v: number) => padT + (1 - v) * plotH;
 
-  const path = (pts: Array<{ value: number | null }>) =>
-    pts
-      .map((p, i) => (p.value === null ? null : `${i === 0 ? "M" : "L"} ${x(i)} ${y(p.value)}`))
-      .filter(Boolean)
-      .join(" ");
+  // Lift the pen at a gap and put it down again after it, so a condition that
+  // was not run in this mode leaves a hole rather than a line drawn straight
+  // across it. The old version stripped nulls and joined what was left, which
+  // both bridged gaps and -- when the first condition had no data -- emitted a
+  // path starting with L, which renders as nothing at all.
+  const path = (pts: Array<{ value: number | null }>) => {
+    let d = "";
+    let pen = false;
+    pts.forEach((p, i) => {
+      if (p.value === null) { pen = false; return; }
+      d += `${pen ? "L" : "M"} ${x(i)} ${y(p.value)} `;
+      pen = true;
+    });
+    return d.trim();
+  };
 
   // The boundary between the two blocks, drawn as a full-height divider: it is
   // where the teal line drops, and a reader should see the two regions before
@@ -173,14 +188,29 @@ export function DisagreementChart({
                   cx={x(i)} cy={y(p.value)} r="3.5" />
         )))}
 
-        {werByModel.map((m) => {
-          const last = m.points[m.points.length - 1];
-          return last.value === null ? null : (
-            <text key={`l${m.model}`} className="ch-value"
-                  x={x(names.length - 1) + 8} y={y(last.value) + 3}
-                  fill="var(--accent)">{m.model.replace("saaras:", "")}</text>
-          );
-        })}
+        {/* End labels, nudged apart when two models finish at the same height.
+            They overlapped into one illegible glyph the moment a mode with
+            partial coverage put both series on the same last point. The last
+            point is also the last one with a value, not the last column:
+            verbatim may not have been run on every condition. */}
+        {(() => {
+          const MIN_GAP = 11;
+          const placed: Array<{ model: string; yAt: number; label: number }> = [];
+          for (const m of werByModel) {
+            const last = [...m.points].reverse().find((p) => p.value !== null);
+            if (!last || last.value === null) continue;
+            let label = y(last.value) + 3;
+            for (const p of placed) {
+              if (Math.abs(label - p.label) < MIN_GAP) label = p.label + MIN_GAP;
+            }
+            placed.push({ model: m.model, yAt: y(last.value), label });
+          }
+          return placed.map((p) => (
+            <text key={`l${p.model}`} className="ch-value"
+                  x={x(names.length - 1) + 8} y={p.label}
+                  fill="var(--accent)">{p.model.replace("saaras:", "")}</text>
+          ));
+        })()}
 
         {names.map((n, i) => (
           <text key={n} className="ch-label" x={x(i)} y={y(0) + 8}
@@ -226,10 +256,22 @@ export function DisagreementChart({
         <figcaption className="figcap">
           Conditions are split by whether packet loss is scattered or clustered,
           and ordered by loss rate within each half, so the loss ramp runs
-          unbroken across the boundary. Entity accuracy holds through bandwidth
-          loss, codecs and scattered packet loss, then falls where clustering
-          begins. Word error rate does not track it, and separates by model
-          rather than by condition.
+          unbroken across the boundary.{" "}
+          {/* The reading of the shape belongs to the mode it was read from.
+              Switching modes can change which conditions even have points, so
+              asserting the shape regardless would be a claim about a chart
+              that is no longer on screen. */}
+          {missing.length === 0 ? (
+            <>Entity accuracy holds through bandwidth loss, codecs and scattered
+              packet loss, then falls where clustering begins. Word error rate
+              does not track it, and separates by model rather than by
+              condition.</>
+          ) : (
+            <>{missing.length} condition{missing.length === 1 ? " has" : "s have"}{" "}
+              no points here: {missing.join(", ")}{" "}
+              {missing.length === 1 ? "was" : "were"} not run in this mode, and
+              a gap is left rather than a line drawn across it.</>
+          )}
         </figcaption>
       )}
     </figure>

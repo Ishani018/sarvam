@@ -10,7 +10,10 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { droppedFraction, pickExemplar } from "./build-data.mjs";
+import {
+  droppedFraction, hitRateMatrix, pickExemplar, renderingTable,
+  sharedModeFigures, werAggregate,
+} from "./build-data.mjs";
 
 const note = (n) => ({ commands: [{ note: n }] });
 const cand = (id, dropped, total) => ({
@@ -101,4 +104,112 @@ test("files with no loss recorded do not dilute a lossy condition", () => {
 test("a single candidate is returned unchanged", () => {
   assert.equal(pickExemplar([cand("00000", 0, 183)]).id, "00000");
   assert.equal(pickExemplar([cand("00000", null)]).id, "00000");
+});
+
+/* -------------------------------------------------------------------------
+ * Mode-aware aggregation
+ *
+ * The build used to refuse to run when two ASR modes were present, because the
+ * per-cell aggregations keyed on (model, condition, type) and would average
+ * transcribe and verbatim into one number. These tests are what that refusal
+ * has been replaced with: they check that mode reaches the key, and that the
+ * mode comparison is measured over cells both modes actually cover.
+ * ---------------------------------------------------------------------- */
+
+const row = (o = {}) => ({
+  utterance_id: o.utt ?? "u1",
+  condition: o.cond ?? "clean",
+  asr_model: o.model ?? "saaras:v3",
+  asr_mode: o.mode ?? "transcribe",
+  language: "hi-IN",
+  reference: o.ref ?? "संदर्भ",
+  hypothesis: o.hyp ?? "अनुमान",
+  wer: o.wer ?? 0.5,
+  realization: o.realization ?? "words",
+  entities: o.entities ?? [
+    { type: "currency", expected: "INR:1400.00", expected_surface: "चौदह सौ",
+      hit: o.hit ?? true, found: null, found_surface: null, edit_distance: 0 },
+  ],
+});
+
+test("the matrix keys on mode, so two modes never pool into one cell", () => {
+  const cells = hitRateMatrix([
+    row({ mode: "transcribe", hit: true }),
+    row({ mode: "verbatim", hit: false }),
+  ]);
+  assert.equal(cells.length, 2);
+  const byMode = Object.fromEntries(cells.map((c) => [c.mode, c]));
+  assert.equal(byMode.transcribe.rate, 1);
+  assert.equal(byMode.verbatim.rate, 0);
+  // The bug this replaces: one cell at 0.5, describing neither reading.
+  assert.ok(!cells.some((c) => c.rate === 0.5));
+});
+
+test("word error rate keys on mode too", () => {
+  const w = werAggregate([
+    row({ mode: "transcribe", wer: 0.4 }),
+    row({ mode: "verbatim", wer: 0.8 }),
+  ]);
+  assert.equal(w.length, 2);
+  assert.deepEqual(w.map((r) => r.wer).sort(), [0.4, 0.8]);
+});
+
+test("rendering rows split by mode rather than stacking modes in `models`", () => {
+  const rt = renderingTable([
+    row({ mode: "transcribe" }),
+    row({ mode: "verbatim" }),
+  ]);
+  assert.equal(rt.length, 2);
+  assert.deepEqual(rt.map((r) => r.mode).sort(), ["transcribe", "verbatim"]);
+  // Each row compares models WITHIN one mode; mixing them would put the row's
+  // own premise -- whether the recogniser rewrites numbers -- on both sides.
+  for (const r of rt) assert.equal(r.models.length, 1);
+});
+
+test("a single mode still produces one row per cell", () => {
+  const cells = hitRateMatrix([row({ model: "saaras:v3" }), row({ model: "saaras:v4" })]);
+  assert.equal(cells.length, 2);
+  assert.deepEqual([...new Set(cells.map((c) => c.mode))], ["transcribe"]);
+});
+
+test("modes are compared over the cells both actually ran", () => {
+  // transcribe ran two conditions, verbatim only the hard one. Pooling each
+  // mode over its own rows would score transcribe on an easy average and
+  // verbatim on a hard subset, and read the difference as a mode effect.
+  const rows = [
+    row({ mode: "transcribe", cond: "clean", hit: true }),
+    row({ mode: "transcribe", cond: "burst", hit: false }),
+    row({ mode: "verbatim", cond: "burst", hit: true }),
+  ];
+  const [t, v] = sharedModeFigures(rows, ["transcribe", "verbatim"], "transcribe");
+  assert.equal(t.coverage.sharedCells, 1);
+  assert.equal(t.entities, 1);
+  assert.equal(t.hits, 0);          // the burst cell only
+  assert.equal(v.hits, 1);
+  assert.equal(t.coverage.ownCells, 2);
+  assert.equal(v.coverage.ownCells, 1);
+  assert.deepEqual(v.coverage.conditions, ["burst"]);
+  assert.equal(t.isPrimary, true);
+  assert.equal(v.isPrimary, false);
+});
+
+test("with no overlap at all the comparison is empty rather than invented", () => {
+  const rows = [
+    row({ mode: "transcribe", cond: "clean" }),
+    row({ mode: "verbatim", cond: "burst" }),
+  ];
+  const figures = sharedModeFigures(rows, ["transcribe", "verbatim"], "transcribe");
+  for (const f of figures) {
+    assert.equal(f.coverage.sharedCells, 0);
+    assert.equal(f.entities, 0);
+    assert.equal(f.hitRate, null);
+  }
+});
+
+test("one mode compares against itself without narrowing anything", () => {
+  const rows = [row({ cond: "clean" }), row({ cond: "burst" })];
+  const [only] = sharedModeFigures(rows, ["transcribe"], "transcribe");
+  assert.equal(only.coverage.sharedCells, 2);
+  assert.equal(only.entities, 2);
+  assert.equal(only.isPrimary, true);
 });
