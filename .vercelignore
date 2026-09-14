@@ -1,0 +1,24 @@
+# The deployed artifact is site/dist and nothing else.
+#
+# Two reasons this file is not just tidiness. The harness talks to a paid API
+# with a key read from the environment, and none of it -- not the client, not
+# the config, not the cost guard -- belongs on a static host. And the repo root
+# carries pyproject.toml, which is what made Vercel try to deploy src/tee/cli.py
+# as a Python function in the first place; excluding it keeps the detection
+# from having anything to find.
+pyproject.toml
+uv.lock
+src/
+tests/
+configs/
+corpora/
+fixtures/
+results/
+.tee/
+.venv/
+.pytest_cache/
+
+# Site sources are built, not served. dist/ is what ships.
+site/scripts/
+site/content/
+site/node_modules/
