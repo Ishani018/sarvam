@@ -235,6 +235,33 @@ def modes_cmd(
     typer.echo(f"\nfull report: {path}")
 
 
+@app.command(name="cues")
+def cues_cmd(
+    results: list[Path] = typer.Argument(
+        ..., help="One or more results JSONL files."),
+    out: Optional[Path] = typer.Option(None, "--out", help="Report path."),
+) -> None:
+    """Measure whether the words identifying a number survived the line.
+
+    Offline: reads the transcripts already in the results and contacts nothing.
+    Reports cue survival per condition against the survival rate of ordinary
+    words, and lists values that reached the transcript with no surviving word
+    saying what they are.
+    """
+    from .cues import analyse, orphans, render as render_cues
+
+    rows = [r for path_ in results for r in read_rows(path_)]
+    modes_seen = sorted({r.asr_mode or "-" for r in rows})
+    typer.echo(f"{len(rows)} row(s) from {len(results)} file(s); "
+               f"modes present: {', '.join(modes_seen)}\n")
+    report = render_cues(analyse(rows), orphans(rows))
+    path = out or results[0].with_suffix(".cues.txt")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(report, encoding="utf-8")
+    typer.echo(report)
+    typer.echo(f"\nfull report: {path}")
+
+
 @app.command()
 def rescore(
     results: Path = typer.Argument(..., help="Results JSONL from a previous run."),
