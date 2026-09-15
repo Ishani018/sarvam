@@ -1,0 +1,147 @@
+/* The 1200x630 link preview.
+ *
+ * Every size here is chosen for where the card is actually seen, not for this
+ * canvas. Slack renders it around 360px wide and LinkedIn around 550, so a
+ * 1200px design is being reduced roughly 3x: 26px is the floor, because below
+ * that it lands under 9px in Slack and stops being readable at all. The pair of
+ * values is 104px for the same reason -- it has to survive the reduction as the
+ * one thing that reads instantly.
+ *
+ * No hover, no motion, no media queries: the only viewport this ever has is
+ * 1200x630, and the only renderer is Playwright.
+ */
+
+.card-body {
+  margin: 0;
+  width: 1200px;
+  height: 630px;
+  overflow: hidden;
+  background: var(--deep);
+}
+
+.card {
+  position: relative;
+  width: 1200px;
+  height: 630px;
+  box-sizing: border-box;
+  padding: 52px 72px 46px;
+  display: flex;
+  flex-direction: column;
+  background: var(--deep);
+  color: var(--on-deep);
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+/* The same soft accent fields the hero uses, so the card reads as the page. */
+.card::before,
+.card::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  pointer-events: none;
+}
+.card::before {
+  width: 560px; height: 560px;
+  top: -200px; right: -120px;
+  background: radial-gradient(circle, var(--accent-2) 0%, transparent 70%);
+  opacity: 0.3;
+}
+.card::after {
+  width: 420px; height: 420px;
+  bottom: -190px; left: -110px;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  opacity: 0.18;
+}
+
+.card > * { position: relative; }
+
+.card__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+}
+.card__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--on-deep);
+}
+.card__mark { color: var(--accent-2-light); flex: none; }
+.card__brand .deva { font-weight: 400; color: var(--on-deep-3); margin-left: 10px; }
+.card__n {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 27px;
+  color: var(--on-deep-3);
+  white-space: nowrap;
+}
+
+.card__claim {
+  font-size: 48px;
+  line-height: 1.14;
+  letter-spacing: -0.022em;
+  font-weight: 600;
+  color: var(--on-deep);
+  margin: 30px 0 0;
+  max-width: 28ch;
+}
+
+/* The pair. This is the whole point of the card, so it takes the space left
+ * over and sits vertically centred in it. */
+.card__pair {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 44px;
+  margin-top: 0;
+}
+.card__side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.card__label {
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--on-deep-3);
+  white-space: nowrap;
+}
+.card__val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 116px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  color: var(--on-deep);
+  white-space: nowrap;
+}
+.card__val--keep { color: var(--accent-2-light); }
+.card__arrow {
+  font-size: 56px;
+  line-height: 1;
+  color: var(--on-deep-3);
+  align-self: flex-end;
+  padding-bottom: 26px;
+}
+/* The wrong digits, marked the way the page marks them. */
+.card__bad {
+  color: var(--deep);
+  background: var(--accent-light);
+  border-radius: 10px;
+  padding: 0 0.08em;
+}
+.card__gone { color: var(--accent-light); letter-spacing: 0.16em; }
+
+.card__foot {
+  font-size: 30px;
+  line-height: 1.38;
+  color: var(--on-deep-3);
+  margin: 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--deep-rule);
+  max-width: 62ch;
+}
+.card__foot b { color: var(--on-deep-2); font-weight: 500; }

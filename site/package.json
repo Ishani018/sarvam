@@ -9,7 +9,8 @@
     "build": "npm run data && tsc -b && vite build",
     "build:ci": "npm run check && tsc -b && vite build",
     "preview": "vite preview",
-    "icons": "node scripts/icons.mjs"
+    "icons": "node scripts/icons.mjs",
+    "card": "node scripts/card.mjs"
   },
   "dependencies": {
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",

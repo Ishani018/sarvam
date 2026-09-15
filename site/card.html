@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Not a page anyone visits: this is the source for the 1200x630 link
+         preview, screenshotted at build time by scripts/card.mjs. It ships in
+         dist/ because Vite builds it there, which is harmless -- it is the same
+         data as the page, laid out for a different medium. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Ginti — link preview card</title>
+  </head>
+  <body class="card-body">
+    <div id="card"></div>
+    <script type="module" src="/src/cardMain.tsx"></script>
+  </body>
+</html>

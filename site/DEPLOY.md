@@ -45,6 +45,31 @@ Audio is copied as `.wav` and deliberately **not** transcoded to mp3 or opus:
 re-encoding degraded audio through a second lossy codec would corrupt the exact
 artefact the listen section exists to demonstrate.
 
+## The link preview card
+
+`public/og-card.png` is the 1200x630 Open Graph image, rendered from
+`card.html` -- a second Vite entry that reuses the page's own components,
+tokens and fonts, so the card cannot drift from the site's design or show a
+figure the run does not support.
+
+```
+npm run build && npm run card
+```
+
+It is committed rather than generated during deployment, because the build
+machine has no browser. Re-run it whenever the results change: the card shows
+the drop and the example value, and `scripts/card.mjs` fails if the rendered
+figure no longer matches the `og:image:alt` text in `index.html`.
+
+The generator also refuses to write a card whose content does not fit the
+frame with at least 12px to spare. The frame is a fixed 630px with
+`overflow: hidden`, so a card that is too tall renders perfectly and ships
+silently cropped -- which is what happened on the first attempt.
+
+Sizes are chosen for where previews actually render: Slack and WhatsApp show
+the card around 360px wide, so everything on it is scaled for a ~3.3x
+reduction and nothing is smaller than 27px.
+
 ## The access gate
 
 `src/gateConfig.ts` holds everything the gate knows, which is no longer very
