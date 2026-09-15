@@ -35,9 +35,11 @@ for (const [name, width, height] of [["desktop", 1440, 1000], ["narrow", 390, 84
     deviceScaleFactor: 2,
   });
   const page = await ctx.newPage();
-  // Bypass the soft gate; it is not what these shots are for.
+  // Bypass the soft gate; it is not what these shots are for. Keep this in
+  // step with GATE.storageKey -- it moved from sessionStorage to localStorage
+  // when the gate stopped asking for credentials.
   await page.addInitScript(() => {
-    try { sessionStorage.setItem("ginti.gate", "1"); } catch { /* ignore */ }
+    try { localStorage.setItem("ginti.gate", "1"); } catch { /* ignore */ }
   });
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);

@@ -1774,38 +1774,29 @@ td.cell-td { padding-left: 0.9rem; }
   place-items: center;
   padding: var(--gutter);
 }
-.gate__box { width: 100%; max-width: 20rem; }
-.gate__title { font-size: var(--t-21); margin-bottom: 0.35rem; }
+.gate__box { width: 100%; max-width: 24rem; text-align: left; }
+.gate__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-size: var(--t-26);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.6rem;
+}
+.gate__mark { color: var(--accent-2); flex: none; }
 .gate__title .deva { color: var(--ink-3); font-weight: 400; margin-left: 0.5rem; }
-.gate__hint { font-size: var(--t-13); color: var(--ink-3); margin-bottom: 1.75rem; }
-.gate__field { margin-bottom: 0.75rem; }
-.gate__label {
-  display: block;
-  font-size: var(--t-11);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-3);
-  margin-bottom: 0.3rem;
-}
-.gate input {
-  width: 100%;
-  font: inherit;
-  font-family: var(--font-mono);
+.gate__hint {
   font-size: var(--t-15);
-  padding: 0.55rem 0.85rem;
-  border: 1px solid var(--rule-strong);
-  background: var(--paper);
-  color: var(--ink);
-  border-radius: var(--r-md);
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin-bottom: 2rem;
+  text-wrap: pretty;
 }
-.gate input:focus { outline: 2px solid var(--ink); outline-offset: -1px; }
 .gate button {
-  width: 100%;
   font: inherit;
   font-size: var(--t-15);
   font-weight: 500;
-  margin-top: 0.6rem;
-  padding: 0.6rem;
+  padding: 0.65rem 1.6rem;
   background: var(--ink);
   color: var(--paper);
   border: 1px solid var(--ink);
@@ -1814,7 +1805,6 @@ td.cell-td { padding-left: 0.9rem; }
   transition: box-shadow 220ms var(--ease-soft), background-color 220ms var(--ease-soft);
 }
 .gate button:hover { background: #000; box-shadow: var(--lift-2); }
-.gate__error { font-size: var(--t-13); color: var(--accent-ink); margin-top: 0.75rem; }
 
 /* ==================================================== footer ============= */
 

@@ -47,13 +47,40 @@ artefact the listen section exists to demonstrate.
 
 ## The access gate
 
-`src/gate.ts` holds the username and password in one place.
+`src/gateConfig.ts` holds everything the gate knows, which is no longer very
+much. There are no credentials: the landing screen shows the project name, one
+line of context and a single **Enter demo** button. Clicking it records the
+entry and shows the page. `?key=sarvam` skips even the click — the parameter is
+read on mount, the state is set, and the key is stripped from the address bar
+before the page renders.
 
-**This is a soft gate — a doorbell, not a lock.** The credentials ship in the
-client bundle and anyone who opens devtools can read them, along with all the
-data behind the screen. It exists so a forwarded link is not casually openable.
-It is deliberately not obfuscated, because obfuscation would imply a security
-property that is not there.
+**This is a soft gate — a doorbell, not a lock, and now one anyone may ring.**
+It stops a forwarded link opening straight onto the page. It stops nothing
+else, and it never did: the old username and password shipped in the same
+client bundle as the data they guarded, so anyone with the link and devtools
+already had both. Removing them cost no security and saved every intended
+visitor a trip to find the email.
+
+Entry is remembered in `localStorage` (`ginti.gate`), so a refresh or a
+reopened tab does not ask again.
+
+### Who entered, and when
+
+Each entry is logged with a timestamp, the referrer, and whether it came from
+the button or the key parameter. The log lives in `localStorage` under
+`ginti.entries`, capped at the last 50, and is readable from the console:
+
+```js
+__ginti.entries()
+```
+
+**That log stays in the visitor's browser and never reaches you.** The site is
+static — no backend, no runtime requests — so there is nowhere for it to go.
+Reporting entries centrally needs one of two things this deployment
+deliberately does not have: a server endpoint to receive them, or a
+third-party analytics script to send them to. Vercel's own Web Analytics is
+the least invasive option if that changes, since it needs no code beyond
+enabling it and reports visits without a cookie.
 
 ### The real gate: Vercel Deployment Protection
 
@@ -72,5 +99,5 @@ feature. The alternatives on the same settings page are Vercel Authentication
 (a token so CI can still reach the deployment).
 
 With Vercel protection on, the in-page gate is redundant. Leave it or remove it
-— it costs nothing and stops a link being opened casually if protection is ever
-switched off.
+— it is one click and it stops a link being opened casually if protection is
+ever switched off.

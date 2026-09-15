@@ -281,7 +281,15 @@ export function Playground({ listen: allListen, conditions, mode }: {
   const shown = sel.m === "all" ? models : models.filter((m) => m === sel.m);
   const ab = useAB(clean?.audio ?? null, chosen?.audio ?? null);
 
+  // Publish the selection to the hash only once a condition has been chosen.
+  //
+  // At rest no condition is chosen, and writing then overwrote whatever hash
+  // the visitor arrived with: `#results` became `#listen?u=...&c=&m=all` on
+  // mount, so every section deep link died on load and a link to this section
+  // carried an empty condition. Choosing the damage is also the moment the
+  // selection becomes worth sharing, so the two conditions are the same one.
   useEffect(() => {
+    if (!sel.c) return;
     if (utt?.utteranceId) writeHash({ u: utt.utteranceId, c: sel.c, m: sel.m });
   }, [utt?.utteranceId, sel.c, sel.m]);
 
