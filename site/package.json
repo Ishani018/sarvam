@@ -6,11 +6,12 @@
     "check": "node scripts/check-case-collisions.mjs && node scripts/check-mark.mjs && node --test scripts/build-data.test.mjs",
     "data": "npm run check && node scripts/build-data.mjs",
     "dev": "npm run data && vite",
-    "build": "npm run data && tsc -b && vite build",
-    "build:ci": "npm run check && tsc -b && vite build",
+    "build": "npm run data && tsc -b && vite build && npm run check:meta",
+    "build:ci": "npm run check && tsc -b && vite build && npm run check:meta",
     "preview": "vite preview",
     "icons": "node scripts/icons.mjs",
-    "card": "node scripts/card.mjs"
+    "card": "node scripts/card.mjs",
+    "check:meta": "node scripts/check-meta.mjs"
   },
   "dependencies": {
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",

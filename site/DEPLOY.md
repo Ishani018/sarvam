@@ -45,6 +45,33 @@ Audio is copied as `.wav` and deliberately **not** transcoded to mp3 or opus:
 re-encoding degraded audio through a second lossy codec would corrupt the exact
 artefact the listen section exists to demonstrate.
 
+## The deploy origin
+
+Open Graph tags need absolute URLs, so `index.html` writes `%SITE_ORIGIN%` and
+`vite.config.ts` substitutes it at build time, after Vite has finished
+rewriting asset paths. Written as `/og-card.png` instead, `base: "./"` silently
+turns it into `./og-card.png` in the built file, which some scrapers refuse to
+resolve -- the source reads correctly and the deployed page is wrong.
+
+Resolution order:
+
+1. `SITE_ORIGIN` if set -- use this for a custom domain
+2. `VERCEL_PROJECT_PRODUCTION_URL`, which Vercel sets and which **follows a
+   project rename automatically**
+3. the fallback in `vite.config.ts`
+
+Not `VERCEL_URL`: that is the per-deployment host and changes every push.
+
+**If you rename the Vercel project**, the tags should follow on the next
+deploy with no code change. Confirm it in the build log, which prints
+`site origin: ...`. If it still shows the old host, Vercel's system environment
+variables are off for the project -- either re-enable them or set `SITE_ORIGIN`
+in project settings.
+
+`npm run check:meta` runs as part of the build and fails it if any social URL
+is relative, still holds the token, points at a second origin, or names an
+image that is not in `dist/`.
+
 ## The link preview card
 
 `public/og-card.png` is the 1200x630 Open Graph image, rendered from
