@@ -44,23 +44,28 @@ export function Hero({ data }: { data: GintiData }) {
       <div className="hero__inner">
         <div className={`hero__grid ${hasDemo ? "hero__grid--split" : ""}`}>
           <div className="hero__lead">
-            {f && f.points !== null && held.length > 0 ? (
-              <h1 className="hero__head">
-                {familyName} holds entity accuracy through {readable(held)}.{" "}
-                <em>Bursty packet loss costs it {f.points.toFixed(1)} points.</em>
-              </h1>
-            ) : (
-              <h1 className="hero__head">
-                Does a number survive an Indian-language phone call?
-              </h1>
-            )}
+            {/* The problem, not the finding. The panel to the right shows
+                a real rupee amount changing on a degraded line, which lands
+                harder in three seconds than any figure; the H1 is free to say
+                why the project exists instead. Static on purpose -- it is true
+                whether or not a run has happened, so it renders with no data
+                and leaves no hole when the guard below does not fire. */}
+            <h1 className="hero__head">
+              Voice agents read out account numbers and amounts over phone
+              lines. <em>Nobody measures whether the digits survive.</em>
+            </h1>
 
-            {/* One sentence, and under 25 words: what is measured, and under
-                what. Longer than that and it stops being a subhead. */}
+            {/* What Ginti is, always -- and the finding folded in when there
+                is a run to fold. Splitting it this way means a build with no
+                results still says what the thing does rather than dropping to
+                a headline and a row of chips. */}
             <p className="hero__sub">
-              Ginti is an open eval harness measuring whether account numbers,
-              amounts, OTPs and dates survive real telephony degradation &mdash;
-              codecs, bandwidth limits and packet loss.
+              Ginti measures it &mdash; an open eval harness for account
+              numbers, amounts, OTPs and dates under real telephony.
+              {f && f.points !== null && held.length > 0 && (
+                <> {familyName} holds through {readable(held)}; bursty loss
+                  costs it {f.points.toFixed(1)} points.</>
+              )}
             </p>
 
             {f && f.ci && (
@@ -117,14 +122,14 @@ function BuiltOn({ data }: { data: GintiData }) {
       <span className="built__label">Built on</span>
       <ul className="built__chips">
         {u.asr.models.map((m) => (
-          <li className="chip chip--model" key={m}>{m}</li>
+          <li className="built__chip built__chip--model" key={m}>{m}</li>
         ))}
-        {asrPath && <li className="chip" key={asrPath}>{asrPath}</li>}
+        {asrPath && <li className="built__chip" key={asrPath}>{asrPath}</li>}
         {u.asr.modes.map((m) => (
-          <li className="chip" key={`mode-${m}`}>mode={m}</li>
+          <li className="built__chip" key={`mode-${m}`}>mode={m}</li>
         ))}
-        {u.tts.model && <li className="chip chip--model">{u.tts.model}</li>}
-        {ttsPath && <li className="chip">{ttsPath}</li>}
+        {u.tts.model && <li className="built__chip built__chip--model">{u.tts.model}</li>}
+        {ttsPath && <li className="built__chip">{ttsPath}</li>}
       </ul>
     </div>
   );

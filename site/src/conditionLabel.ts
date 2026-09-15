@@ -61,8 +61,33 @@ export function heldThrough(conditions: ConditionDef[], names: string[]): string
   return parts.sort((a, b) => rank(a) - rank(b));
 }
 
-/** "a, b and c". */
-export function readable(xs: string[]): string {
-  if (xs.length <= 1) return xs.join("");
-  return `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+/**
+ * The most labels the subhead will ever print.
+ *
+ * Four, not three, and not by eye: four is what the current run produces, so
+ * the bound is "never longer than it is now". Three would drop scattered
+ * packet loss, which is the contrast the whole project rests on -- a
+ * recogniser surviving lost packets and then failing when the same loss
+ * clusters. Change this number to change the bound; nothing else needs
+ * touching.
+ */
+export const MAX_LABELS = 4;
+
+/**
+ * "a, b and c", with a hard ceiling on the length.
+ *
+ * A subhead that silently grows when a future run adds a condition is the same
+ * class of problem as a hardcoded number that silently goes stale: correct
+ * today, wrong later, and nothing in the build notices. The cap makes the
+ * length a property of the code rather than of the data.
+ */
+export function readable(xs: string[], max = MAX_LABELS): string {
+  const over = xs.length - max;
+  const shown = over > 0 ? xs.slice(0, max) : xs;
+  const tail = over > 0
+    ? `${over} other condition${over === 1 ? "" : "s"}`
+    : null;
+  const parts = tail ? [...shown, tail] : shown;
+  if (parts.length <= 1) return parts.join("");
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`;
 }

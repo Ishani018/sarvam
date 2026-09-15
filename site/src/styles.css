@@ -488,7 +488,10 @@ code, .mono, .t-mono { font-family: var(--font-mono); font-variant-numeric: tabu
   margin: 0;
   padding: 0;
 }
-.chip {
+/* Namespaced. `.chip` was already taken by the conditions explainer, on a
+ * light ground -- claiming the bare name here restyled those chips across the
+ * page with hero colours meant for the dark band. */
+.built__chip {
   font-family: var(--font-mono);
   font-size: var(--t-12);
   line-height: 1;
@@ -500,7 +503,7 @@ code, .mono, .t-mono { font-family: var(--font-mono); font-variant-numeric: tabu
   white-space: nowrap;
 }
 /* The models are the thing under test; the endpoint and mode are context. */
-.chip--model {
+.built__chip--model {
   color: var(--deep);
   background: var(--accent-2-light);
   border-color: var(--accent-2-light);
@@ -2688,7 +2691,7 @@ td.cell-td { padding-left: 0.9rem; }
   .hero__head { max-width: none; }
   .hero__brand { font-size: var(--t-15); }
   .built__chips { gap: 0.35rem; }
-  .chip { font-size: var(--t-11); padding: 0.35rem 0.6rem; }
+  .built__chip { font-size: var(--t-11); padding: 0.35rem 0.6rem; }
   .hero__cta { gap: 0.6rem; }
   .btn { width: 100%; justify-content: center; }
 
