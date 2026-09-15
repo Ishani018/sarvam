@@ -455,6 +455,43 @@ function sharedModeFigures(rows, modesPresent, primaryMode) {
   });
 }
 
+
+/** Wilson score interval -- behaves at p=1, where the normal approximation
+ *  collapses to a zero-width interval and would claim certainty from 114
+ *  observations. */
+function wilson(hits, n, z = 1.96) {
+  if (!n) return null;
+  const p = hits / n;
+  const d = 1 + (z * z) / n;
+  const centre = (p + (z * z) / (2 * n)) / d;
+  const m = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / d;
+  return [Math.max(0, centre - m), Math.min(1, centre + m)];
+}
+
+/** 95% CI on the difference of two independent proportions. */
+function diffCI(h1, n1, h2, n2, z = 1.96) {
+  if (!n1 || !n2) return null;
+  const p1 = h1 / n1, p2 = h2 / n2;
+  const se = Math.sqrt((p1 * (1 - p1)) / n1 + (p2 * (1 - p2)) / n2);
+  return { diff: p1 - p2, lo: p1 - p2 - z * se, hi: p1 - p2 + z * se };
+}
+
+/** Pooled hit rate per condition, for one mode. */
+function ratesByCondition(rows) {
+  const by = new Map();
+  for (const r of rows) {
+    for (const e of r.entities) {
+      const c = by.get(r.condition) ?? { condition: r.condition, hits: 0, total: 0 };
+      c.total += 1;
+      c.hits += e.hit ? 1 : 0;
+      by.set(r.condition, c);
+    }
+  }
+  return [...by.values()].map((c) => ({
+    ...c, rate: c.total ? c.hits / c.total : null, ci: wilson(c.hits, c.total),
+  })).sort((a, b) => (b.rate ?? 0) - (a.rate ?? 0));
+}
+
 /** Pick the listen set: deterministic, spread across entity types, biased
  *  toward utterances that fail somewhere. A demo in which everything survives
  *  demonstrates nothing. */
@@ -1218,6 +1255,118 @@ function build() {
     // average and calls the difference a mode effect. `coverage` reports what
     // each mode actually ran so the narrowing is visible rather than implied.
     modeCompare: sharedModeFigures(rows, modesPresent, primaryMode),
+
+    // The headline finding, with the arithmetic that makes it a benchmark
+    // rather than an anecdote: n per condition, a Wilson interval on each rate,
+    // and a confidence interval on the drop itself.
+    //
+    // The pair is derived, not chosen. `best` is whatever condition scored
+    // highest and `worst` whatever scored lowest, so the sentence cannot claim
+    // a drop the table does not show, and cannot name a condition that stopped
+    // being the worst one.
+    finding: (() => {
+      const rates = ratesByCondition(primaryRows);
+      if (rates.length < 2) return null;
+      const best = rates[0];
+      const worst = rates[rates.length - 1];
+      const ci = diffCI(best.hits, best.total, worst.hits, worst.total);
+      // Conditions that scored as well as the best one. The claim is "holds
+      // through these, falls here", so the page needs to know which "these".
+      const held = rates.filter((r) => r.rate === best.rate).map((r) => r.condition);
+      return {
+        best, worst, held,
+        points: ci ? ci.diff * 100 : null,
+        ci: ci ? [ci.lo * 100, ci.hi * 100] : null,
+        nPerCondition: worst.total,
+        rates,
+      };
+    })(),
+
+    // Both ASR models on the same audio, per condition -- and pooled over the
+    // conditions where anything moves at all. Nobody outside the vendor has
+    // published this comparison, and the interval is what keeps it from
+    // becoming a claim the sample cannot carry.
+    modelSplit: (() => {
+      const byKey = new Map();
+      for (const r of primaryRows) {
+        for (const e of r.entities) {
+          const k = `${r.condition}\u001f${r.asr_model ?? "-"}`;
+          const c = byKey.get(k) ?? { condition: r.condition, model: r.asr_model ?? "-", hits: 0, total: 0 };
+          c.total += 1;
+          c.hits += e.hit ? 1 : 0;
+          byKey.set(k, c);
+        }
+      }
+      const cells = [...byKey.values()].map((c) => ({ ...c, rate: c.total ? c.hits / c.total : null }));
+      const ms = [...new Set(cells.map((c) => c.model))].sort();
+      if (ms.length !== 2) return null;
+
+      const burstyNames = cfg.conditions
+        .filter((c) => c.chain.some((o) => o.op === "packet_loss" && o.model === "gilbert"))
+        .map((c) => c.name)
+        .filter((n) => conditionsInResults.includes(n));
+
+      const pool = (model) => {
+        const rs = cells.filter((c) => c.model === model && burstyNames.includes(c.condition));
+        const hits = rs.reduce((a, c) => a + c.hits, 0);
+        const total = rs.reduce((a, c) => a + c.total, 0);
+        return { model, hits, total, rate: total ? hits / total : null, ci: wilson(hits, total) };
+      };
+      const a = pool(ms[0]);
+      const b = pool(ms[1]);
+      const d = diffCI(b.hits, b.total, a.hits, a.total);
+      return {
+        models: ms,
+        burstyConditions: burstyNames,
+        cells: cells.sort((x, y) => x.condition.localeCompare(y.condition)
+          || x.model.localeCompare(y.model)),
+        bursty: { [ms[0]]: a, [ms[1]]: b },
+        // Second minus first, so a positive number means the later model is
+        // ahead. Whether the interval clears zero is the whole point.
+        delta: d ? { points: d.diff * 100, ci: [d.lo * 100, d.hi * 100],
+                     separates: d.lo > 0 || d.hi < 0 } : null,
+      };
+    })(),
+
+    // Loss conditions whose audio came back byte-identical to the same chain
+    // without the loss step -- the random process drew no loss event at all.
+    //
+    // Not a defect: a Gilbert-Elliott process at 5% over a six-second utterance
+    // genuinely produces nothing sometimes. It matters because those files are
+    // still scored as burst conditions while carrying no burst, which can only
+    // push the measured burst penalty toward zero. The headline drop is a
+    // floor, and the page says so rather than leaving a reader to wonder.
+    degenerateDraws: (() => {
+      const hashes = new Map();
+      for (const r of rows) {
+        if (r.audio_sha256) hashes.set(`${r.utterance_id}\u001f${r.condition}`, r.audio_sha256);
+      }
+      const chainKey = (chain) => JSON.stringify(chain);
+      const base = new Map();
+      for (const c of cfg.conditions) {
+        const loss = c.chain.find((o) => o.op === "packet_loss");
+        if (!loss) continue;
+        const without = chainKey(c.chain.filter((o) => o.op !== "packet_loss"));
+        const match = cfg.conditions.find(
+          (o) => o.name !== c.name && chainKey(o.chain) === without);
+        if (match) base.set(c.name, match.name);
+      }
+      const utts = [...new Set(rows.map((r) => r.utterance_id))];
+      const out = [];
+      for (const [cond, baseName] of base) {
+        if (!conditionsInResults.includes(cond)) continue;
+        let same = 0, seen = 0;
+        for (const u of utts) {
+          const a = hashes.get(`${u}\u001f${cond}`);
+          const b = hashes.get(`${u}\u001f${baseName}`);
+          if (!a || !b) continue;
+          seen += 1;
+          if (a === b) same += 1;
+        }
+        if (seen) out.push({ condition: cond, base: baseName, identical: same, utterances: seen });
+      }
+      return out.sort((a, b) => b.identical - a.identical);
+    })(),
 
     audioBundle: { files: copied, bytes },
 

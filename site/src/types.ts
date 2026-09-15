@@ -132,6 +132,30 @@ export interface GintiData {
     conditions: number; declaredConditions: number; models: number;
     modes: string[]; mode: string; languages: string[]; utterances: number;
   };
+  /** The headline finding, derived: the best and worst conditions in the run,
+   *  the drop between them, and the interval that makes it a measurement. */
+  finding: {
+    best: ConditionRate; worst: ConditionRate;
+    held: string[];
+    points: number | null;
+    ci: [number, number] | null;
+    nPerCondition: number;
+    rates: ConditionRate[];
+  } | null;
+  /** Both ASR models on identical audio, per condition and pooled over the
+   *  bursty ones. `separates` is false when the interval spans zero. */
+  modelSplit: {
+    models: string[];
+    burstyConditions: string[];
+    cells: Array<{ condition: string; model: string; hits: number; total: number; rate: number | null }>;
+    bursty: Record<string, { model: string; hits: number; total: number; rate: number | null; ci: [number, number] | null }>;
+    delta: { points: number; ci: [number, number]; separates: boolean } | null;
+  } | null;
+  /** Loss conditions whose audio came back identical to the same chain without
+   *  the loss step: the random process drew no loss event at all. */
+  degenerateDraws: Array<{
+    condition: string; base: string; identical: number; utterances: number;
+  }>;
   audioBundle: { files: number; bytes: number };
   /** Cue-survival figures from `tee cues --json`, keyed by ASR mode. Null when
    *  no sidecar was present at build time; the section then does not render. */
@@ -175,6 +199,14 @@ export interface CueFigures {
   orphansByType: Record<string, number>;
   shapedTypes: string[];
   totals: { orphans: number; orphansUnrecovered: number; valuePresent: number };
+}
+
+export interface ConditionRate {
+  condition: string;
+  hits: number;
+  total: number;
+  rate: number | null;
+  ci: [number, number] | null;
 }
 
 export interface ListenEntity {

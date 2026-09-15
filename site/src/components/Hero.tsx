@@ -1,113 +1,83 @@
-import { Mark } from "./Mark";
 import { HeroDemo, heroDemoTakes } from "./HeroDemo";
 import { diffValue, entityNoun, prettyValue } from "../entityDiff";
 import { pickHeroExample } from "../conditionKind";
 import { languageList } from "../lang";
+import { heldThrough, readable } from "../conditionLabel";
 import type { GintiData } from "../types";
 
 /**
- * The title, two lines, the two numbers, and one failure you can hear.
+ * The finding first, then what produced it, then what it was built on.
  *
- * The order is what a stranger needs, not what is most interesting. Line one
- * says what this is, in a situation anyone recognises; line two says what was
- * found. Led with the other way round, "came back wrong" is the result of an
- * experiment the reader has not been told exists -- wrong from what, recorded
- * by whom, counted against what.
+ * A technical reader arriving cold gives this about two seconds. The order is
+ * what survives that: the result, one sentence saying what was measured and
+ * under what conditions, the API surface as credit rather than padding, and a
+ * way into the numbers.
  *
- * Two columns where there is room: the argument in words on the left, the same
- * argument audible on the right. The right half used to be empty, which left
- * the strongest evidence on the page -- that the damage is hearable and the
- * number still changed -- below the fold behind a scroll.
+ * The headline credits before it criticises, and it does so because that is
+ * what the table says: bandwidth limits, both telephony codecs and scattered
+ * packet loss cost nothing at all. Only clustering does. A headline reading
+ * "telephony degrades accuracy" would be the more dramatic sentence and would
+ * be falsified by the first five rows of our own results.
  *
- * Every label below the first line has to survive a reader with no telecoms
- * vocabulary. No "packet loss", no "burst", no "condition" without the words to
- * cash them out sitting next to them.
- *
- * The dark ground is the one on the page. It gives a long document a spine and
- * makes the numbers the brightest thing a reader sees.
+ * Every number here is derived. The drop, the conditions it holds through, the
+ * sample size, the interval and the chips all come out of the results, so a
+ * rerun that moves them moves the hero with it.
  */
-
-/** Small numbers in words: a sentence meant to land in one glance should not
- *  open with a numeral. Only up to ninety-nine -- past that the words are
- *  longer than the thing they spell, and mixing the two in one phrase
- *  ("twenty-six of 114") reads worse than either. */
-const WORDS = [
-  "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
-  "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
-  "sixteen", "seventeen", "eighteen", "nineteen",
-];
-const TENS = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy",
-  "eighty", "ninety"];
-
-function inWords(n: number): string {
-  if (!Number.isInteger(n) || n < 0 || n > 99) return String(n);
-  if (n < 20) return WORDS[n];
-  const t = TENS[Math.floor(n / 10)];
-  return n % 10 ? `${t}-${WORDS[n % 10]}` : t;
-}
 
 export function Hero({ data }: { data: GintiData }) {
   const pair = data.lossPairs[0];
-  const example = pickHeroExample(data.listen, data.conditions,
-                                  data.primaryMode);
-  // Whether the right column has anything in it. A build with no bundled audio
-  // is one column, not one column and a hole -- and in that build the failure
-  // moves back into the left column, since nothing else is carrying it.
+  const example = pickHeroExample(data.listen, data.conditions, data.primaryMode);
   const hasDemo = heroDemoTakes(data, example) !== null;
 
-  // Every scored entity type, not account numbers alone. The question above is
-  // about an amount, and the failure shown below is an amount; narrowing the
-  // figures to account numbers would put a number on screen that does not
-  // answer the sentence it sits under.
-  const lost = pair ? pair.bursty.total - pair.bursty.hits : 0;
-  const total = pair ? pair.bursty.total : 0;
-  // Words only when both halves fit in words, or the phrase mixes the two.
-  const pairInWords = lost <= 99 && total <= 99;
-  const say = (n: number) => (pairInWords ? inWords(n) : String(n));
+  const f = data.finding;
+  const u = data.usage;
+
+  // What the recogniser came through without losing anything, in the words an
+  // engineer uses for it, derived from the declared chains.
+  const held = f ? heldThrough(data.conditions, f.held) : [];
+  // The ASR family, from the model strings themselves: "saaras:v3" -> "Saaras".
+  const family = u?.asr.models[0]?.split(":")[0] ?? "the recogniser";
+  const familyName = family.charAt(0).toUpperCase() + family.slice(1);
 
   return (
     <section className="hero" id="top">
       <div className="hero__inner">
         <div className={`hero__grid ${hasDemo ? "hero__grid--split" : ""}`}>
           <div className="hero__lead">
-            <h1 className="hero__title">
-              <Mark className="hero__mark" size="1em" />
-              <span>Ginti<span className="deva">गिनती</span></span>
-            </h1>
+            {f && f.points !== null && held.length > 0 ? (
+              <h1 className="hero__head">
+                {familyName} holds entity accuracy through {readable(held)}.{" "}
+                <em>Bursty packet loss costs it {f.points.toFixed(1)} points.</em>
+              </h1>
+            ) : (
+              <h1 className="hero__head">
+                Does a number survive an Indian-language phone call?
+              </h1>
+            )}
 
-            {/* Line one: what this is. It has to work with no prior knowledge,
-                so it names a situation anyone recognises and no part of the
-                method. An amount owed, deliberately: a bank's agent reads back
-                the last four digits of an account, never the whole thing --
-                saying it aloud is the security problem the masking exists to
-                avoid. What an agent does say in full is money, dates and
-                reference numbers. */}
-            <p className="hero__line">
-              When a voice agent tells you how much you owe, does it get the
-              number right?
+            {/* One sentence, and under 25 words: what is measured, and under
+                what. Longer than that and it stops being a subhead. */}
+            <p className="hero__sub">
+              Ginti is an open eval harness measuring whether account numbers,
+              amounts, OTPs and dates survive real telephony degradation &mdash;
+              codecs, bandwidth limits and packet loss.
             </p>
 
-            {/* Line two: the finding. Only now does it have something to land
-                against; on its own it was a result with no experiment
-                attached. */}
-            {pair && (
-              <p className="hero__finding">
-                Ginti reads amounts, dates and reference numbers aloud in{" "}
-                {languageList(data.headline.languages)}, puts the recording
-                through a phone line and checks what comes back. On one kind of
-                bad line <em>{say(lost)} of {say(total)}</em> came back wrong.
-                On another that damaged the audio just as much, almost all of
-                them survived.
+            {f && f.ci && (
+              <p className="hero__stat">
+                n&nbsp;=&nbsp;{f.nPerCondition} entity observations per
+                condition, {data.headline.models} models, {data.headline.utterances}{" "}
+                {languageList(data.headline.languages)} utterances. 95% CI on the
+                drop [{f.ci[0].toFixed(1)}, {f.ci[1].toFixed(1)}].
               </p>
             )}
 
-            {pair && <Verdict pair={pair} />}
+            {u && <BuiltOn data={data} />}
 
-            {/* The failure lives in the demo on the right when there is audio
-                to play. Repeating it here would put the same two values on
-                screen twice in one viewport. */}
-            {!hasDemo && example && <HeroFailure ex={example} />}
-
+            <div className="hero__cta">
+              <a className="btn btn--primary" href="#results">See the results</a>
+              <a className="btn btn--quiet" href="#why">Why it goes unnoticed</a>
+            </div>
           </div>
 
           {hasDemo && example && (
@@ -117,19 +87,46 @@ export function Hero({ data }: { data: GintiData }) {
           )}
         </div>
 
-        {/* Outside the grid, so it is the last thing in the hero on every
-            width. Inside the left column it sat above the player on a phone,
-            pointing down at a section that was not next. */}
-        <a className="hero__cue" href="#why">
-          <span>Why it goes unnoticed</span>
-          <svg viewBox="0 0 16 22" width="11" height="15" aria-hidden="true">
-            <path d="M8 0 v18 M2 12 l6 6 l6 -6" fill="none"
-                  stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"
-                  strokeLinejoin="round" />
-          </svg>
-        </a>
+        {pair && <Verdict pair={pair} />}
+
+        {!hasDemo && example && <HeroFailure ex={example} />}
       </div>
     </section>
+  );
+}
+
+/**
+ * The Sarvam surface this runs on, as credit rather than a feature list.
+ *
+ * Every chip is read from the usage block, which is read from the run: the
+ * model strings are the ones actually sent, the endpoints the ones actually
+ * posted to, the mode the one the rows carry. Nothing here can name a model the
+ * harness does not call.
+ */
+function BuiltOn({ data }: { data: GintiData }) {
+  const u = data.usage!;
+  const path = (endpoint: string | null) => {
+    if (!endpoint) return null;
+    try { return new URL(endpoint).pathname; } catch { return endpoint; }
+  };
+  const asrPath = path(u.asr.endpoint);
+  const ttsPath = path(u.tts.endpoint);
+
+  return (
+    <div className="built">
+      <span className="built__label">Built on</span>
+      <ul className="built__chips">
+        {u.asr.models.map((m) => (
+          <li className="chip chip--model" key={m}>{m}</li>
+        ))}
+        {asrPath && <li className="chip" key={asrPath}>{asrPath}</li>}
+        {u.asr.modes.map((m) => (
+          <li className="chip" key={`mode-${m}`}>mode={m}</li>
+        ))}
+        {u.tts.model && <li className="chip chip--model">{u.tts.model}</li>}
+        {ttsPath && <li className="chip">{ttsPath}</li>}
+      </ul>
+    </div>
   );
 }
 

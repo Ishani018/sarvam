@@ -11,6 +11,7 @@ import { pickHeroExample } from "./conditionKind";
 import { prettyValue } from "./entityDiff";
 import { WhatWasUsed } from "./components/WhatWasUsed";
 import { CueSurvival } from "./components/CueSurvival";
+import { DegenerateNote, ModelSplit } from "./components/ModelSplit";
 import { ModeCompare } from "./components/ModeCompare";
 import { ModeSwitch } from "./components/ModeSwitch";
 import { ConditionLadder, ContrastBars, DisagreementChart } from "./components/Charts";
@@ -311,6 +312,16 @@ export function App() {
             matrix={matrix} wer={wer} conditions={data.conditions}
           />
         </Reveal>
+
+        {data.modelSplit && (
+          <>
+            <Subhead note="Both models transcribe every file, so the comparison is free. The interval is what keeps a direction from reading as a result.">
+              saaras:v3 against saaras:v4, where it matters
+            </Subhead>
+            <ModelSplit data={data} />
+            <DegenerateNote data={data} />
+          </>
+        )}
 
         <Subhead note="An entity counts as a hit only on exact normalised match.">
           Entity hit rate by type and condition

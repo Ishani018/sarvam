@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-14T10:40:19.525Z",
+  "generatedAt": "2026-09-15T08:07:55.189Z",
   "project": {
     "name": "Ginti",
     "script": "गिनती",
@@ -29355,6 +29355,358 @@
           "packet_loss_burst_5_repeat"
         ]
       }
+    }
+  ],
+  "finding": {
+    "best": {
+      "condition": "clean",
+      "hits": 114,
+      "total": 114,
+      "rate": 1,
+      "ci": [
+        0.9674003068525885,
+        1
+      ]
+    },
+    "worst": {
+      "condition": "packet_loss_burst_10",
+      "hits": 88,
+      "total": 114,
+      "rate": 0.7719298245614035,
+      "ci": [
+        0.6867898547765523,
+        0.8393401366695923
+      ]
+    },
+    "held": [
+      "clean",
+      "g711_ulaw",
+      "narrowband",
+      "packet_loss_5",
+      "g726_16k"
+    ],
+    "points": 22.807017543859654,
+    "ci": [
+      15.104604493810903,
+      30.509430593908405
+    ],
+    "nPerCondition": 114,
+    "rates": [
+      {
+        "condition": "clean",
+        "hits": 114,
+        "total": 114,
+        "rate": 1,
+        "ci": [
+          0.9674003068525885,
+          1
+        ]
+      },
+      {
+        "condition": "g711_ulaw",
+        "hits": 114,
+        "total": 114,
+        "rate": 1,
+        "ci": [
+          0.9674003068525885,
+          1
+        ]
+      },
+      {
+        "condition": "narrowband",
+        "hits": 114,
+        "total": 114,
+        "rate": 1,
+        "ci": [
+          0.9674003068525885,
+          1
+        ]
+      },
+      {
+        "condition": "packet_loss_5",
+        "hits": 114,
+        "total": 114,
+        "rate": 1,
+        "ci": [
+          0.9674003068525885,
+          1
+        ]
+      },
+      {
+        "condition": "g726_16k",
+        "hits": 114,
+        "total": 114,
+        "rate": 1,
+        "ci": [
+          0.9674003068525885,
+          1
+        ]
+      },
+      {
+        "condition": "packet_loss_10",
+        "hits": 113,
+        "total": 114,
+        "rate": 0.9912280701754386,
+        "ci": [
+          0.9519784746833306,
+          0.9984498969613178
+        ]
+      },
+      {
+        "condition": "noisy_line_snr5",
+        "hits": 112,
+        "total": 114,
+        "rate": 0.9824561403508771,
+        "ci": [
+          0.9382807541193635,
+          0.9951756823173447
+        ]
+      },
+      {
+        "condition": "packet_loss_burst_5",
+        "hits": 103,
+        "total": 114,
+        "rate": 0.9035087719298246,
+        "ci": [
+          0.8354446041659676,
+          0.9452644153992793
+        ]
+      },
+      {
+        "condition": "packet_loss_burst_5_repeat",
+        "hits": 101,
+        "total": 114,
+        "rate": 0.8859649122807017,
+        "ci": [
+          0.8146297223884994,
+          0.9321354267608671
+        ]
+      },
+      {
+        "condition": "packet_loss_burst_10",
+        "hits": 88,
+        "total": 114,
+        "rate": 0.7719298245614035,
+        "ci": [
+          0.6867898547765523,
+          0.8393401366695923
+        ]
+      }
+    ]
+  },
+  "modelSplit": {
+    "models": [
+      "saaras:v3",
+      "saaras:v4"
+    ],
+    "burstyConditions": [
+      "packet_loss_burst_5",
+      "packet_loss_burst_10",
+      "packet_loss_burst_5_repeat"
+    ],
+    "cells": [
+      {
+        "condition": "clean",
+        "model": "saaras:v3",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "clean",
+        "model": "saaras:v4",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "g711_ulaw",
+        "model": "saaras:v3",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "g711_ulaw",
+        "model": "saaras:v4",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "g726_16k",
+        "model": "saaras:v3",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "g726_16k",
+        "model": "saaras:v4",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "narrowband",
+        "model": "saaras:v3",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "narrowband",
+        "model": "saaras:v4",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "noisy_line_snr5",
+        "model": "saaras:v3",
+        "hits": 56,
+        "total": 57,
+        "rate": 0.9824561403508771
+      },
+      {
+        "condition": "noisy_line_snr5",
+        "model": "saaras:v4",
+        "hits": 56,
+        "total": 57,
+        "rate": 0.9824561403508771
+      },
+      {
+        "condition": "packet_loss_10",
+        "model": "saaras:v3",
+        "hits": 56,
+        "total": 57,
+        "rate": 0.9824561403508771
+      },
+      {
+        "condition": "packet_loss_10",
+        "model": "saaras:v4",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "packet_loss_5",
+        "model": "saaras:v3",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "packet_loss_5",
+        "model": "saaras:v4",
+        "hits": 57,
+        "total": 57,
+        "rate": 1
+      },
+      {
+        "condition": "packet_loss_burst_10",
+        "model": "saaras:v3",
+        "hits": 43,
+        "total": 57,
+        "rate": 0.7543859649122807
+      },
+      {
+        "condition": "packet_loss_burst_10",
+        "model": "saaras:v4",
+        "hits": 45,
+        "total": 57,
+        "rate": 0.7894736842105263
+      },
+      {
+        "condition": "packet_loss_burst_5",
+        "model": "saaras:v3",
+        "hits": 51,
+        "total": 57,
+        "rate": 0.8947368421052632
+      },
+      {
+        "condition": "packet_loss_burst_5",
+        "model": "saaras:v4",
+        "hits": 52,
+        "total": 57,
+        "rate": 0.9122807017543859
+      },
+      {
+        "condition": "packet_loss_burst_5_repeat",
+        "model": "saaras:v3",
+        "hits": 49,
+        "total": 57,
+        "rate": 0.8596491228070176
+      },
+      {
+        "condition": "packet_loss_burst_5_repeat",
+        "model": "saaras:v4",
+        "hits": 52,
+        "total": 57,
+        "rate": 0.9122807017543859
+      }
+    ],
+    "bursty": {
+      "saaras:v3": {
+        "model": "saaras:v3",
+        "hits": 143,
+        "total": 171,
+        "rate": 0.8362573099415205,
+        "ci": [
+          0.7735227504293591,
+          0.8842154537508817
+        ]
+      },
+      "saaras:v4": {
+        "model": "saaras:v4",
+        "hits": 149,
+        "total": 171,
+        "rate": 0.8713450292397661,
+        "ci": [
+          0.8128899198375854,
+          0.9134818360832022
+        ]
+      }
+    },
+    "delta": {
+      "points": 3.508771929824561,
+      "ci": [
+        -3.9709808367579575,
+        10.98852469640708
+      ],
+      "separates": false
+    }
+  },
+  "degenerateDraws": [
+    {
+      "condition": "packet_loss_burst_5",
+      "base": "g711_ulaw",
+      "identical": 6,
+      "utterances": 40
+    },
+    {
+      "condition": "packet_loss_burst_5_repeat",
+      "base": "g711_ulaw",
+      "identical": 4,
+      "utterances": 40
+    },
+    {
+      "condition": "packet_loss_burst_10",
+      "base": "g711_ulaw",
+      "identical": 1,
+      "utterances": 40
+    },
+    {
+      "condition": "packet_loss_5",
+      "base": "g711_ulaw",
+      "identical": 0,
+      "utterances": 40
+    },
+    {
+      "condition": "packet_loss_10",
+      "base": "g711_ulaw",
+      "identical": 0,
+      "utterances": 40
     }
   ],
   "audioBundle": {
